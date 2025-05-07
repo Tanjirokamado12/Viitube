@@ -14,15 +14,18 @@ Installation
 
  
   You Need:
+  
   -a YouTube channel WAD (you can back it up from your wii)
   
-  Jpexs Decompiller:https://github.com/jindrapetrik/jpexs-decompiler
+  -Jpexs Decompiller:https://github.com/jindrapetrik/jpexs-decompiler
   
   -Java (for JPEXS):https://www.java.com/en/
   
   -Wii C.s tools (for unpack and repack) https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/showmiiwads/Wii.cs%20Tools%200.3.rar (extract it)
 
-  -And FFMPEG (required to get Video Playback) https://www.ffmpeg.org/download.html
+  -FFMPEG (required to get Video Playback) https://www.ffmpeg.org/download.html
+
+  -Python (For get a working server) https://www.python.org/downloads/windows/
 
 1.Patch The Wad
 
