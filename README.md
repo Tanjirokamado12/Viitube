@@ -6,23 +6,23 @@ THIS IS NOT ASSOCIATED NOR ENDORSED BY GOOGLE, YOUTUBE, OR NINTENDO AND LIINBACK
 
 --
 
-This Revival has been add With Vii no ma revial,But Removed and Converted to python due to Issue With Video Downloading and converting
+This Revival has been add With Vii no ma revial,But Removed and Converted to python due to Issue With Video Downloading and converting,so this tutorial can have errors
 
 --
 
 Installation 
 
-(You Need to get Instance of vii no ma)
+ 
+  You Need:
+  -a YouTube channel WAD (you can back it up from your wii)
+  
+  Jpexs Decompiller:https://github.com/jindrapetrik/jpexs-decompiler
+  
+  -Java (for JPEXS):https://www.java.com/en/
+  
+  -Wii C.s tools (for unpack and repack) https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/showmiiwads/Wii.cs%20Tools%200.3.rar (extract it)
 
-  You Need a YouTube channel WAD (you can back it up from your wii)
-  
-  https://github.com/jindrapetrik/jpexs-decompiler
-  
-  https://www.java.com/en/
-  
-  https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/showmiiwads/Wii.cs%20Tools%200.3.rar (extract it)
-
-And FFMPEG (required to get Video Playback) https://www.ffmpeg.org/download.html
+  -And FFMPEG (required to get Video Playback) https://www.ffmpeg.org/download.html
 
 1.Patch The Wad
 
