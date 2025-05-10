@@ -2,6 +2,9 @@ from flask import Flask, request, Response, send_file
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
+import pytubefix
+import subprocess
+import os
 
 app = Flask(__name__)
 
@@ -252,5 +255,50 @@ def search_videos():
     xml_response = convert_to_xml(response.json())
     return Response(xml_response, content_type="application/xml")
 
+@app.route("/get_video")
+def get_video():
+    # Extract video_id from the request
+    video_id = request.args.get("video_id")
+    if not video_id:
+        return "Missing video_id", 400
+
+    # Construct YouTube URL
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
+
+    # Define the path for assets folder
+    assets_dir = os.path.join(os.getcwd(), "assets")
+
+    # Ensure the assets folder exists
+    if not os.path.exists(assets_dir):
+        os.makedirs(assets_dir)
+
+    try:
+        # Download video using pytubefix
+        yt = pytubefix.YouTube(video_url)
+        stream = yt.streams.filter(progressive=True, file_extension="mp4").first()
+        if not stream:
+            return "No suitable stream found", 404
+        
+        stream_url = stream.url
+
+        # Define output file path
+        output_file = os.path.join(assets_dir, f"{video_id}.webm")
+
+        # FFmpeg command to process the video
+        ffmpeg_cmd = [
+            "ffmpeg", "-i", stream_url,
+            "-c:v", "libvpx", "-b:v", "300k", "-cpu-used", "8",
+            "-pix_fmt", "yuv420p", "-c:a", "libvorbis", "-b:a", "128k",
+            "-r", "30", "-g", "30", output_file
+        ]
+
+        # Run FFmpeg command
+        subprocess.run(ffmpeg_cmd)
+
+        return f"Video downloaded and processed: {output_file}"
+
+    except Exception as e:
+        return f"Error: {str(e)}", 500
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80)
+    app.run(debug=True, host='0.0.0.0', port=80)
