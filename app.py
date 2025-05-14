@@ -2,7 +2,7 @@ from flask import Flask, request, Response, send_file
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
-import pytubefix
+from pytubefix import YouTube
 import subprocess
 import os
 
@@ -85,128 +85,6 @@ class GetVideoInfo:
         )
         return Response(response_str, content_type='text/plain')
     
-# Helper functions
-def format_duration(seconds):
-    """Convert seconds into YouTube-style duration format."""
-    try:
-        seconds = int(seconds)
-        if seconds < 60:
-            return f"0:{seconds:02d}"
-        elif seconds < 3600:
-            minutes = seconds // 60
-            sec = seconds % 60
-            return f"{minutes}:{sec:02d}"
-        else:
-            hours = seconds // 3600
-            minutes = (seconds % 3600) // 60
-            sec = seconds % 60
-            return f"{hours}:{minutes:02d}:{sec:02d}"
-    except (ValueError, TypeError):
-        return "Unknown"
-
-def time_since(date_str):
-    """Convert date string (YYYY-MM-DD) into a relative time format."""
-    try:
-        published_date = datetime.strptime(date_str, "%Y-%m-%d")
-        now = datetime.now()
-        diff = now - published_date
-        if diff.days < 1:
-            return "Today"
-        elif diff.days < 7:
-            return f"{diff.days} days ago"
-        elif diff.days < 30:
-            weeks = diff.days // 7
-            return f"{weeks} weeks ago"
-        elif diff.days < 365:
-            months = diff.days // 30
-            return f"{months} months ago"
-        else:
-            years = diff.days // 365
-            return f"{years} years ago"
-    except ValueError:
-        return "Unknown"
-
-def fetch_video_details(video_id):
-    """Fetch detailed video info using YouTubei player API."""
-    payload = {"videoId": video_id, "context": {"client": {"clientName": "WEB", "clientVersion": "2.20231221"}}}
-    response = requests.post(YOUTUBEI_PLAYER_URL, json=payload, headers=HEADERS)
-    if response.status_code == 200:
-        return response.json()
-    return None
-
-def convert_to_xml(data):
-    """Convert YouTube JSON search response into XML format."""
-    feed = ET.Element("feed", {
-        "xmlns:openSearch": "http://a9.com/-/spec/opensearch/1.1/",
-        "xmlns:media": "http://search.yahoo.com/mrss/",
-        "xmlns:yt": "http://www.youtube.com/xml/schemas/2015"
-    })
-
-    ET.SubElement(feed, "title", {"type": "text"}).text = "Videos"
-    ET.SubElement(feed, "generator", {
-        "ver": "1.0",
-        "uri": "http://kamil.cc/"
-    }).text = "Liinback data API"
-
-    search_results = data.get("contents", {}).get("twoColumnSearchResultsRenderer", {}).get("primaryContents", {}).get("sectionListRenderer", {}).get("contents", [])
-
-    for item in search_results:
-        for video in item.get("itemSectionRenderer", {}).get("contents", []):
-            if "videoRenderer" in video:
-                video_data = video["videoRenderer"]
-                entry = ET.SubElement(feed, "entry")
-
-                video_id = video_data.get("videoId", "")
-                video_title = video_data.get("title", {}).get("runs", [{}])[0].get("text", "")
-                uploader_name = video_data.get("ownerText", {}).get("runs", [{}])[0].get("text", "")
-                uploader_id = video_data.get("ownerText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
-                thumbnail_url = f"http://i.ytimg.com/vi/{video_id}/mqdefault.jpg"
-
-                # Fetch detailed video info
-                details = fetch_video_details(video_id)
-                if details and "videoDetails" in details:
-                    duration_seconds = details["videoDetails"].get("lengthSeconds")
-                    formatted_duration = format_duration(int(duration_seconds)) if duration_seconds else "Live"
-                    raw_published_time = details.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "Unknown")
-                    published_time = time_since(raw_published_time)
-                    views_count = details.get("videoDetails", {}).get("viewCount", "0")
-                else:
-                    formatted_duration = "Unknown"
-                    published_time = "Unknown"
-                    views_count = "0"
-
-                # Entry details
-                ET.SubElement(entry, "id").text = f"http://192.168.1.18:443/api/videos/{video_id}"
-                ET.SubElement(entry, "published").text = published_time
-                ET.SubElement(entry, "title", {"type": "text"}).text = video_title
-                ET.SubElement(entry, "link", {"rel": f"http://192.168.1.18:443/api/videos/{video_id}/related"})
-
-                author = ET.SubElement(entry, "author")
-                ET.SubElement(author, "name").text = uploader_name
-                ET.SubElement(author, "uri").text = f"https://www.youtube.com/channel/{uploader_id}"
-
-                media_group = ET.SubElement(entry, "media:group")
-                ET.SubElement(media_group, "media:thumbnail", {
-                    "yt:name": "mqdefault",
-                    "url": thumbnail_url,
-                    "height": "240",
-                    "width": "320",
-                    "time": formatted_duration
-                })
-                ET.SubElement(media_group, "yt:duration", {"seconds": str(duration_seconds if duration_seconds else 0)}).text = formatted_duration
-                ET.SubElement(media_group, "yt:uploaderId", {"id": uploader_id}).text = uploader_id
-                ET.SubElement(media_group, "yt:videoid", {"id": video_id}).text = video_id
-                ET.SubElement(media_group, "media:credit", {"role": "uploader", "name": uploader_name}).text = uploader_name
-
-                # Adding statistics
-                ET.SubElement(entry, "yt:statistics", {
-                    "favoriteCount": "0",
-                    "viewCount": f"{views_count}"
-                })
-
-    return ET.tostring(feed, encoding="utf-8").decode()
-
-
 # Flask Routes
 @app.route('/wiitv')
 def wiitv():
@@ -237,68 +115,143 @@ def get_video_info():
 
     video_info = GetVideoInfo().build(video_id)
     return video_info  # Ensure this returns a valid response
+    
+    YOUTUBE_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search?key=YOUR_API_KEY"
 
-@app.route('/feeds/api/videos', methods=['GET'])
-def search_videos():
-    """Search videos using YouTubei API and return XML response."""
-    query = request.args.get('q')
+HEADERS = {
+    "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0"
+}
+
+def create_xml_response(videos):
+    root = ET.Element("feed", {
+        "xmlns:openSearch": "http://a9.com/-/spec/opensearch/1.1/",
+        "xmlns:media": "http://search.yahoo.com/mrss/",
+        "xmlns:yt": "http://www.youtube.com/xml/schemas/2015"
+    })
+    ET.SubElement(root, "title", {"type": "text"}).text = "Videos"
+    ET.SubElement(root, "generator", {"ver": "1.0", "uri": "http://kamil.cc/"}).text = "Liinback data API"
+    ET.SubElement(root, "openSearch:totalResults").text = str(len(videos))
+    ET.SubElement(root, "openSearch:startIndex").text = "1"
+    ET.SubElement(root, "openSearch:itemsPerPage").text = "20"
+
+    for video in videos:
+        entry = ET.SubElement(root, "entry")
+        ET.SubElement(entry, "id").text = f"http://192.168.1.192:443/api/videos/{video['videoId']}"
+        ET.SubElement(entry, "published").text = video["published"]
+        ET.SubElement(entry, "title", {"type": "text"}).text = video["title"]
+        ET.SubElement(entry, "link", {"rel": f"http://192.168.1.192:443/api/videos/{video['videoId']}/related"})
+
+        author = ET.SubElement(entry, "author")
+        ET.SubElement(author, "name").text = video["author"]
+        ET.SubElement(author, "uri").text = f"https://www.youtube.com/channel/{video['authorId']}"
+
+        media_group = ET.SubElement(entry, "media:group")
+        ET.SubElement(media_group, "media:thumbnail", {
+            "yt:name": "hqdefault",
+            "url": f"http://i.ytimg.com/vi/{video['videoId']}/hqdefault.jpg",
+            "height": "240",
+            "width": "320",
+            "time": "00:00:00"
+        })
+        ET.SubElement(media_group, "yt:duration", {"seconds": video["duration"]})
+        ET.SubElement(media_group, "yt:uploaderId", {"id": video["authorId"]}).text = video["authorId"]
+        ET.SubElement(media_group, "yt:videoid", {"id": video["videoId"]}).text = video["videoId"]
+        ET.SubElement(media_group, "media:credit", {"role": "uploader", "name": video["author"]}).text = video["author"]
+
+        ET.SubElement(entry, "yt:statistics", {
+            "favoriteCount": "0",
+            "viewCount": video["viewCount"]
+        })
+
+    return ET.tostring(root, encoding="utf-8", method="xml")
+
+@app.route("/feeds/api/videos", methods=["GET"])
+def search():
+    query = request.args.get("q")
     if not query:
-        return Response("<error>Query parameter is required</error>", content_type="application/xml", status=400)
+        return "Query parameter 'q' is required", 400
 
-    payload = PAYLOAD_TEMPLATE.copy()
-    payload["query"] = query
+    payload = {
+        "context": {
+            "client": {
+                "hl": "en",
+                "gl": "US",
+                "clientName": "WEB",
+                "clientVersion": "2.20210714.01.00"
+            }
+        },
+        "query": query
+    }
 
     response = requests.post(YOUTUBEI_SEARCH_URL, json=payload, headers=HEADERS)
-    if response.status_code != 200:
-        return Response("<error>Failed to fetch results</error>", content_type="application/xml", status=500)
+    data = response.json()
 
-    xml_response = convert_to_xml(response.json())
-    return Response(xml_response, content_type="application/xml")
+    primary_contents = data.get("contents", {}).get("twoColumnSearchResultsRenderer", {}).get("primaryContents", {}).get("sectionListRenderer", {}).get("contents", [])
 
-@app.route("/get_video")
+    videos = []
+    for section in primary_contents:
+        for item in section.get("itemSectionRenderer", {}).get("contents", []):
+            video = item.get("videoRenderer")
+            if video:
+                videos.append({
+                    "title": video.get("title", {}).get("runs", [{}])[0].get("text", "No Title"),
+                    "videoId": video.get("videoId", "No Video ID"),
+                    "author": video.get("ownerText", {}).get("runs", [{}])[0].get("text", "Unknown Author"),
+                    "authorId": video.get("ownerText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", ""),
+                    "thumbnailUrl": video.get("thumbnail", {}).get("thumbnails", [{}])[0].get("url", ""),
+                    "viewCount": video.get("viewCountText", {}).get("simpleText", "0 views"),
+                    "duration": video.get("lengthText", {}).get("simpleText", "Unknown Duration"),
+                    "published": video.get("publishedTimeText", {}).get("simpleText", "Unknown Time")
+                })
+
+    xml_response = create_xml_response(videos)
+    return Response(xml_response, mimetype="application/xml")
+    
+# Ensure 'assets' folder exists
+if not os.path.exists("assets"):
+    os.makedirs("assets")
+    
+# Ensure the assets folder exists
+ASSETS_FOLDER = 'assets'
+os.makedirs(ASSETS_FOLDER, exist_ok=True)
+
+@app.route('/get_video', methods=['GET'])
 def get_video():
-    # Extract video_id from the request
-    video_id = request.args.get("video_id")
+    video_id = request.args.get('video_id')
     if not video_id:
-        return "Missing video_id", 400
+        return "Missing video_id parameter", 400
 
-    # Construct YouTube URL
     video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-    # Define the path for assets folder
-    assets_dir = os.path.join(os.getcwd(), "assets")
-
-    # Ensure the assets folder exists
-    if not os.path.exists(assets_dir):
-        os.makedirs(assets_dir)
-
     try:
-        # Download video using pytubefix
-        yt = pytubefix.YouTube(video_url)
-        stream = yt.streams.filter(progressive=True, file_extension="mp4").first()
-        if not stream:
-            return "No suitable stream found", 404
-        
-        stream_url = stream.url
+        # Define paths for downloaded and processed files
+        file_path = os.path.join(ASSETS_FOLDER, f"{video_id}.mp4")
+        processed_file = os.path.join(ASSETS_FOLDER, f"{video_id}.webm")
 
-        # Define output file path
-        output_file = os.path.join(assets_dir, f"{video_id}.webm")
+        # Check if processed file already exists
+        if os.path.exists(processed_file):
+            return send_file(processed_file, as_attachment=True)
 
-        # FFmpeg command to process the video
+        # Download video using pytube
+        yt = YouTube(video_url)
+        stream = yt.streams.get_highest_resolution()
+        stream.download(output_path=ASSETS_FOLDER, filename=f"{video_id}.mp4")
+
+        # Define FFmpeg command to process the video
         ffmpeg_cmd = [
-            "ffmpeg", "-i", stream_url,
-            "-c:v", "libvpx", "-b:v", "300k", "-cpu-used", "8",
-            "-pix_fmt", "yuv420p", "-c:a", "libvorbis", "-b:a", "128k",
-            "-r", "30", "-g", "30", output_file
+            'ffmpeg', '-i', file_path, '-c:v', 'libvpx', '-b:v', '300k',
+            '-cpu-used', '8', '-pix_fmt', 'yuv420p', '-c:a', 'libvorbis', '-b:a', '128k',
+            '-r', '30', '-g', '30', processed_file
         ]
 
-        # Run FFmpeg command
-        subprocess.run(ffmpeg_cmd)
+        # Run FFmpeg if processed file is not present
+        subprocess.run(ffmpeg_cmd, check=True)
 
-        return f"Video downloaded and processed: {output_file}"
+        return send_file(processed_file, as_attachment=True)
 
     except Exception as e:
         return f"Error: {str(e)}", 500
-
+    
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
