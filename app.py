@@ -1,9 +1,10 @@
 from flask import Flask, request, Response, send_file,jsonify
 import requests
 import xml.etree.ElementTree as ET
-
 from datetime import datetime
 from pytubefix import YouTube
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 import subprocess
 import os
 
@@ -413,7 +414,222 @@ def get_youtube_info():
 
     return Response(f"<?xml version='1.0' encoding='UTF-8'?><error>Invalid token or API request failed</error>", status=response.status_code, content_type="application/xml")
 
+def escape_xml(text):
+    return ET.Element("dummy").text if text is None else ET.Element("dummy", {"text": text}).attrib["text"]
 
+def build_subscriptions(ip, port, oauth_token):
+    creds = Credentials(oauth_token)
+    youtube = build("youtube", "v3", credentials=creds)
+
+    request = youtube.subscriptions().list(
+        part="snippet",
+        mine=True,
+        maxResults=40
+    )
+    response = request.execute()
+
+    xml_string = '<?xml version="1.0" encoding="UTF-8"?>'
+    xml_string += '<feed xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:yt="http://www.youtube.com/xml/schemas/2015">'
+    xml_string += f'<link>http://{ip}:{port}/feeds/api/users/default/subscriptions?oauth_token={oauth_token}</link>'
+    xml_string += '<title type="text">Subscriptions</title>'
+    xml_string += '<openSearch:totalResults></openSearch:totalResults>'
+    xml_string += '<generator ver="1.0" uri="http://kamil.cc/">Liinback data API</generator>'
+    xml_string += '<openSearch:startIndex>1</openSearch:startIndex>'
+    xml_string += '<openSearch:itemsPerPage>40</openSearch:itemsPerPage>'
+
+    for item in response.get("items", []):
+        author_name = item["snippet"]["title"]
+        author_id = item["snippet"]["resourceId"]["channelId"]
+        unread_count = 0  # Placeholder for unread count if applicable
+        xml_string += '<entry>'
+        xml_string += f'<yt:username>{escape_xml(author_name)}</yt:username>'
+        xml_string += f'<yt:channelId>{escape_xml(author_id)}</yt:channelId>'
+        xml_string += f'<yt:unreadCount>{unread_count}</yt:unreadCount>'
+        xml_string += '</entry>'
+
+    xml_string += '</feed>'
+    return xml_string
+
+@app.route('/feeds/api/users/default/subscriptions', methods=['GET'])
+def get_subscriptions():
+    ip = request.remote_addr
+    port = request.environ.get('SERVER_PORT', '5000')
+    oauth_token = request.args.get("oauth_token")
+
+    if not oauth_token:
+        return Response("<error>Missing OAuth Token</error>", content_type="application/xml")
+
+    xml_data = build_subscriptions(ip, port, oauth_token)
+    return Response(xml_data, content_type='application/xml')
+
+
+def get_channel_uploads(channel_id, oauth_token):
+    """Fetch channel name and videos"""
+    creds = Credentials(token=oauth_token)
+    service = build("youtube", "v3", credentials=creds)
+
+    # Fetch the channel name
+    channel_info = service.channels().list(part="snippet", id=channel_id).execute()
+    channel_name = channel_info["items"][0]["snippet"]["title"] if "items" in channel_info and channel_info["items"] else "Unknown Channel"
+
+    # Get uploads playlist ID
+    response = service.channels().list(part="contentDetails", id=channel_id).execute()
+    uploads_playlist_id = response["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+
+    # Fetch latest videos
+    response = service.playlistItems().list(part="snippet,contentDetails", playlistId=uploads_playlist_id, maxResults=10).execute()
+    
+    videos = []
+    video_ids = []
+
+    for item in response["items"]:
+        video_id = item["snippet"]["resourceId"]["videoId"]
+        video_ids.append(video_id)
+
+        # Convert HTTPS thumbnails to HTTP (optional)
+        thumbnail_url = item["snippet"]["thumbnails"]["default"]["url"].replace("https://", "http://")
+
+        videos.append({
+            "id": f"http://www.youtube.com/watch?v={video_id}",
+            "videoid": video_id,
+            "published": item["snippet"]["publishedAt"],
+            "updated": item["snippet"]["publishedAt"],
+            "title": item["snippet"]["title"],
+            "description": item["snippet"].get("description", "No description available"),
+            "thumbnail": thumbnail_url, 
+            "uploader": channel_name,
+            "duration": item["contentDetails"].get("duration", "N/A"),
+        })
+
+    # Fetch video statistics separately
+    stats_response = service.videos().list(part="statistics", id=",".join(video_ids)).execute()
+    stats_map = {item["id"]: item["statistics"] for item in stats_response["items"]}
+
+    # Merge statistics with videos (handling missing keys)
+    for vid in videos:
+        video_stats = stats_map.get(vid["videoid"], {})
+        vid["view_count"] = video_stats.get("viewCount", "0")
+        vid["like_count"] = video_stats.get("likeCount", "0")
+        vid["favorite_count"] = video_stats.get("favoriteCount", "0")
+
+    return videos, channel_name  # Return videos AND channel name
+
+def create_xml_feed(videos, channel_name):
+    feed = ET.Element("feed", {
+        "xmlns": "http://www.w3.org/2005/Atom",
+        "xmlns:media": "http://search.yahoo.com/mrss/",
+        "xmlns:yt": "http://gdata.youtube.com/schemas/2007",
+        "xmlns:gd": "http://schemas.google.com/g/2005"
+    })
+
+    ET.SubElement(feed, "id").text = "http://gdata.youtube.com/feeds/api/channel/uploads"
+    ET.SubElement(feed, "updated").text = videos[0]["published"] if videos else ""
+    ET.SubElement(feed, "title").text = f"{channel_name}"  
+
+    author = ET.SubElement(feed, "author")
+    ET.SubElement(author, "name").text = channel_name
+    ET.SubElement(author, "uri").text = f"http://www.youtube.com/channel/{videos[0]['videoid']}" if videos else ""
+
+    # Add video entries
+    for vid in videos:
+        entry = ET.SubElement(feed, "entry")
+
+        ET.SubElement(entry, "id").text = vid["id"]
+        ET.SubElement(entry, "youTubeId", {"id": vid["videoid"]}).text = vid["videoid"]
+        ET.SubElement(entry, "published").text = vid["published"]
+        ET.SubElement(entry, "updated").text = vid["updated"]
+
+        category = ET.SubElement(entry, "category", {
+            "scheme": "http://gdata.youtube.com/schemas/2007/categories.cat",
+            "label": "-",
+            "term": "-"
+        })
+        category.text = "-"
+
+        ET.SubElement(entry, "title", {"type": "text"}).text = vid["title"]
+        ET.SubElement(entry, "content", {"type": "text"}).text = vid["description"]
+
+        ET.SubElement(entry, "link", {
+            "rel": "http://gdata.youtube.com/schemas/2007#video.related",
+            "href": f"http://192.168.1.18:80/feeds/api/videos/{vid['videoid']}/related"
+        })
+
+        author = ET.SubElement(entry, "author")
+        ET.SubElement(author, "name").text = vid["uploader"]
+        ET.SubElement(author, "uri").text = f"http://192.168.1.18:80/feeds/api/users/{vid['uploader']}"
+
+        comments = ET.SubElement(entry, "gd:comments")
+        ET.SubElement(comments, "gd:feedLink", {
+            "href": f"http://192.168.1.18:80/feeds/api/videos/{vid['videoid']}/comments",
+            "countHint": "530"
+        })
+
+        media_group = ET.SubElement(entry, "media:group")
+        ET.SubElement(media_group, "media:category", {
+            "label": "-",
+            "scheme": "http://gdata.youtube.com/schemas/2007/categories.cat"
+        }).text = "-"
+
+        ET.SubElement(media_group, "media:content", {
+            "url": f"http://192.168.1.18:80/channel_fh264_getvideo?v={vid['videoid']}",
+            "type": "video/3gpp",
+            "medium": "video",
+            "expression": "full",
+            "duration": "999",
+            "yt:format": "3"
+        })
+
+        ET.SubElement(media_group, "media:description", {"type": "plain"}).text = vid["description"]
+        ET.SubElement(media_group, "media:keywords").text = "-"
+
+        ET.SubElement(media_group, "media:player", {"url": f"http://www.youtube.com/watch?v={vid['videoid']}"})
+
+        for thumbnail_type in ["hqdefault", "poster", "default"]:
+            ET.SubElement(media_group, "media:thumbnail", {
+                "yt:name": thumbnail_type,
+                "url": f"http://i.ytimg.com/vi/{vid['videoid']}/{thumbnail_type}.jpg",
+                "height": "240",
+                "width": "320",
+                "time": "00:00:00"
+            })
+
+        ET.SubElement(media_group, "yt:duration", {"seconds": "217"})
+        ET.SubElement(media_group, "yt:videoid", {"id": vid["videoid"]}).text = vid["videoid"]
+        ET.SubElement(media_group, "youTubeId", {"id": vid["videoid"]}).text = vid["videoid"]
+        ET.SubElement(media_group, "media:credit", {"role": "uploader", "name": vid["uploader"]}).text = vid["uploader"]
+
+        ET.SubElement(entry, "gd:rating", {
+            "average": "5",
+            "max": "5",
+            "min": "1",
+            "numRaters": "25",
+            "rel": "http://schemas.google.com/g/2005#overall"
+        })
+
+        ET.SubElement(entry, "yt:statistics", {
+            "favoriteCount": vid.get("favorite_count", "101"),
+            "viewCount": vid.get("view_count", "15292")
+        })
+
+        ET.SubElement(entry, "yt:rating", {
+            "numLikes": vid.get("like_count", "917"),
+            "numDislikes": vid.get("favorite_count", "101")
+        })
+
+    return ET.tostring(feed, encoding="utf-8").decode("utf-8")
+
+
+@app.route("/feeds/api/users/<channel_id>/uploads")
+def uploads(channel_id):
+    """Endpoint to generate YouTube XML feed"""
+    oauth_token = request.args.get("oauth_token")
+    if not oauth_token:
+        return Response("<error>OAuth token is required</error>", status=400, mimetype="application/xml")
+
+    videos, channel_name = get_channel_uploads(channel_id, oauth_token)  # Fetch data
+    xml_response = create_xml_feed(videos, channel_name)  # Generate XML
+
+    return Response(xml_response, mimetype="application/xml")
     
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
