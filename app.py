@@ -1,10 +1,18 @@
-from flask import Flask, request, Response, send_file
+from flask import Flask, request, Response, send_file,jsonify
 import requests
 import xml.etree.ElementTree as ET
+
 from datetime import datetime
 from pytubefix import YouTube
 import subprocess
 import os
+
+OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
+OAUTH2_TOKEN_URL = 'https://oauth2.googleapis.com/token'
+CLIENT_ID = '627431331381.apps.googleusercontent.com'
+CLIENT_SECRET = 'O_HOjELPNFcHO_n_866hamcO'
+REDIRECT_URI = ''
+YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/channels"
 
 app = Flask(__name__)
 
@@ -252,6 +260,160 @@ def get_video():
 
     except Exception as e:
         return f"Error: {str(e)}", 500
+
+@app.route('/o/oauth2/device/code', methods=['POST'])
+def deviceCode():
+    response = requests.post(
+        OAUTH2_DEVICE_CODE_URL,
+        data={
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'scope': 'https://www.googleapis.com/auth/youtube',
+        }
+    )
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to get device code"}), 400
+    data = response.json()
+    device_code = data['device_code']
+    user_code = data['user_code']
+    verification_url = data['verification_url']
+    expires_in = data['expires_in']
+    message = f"Please visit {verification_url} and enter the user code: {user_code}"
+    return jsonify({
+        'device_code': device_code,
+        'user_code': user_code,
+        'verification_url': verification_url,
+        'expires_in': expires_in,
+        'message': message
+    })
+    print(message)
+@app.route('/o/oauth2/device/code/status', methods=['POST'])
+def checkStatus():
+    device_code = request.json.get('device_code')
+    if not device_code:
+        return jsonify({"error": "Device code is required"}), 400
+    response = requests.post(
+        OAUTH2_TOKEN_URL,
+        data={
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET,
+            'device_code': device_code,
+            'grant_type': 'urn:ietf:params:oauth:grant-type:device_code',
+        }
+    )
+    if response.status_code == 200:
+        data = response.json()
+        return jsonify({
+            'access_token': data['access_token'],
+            'refresh_token': data.get('refresh_token'),
+            'expires_in': data['expires_in']
+        })
+    elif response.status_code == 400:
+        data = response.json()
+        if data.get('error') == 'authorization_pending':
+            return jsonify({"status": "pending", "message": "User hasn't authorized yet."}), 200
+        elif data.get('error') == 'slow_down':
+            return jsonify({"status": "slow_down", "message": "Too many requests, try again later."}), 429
+        return jsonify({"error": "Authorization failed."}), 400
+    return jsonify({"error": "Unknown error occurred."}), 500
+@app.route('/o/oauth2/token', methods=['POST'])
+def oauth2_token():
+    youtube_oauth_url = 'https://www.youtube.com/o/oauth2/token'
+    response = requests.post(youtube_oauth_url, data=request.form)
+    if response.status_code == 200:
+        return jsonify(response.json())
+
+@app.route("/feeds/api/users/default", methods=["GET"])
+def get_youtube_info():
+    access_token = request.args.get("oauth_token")
+
+    if not access_token:
+        return Response("<?xml version='1.0' encoding='UTF-8'?><error>Access token is required</error>", status=400, content_type="application/xml")
+
+    headers = {"Authorization": f"Bearer {access_token}"}
+    params = {
+        "part": "snippet,statistics",
+        "mine": "true"
+    }
+
+    response = requests.get(YOUTUBE_API_URL, params=params, headers=headers)
+
+    if response.status_code == 200:
+        data = response.json()
+        if "items" in data and data["items"]:
+            channel = data["items"][0]
+            snippet = channel["snippet"]
+            statistics = channel["statistics"]
+
+            channel_name = snippet.get("title", "Unknown Channel")
+            thumbnail_url = snippet.get("thumbnails", {}).get("high", {}).get("url", "")
+
+            # Root XML entry
+            root = ET.Element("entry", {
+                "xmlns": "http://www.w3.org/2005/Atom",
+                "xmlns:media": "http://search.yahoo.com/mrss/",
+                "xmlns:gd": "http://schemas.google.com/g/2005",
+                "xmlns:yt": "http://gdata.youtube.com/schemas/2007"
+            })
+
+            ET.SubElement(root, "id").text = "http://192.168.1.18:80/feeds/api/users/default"
+            ET.SubElement(root, "published").text = "2010-05-28T09:21:19.000-07:00"
+            ET.SubElement(root, "updated").text = "2011-02-09T03:27:42.000-08:00"
+
+            ET.SubElement(root, "category", {
+                "scheme": "http://schemas.google.com/g/2005#kind",
+                "term": "http://gdata.youtube.com/schemas/2007#userProfile"
+            })
+            ET.SubElement(root, "category", {
+                "scheme": "http://gdata.youtube.com/schemas/2007/channeltypes.cat",
+                "term": ""
+            })
+
+            ET.SubElement(root, "title", {"type": "text"}).text = channel_name
+            ET.SubElement(root, "content", {"type": "text"}).text = ""
+
+            ET.SubElement(root, "link", {
+                "rel": "self",
+                "type": "application/atom+xml",
+                "href": "http://gdata.youtube.com/feeds/api/users/default"
+            })
+
+            author = ET.SubElement(root, "author")
+            ET.SubElement(author, "name").text = channel_name
+            ET.SubElement(author, "uri").text = "http://gdata.youtube.com/feeds/api/users/default"
+
+            ET.SubElement(root, "yt:age").text = "1"
+            ET.SubElement(root, "yt:description").text = snippet.get("description", "")
+
+            ET.SubElement(root, "gd:feedLink", {
+                "rel": "http://gdata.youtube.com/schemas/2007#user.uploads",
+                "href": "http://gdata.youtube.com/feeds/api/users/default/uploads",
+                "countHint": "0"
+            })
+
+            ET.SubElement(root, "yt:statistics", {
+                "lastWebAccess": "2011-02-01T12:45:18.000-08:00",
+                "subscriberCount": statistics.get("subscriberCount", "0"),
+                "videoWatchCount": "1",
+                "viewCount": statistics.get("viewCount", "0"),
+                "totalUploadViews": "0"
+            })
+
+            thumbnail_url = snippet.get("thumbnails", {}).get("high", {}).get("url", "").replace("https://", "http://")
+            ET.SubElement(root, "media:thumbnail", {"url": thumbnail_url})
+            ET.SubElement(root, "yt:username").text = channel_name
+            ET.SubElement(root, "yt:channelId").text = channel.get("id", "")
+
+            # Convert XML tree to string with proper header
+            xml_response = "<?xml version='1.0' encoding='UTF-8'?>\n" + ET.tostring(root, encoding="utf-8").decode("utf-8")
+            return Response(xml_response, content_type="application/xml")
+
+        else:
+            return Response("<?xml version='1.0' encoding='UTF-8'?><error>No channel found</error>", status=404, content_type="application/xml")
+
+    return Response(f"<?xml version='1.0' encoding='UTF-8'?><error>Invalid token or API request failed</error>", status=response.status_code, content_type="application/xml")
+
+
     
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
