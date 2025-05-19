@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, send_file,jsonify
+from flask import Flask, request, Response, send_file,jsonify, redirect
 import requests
 import xml.etree.ElementTree as ET
 from datetime import datetime
@@ -7,6 +7,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import subprocess
 import os
+import jwt  # Install with `pip install PyJWT`
 
 OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
 OAUTH2_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -139,7 +140,7 @@ def create_xml_response(videos):
         "xmlns:yt": "http://www.youtube.com/xml/schemas/2015"
     })
     ET.SubElement(root, "title", {"type": "text"}).text = "Videos"
-    ET.SubElement(root, "generator", {"ver": "1.0", "uri": "http://kamil.cc/"}).text = "Liinback data API"
+    ET.SubElement(root, "generator", {"ver": "1.0", "uri": "http://kamil.cc/"}).text = "Viitube data API"
     ET.SubElement(root, "openSearch:totalResults").text = str(len(videos))
     ET.SubElement(root, "openSearch:startIndex").text = "1"
     ET.SubElement(root, "openSearch:itemsPerPage").text = "20"
@@ -433,7 +434,7 @@ def build_subscriptions(ip, port, oauth_token):
     xml_string += f'<link>http://{ip}:{port}/feeds/api/users/default/subscriptions?oauth_token={oauth_token}</link>'
     xml_string += '<title type="text">Subscriptions</title>'
     xml_string += '<openSearch:totalResults></openSearch:totalResults>'
-    xml_string += '<generator ver="1.0" uri="http://kamil.cc/">Liinback data API</generator>'
+    xml_string += '<generator ver="1.0" uri="http://kamil.cc/">Viitube data API</generator>'
     xml_string += '<openSearch:startIndex>1</openSearch:startIndex>'
     xml_string += '<openSearch:itemsPerPage>40</openSearch:itemsPerPage>'
 
@@ -630,6 +631,44 @@ def uploads(channel_id):
     xml_response = create_xml_feed(videos, channel_name)  # Generate XML
 
     return Response(xml_response, mimetype="application/xml")
+
+def get_channel_id_from_api(oauth_token):
+    """Fetch Channel ID using YouTube API"""
+    headers = {"Authorization": f"Bearer {oauth_token}"}
+    response = requests.get("https://www.googleapis.com/youtube/v3/channels?part=id&mine=true", headers=headers)
+    
+    if response.status_code == 200:
+        data = response.json()
+        return data["items"][0]["id"] if "items" in data else None
+    return None
+
+@app.route("/feeds/api/users/default/uploads")
+def extract_channel_id_and_redirect():
+    """Extract Channel ID from OAuth token and redirect while preserving query arguments"""
+    oauth_token = request.args.get("oauth_token")
+    if not oauth_token:
+        return Response("<error>OAuth token is required</error>", status=400, mimetype="application/xml")
+
+    # Extract channel_id from OAuth token
+    try:
+        payload = jwt.decode(oauth_token, options={"verify_signature": False})  # Decode without verification
+        channel_id = payload.get("channel_id", None)
+    except Exception:
+        channel_id = None  # If decoding fails, fallback to API call
+
+    # If channel_id not in token, try YouTube API
+    if not channel_id:
+        channel_id = get_channel_id_from_api(oauth_token)
+        if not channel_id:
+            return Response("<error>Failed to retrieve channel ID</error>", status=400, mimetype="application/xml")
+
+    # Preserve all original query arguments
+    query_params = request.query_string.decode("utf-8")  # Get full query string
+    redirect_url = f"/feeds/api/users/{channel_id}/uploads?{query_params}"  # Append query params
+
+    # Redirect while keeping arguments
+    return redirect(redirect_url, code=302)
+
     
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
