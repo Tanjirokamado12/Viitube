@@ -691,6 +691,89 @@ def extract_channel_id_and_redirect():
     # Redirect while keeping arguments
     return redirect(redirect_url, code=302)
 
-    
+@app.route("/feeds/api/users/default/favorites", methods=["GET"])
+def get_liked_videos():
+    try:
+        # Get OAuth token from request URL
+        oauth_token = request.args.get("oauth_token")
+        if not oauth_token:
+            return Response("<error>OAuth token missing</error>", mimetype="application/xml", status=400)
+
+        # Fetch liked videos (Playlist "LL")
+        video_url = "https://www.googleapis.com/youtube/v3/playlistItems"
+        video_params = {
+            "part": "snippet,contentDetails",
+            "playlistId": "LL",
+            "maxResults": 20,
+            "access_token": oauth_token
+        }
+        video_response = requests.get(video_url, params=video_params).json()
+
+        if "items" not in video_response or not video_response["items"]:
+            return Response("<error>No liked videos found</error>", mimetype="application/xml", status=400)
+
+        video_ids = [item["snippet"]["resourceId"]["videoId"] for item in video_response["items"]]
+
+        # Fetch real video durations, views, and uploader names from videos.list
+        video_details_url = "https://www.googleapis.com/youtube/v3/videos"
+        video_details_params = {
+            "part": "contentDetails,statistics,snippet",  # Fetch uploader name with 'snippet'
+            "id": ",".join(video_ids),
+            "access_token": oauth_token
+        }
+        video_details_response = requests.get(video_details_url, params=video_details_params).json()
+
+        durations = {item["id"]: isodate.parse_duration(item["contentDetails"]["duration"]).total_seconds()
+                     for item in video_details_response.get("items", [])}
+        views = {item["id"]: item["statistics"]["viewCount"]
+                 for item in video_details_response.get("items", [])}
+        uploaders = {item["id"]: item["snippet"]["channelTitle"]  # Correct uploader name
+                     for item in video_details_response.get("items", [])}
+
+        # Generate XML response
+        xml_string = '<?xml version="1.0" encoding="UTF-8"?>'
+        xml_string += '<feed xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/" '
+        xml_string += 'xmlns:media="http://search.yahoo.com/mrss/" xmlns:yt="http://www.youtube.com/xml/schemas/2015">'
+        xml_string += '<title type="text">Liked Videos</title>'
+        xml_string += '<generator ver="1.0" uri="http://kamil.cc/">Liinback data API</generator>'
+        xml_string += f'<openSearch:totalResults>{len(video_response.get("items", []))}</openSearch:totalResults>'
+        xml_string += '<openSearch:startIndex>1</openSearch:startIndex>'
+        xml_string += '<openSearch:itemsPerPage>20</openSearch:itemsPerPage>'
+
+        for item in video_response["items"]:
+            video_id = item["snippet"]["resourceId"]["videoId"]
+            title = item["snippet"]["title"]
+            published = item["snippet"]["publishedAt"]
+            uploader = uploaders.get(video_id, "Unknown Uploader")  # Correct uploader name
+            thumbnail_url = f"http://i.ytimg.com/vi/{video_id}/mqdefault.jpg"  # Convert HTTPS to HTTP
+            duration_seconds = int(durations.get(video_id, 0))  # Real video duration
+            view_count = views.get(video_id, "0")  # Fetch views correctly
+
+            xml_string += "<entry>"
+            xml_string += f"<id>http://localhost:5000/api/videos/{video_id}</id>"
+            xml_string += f"<published>{published}</published>"
+            xml_string += f"<title type='text'>{title}</title>"
+            xml_string += f"<link rel='http://localhost:5000/api/videos/{video_id}/related'/>"
+            xml_string += "<author>"
+            xml_string += f"<name>{uploader}</name>"  # Correct uploader name
+            xml_string += "</author>"
+            xml_string += "<media:group>"
+            xml_string += f"<media:thumbnail yt:name='mqdefault' url='{thumbnail_url}' height='240' width='320' time='00:00:00'/>"
+            xml_string += f"<yt:duration seconds='{duration_seconds}'/>"  # Real video duration
+            xml_string += f"<yt:views>{view_count}</yt:views>"  # Correct view count
+            xml_string += f"<yt:videoid id='{video_id}'>{video_id}</yt:videoid>"
+            xml_string += "</media:group>"
+            xml_string += "</entry>"
+
+        xml_string += "</feed>"
+
+        return Response(xml_string, mimetype="application/xml")
+
+    except Exception as e:
+        return Response(f"<error>{e}</error>", mimetype="application/xml")
+
+    except Exception as e:
+        return Response(f"<error>{e}</error>", mimetype="application/xml")
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
