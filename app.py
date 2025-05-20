@@ -7,6 +7,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import subprocess
 import os
+import isodate  # Install with `pip install isodate`
 import jwt  # Install with `pip install PyJWT`
 
 OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
@@ -465,7 +466,7 @@ def get_subscriptions():
 
 
 def get_channel_uploads(channel_id, oauth_token):
-    """Fetch channel name and videos"""
+    """Fetch channel name and videos with correct durations"""
     creds = Credentials(token=oauth_token)
     service = build("youtube", "v3", credentials=creds)
 
@@ -487,7 +488,6 @@ def get_channel_uploads(channel_id, oauth_token):
         video_id = item["snippet"]["resourceId"]["videoId"]
         video_ids.append(video_id)
 
-        # Convert HTTPS thumbnails to HTTP (optional)
         thumbnail_url = item["snippet"]["thumbnails"]["default"]["url"].replace("https://", "http://")
 
         videos.append({
@@ -499,8 +499,15 @@ def get_channel_uploads(channel_id, oauth_token):
             "description": item["snippet"].get("description", "No description available"),
             "thumbnail": thumbnail_url, 
             "uploader": channel_name,
-            "duration": item["contentDetails"].get("duration", "N/A"),
+            "duration": "N/A",  # Placeholder for now
         })
+
+    # Fetch correct video durations
+    durations = get_video_durations(video_ids, oauth_token)
+    
+    # Merge durations into videos list
+    for vid in videos:
+        vid["duration"] = durations.get(vid["videoid"], "N/A")
 
     # Fetch video statistics separately
     stats_response = service.videos().list(part="statistics", id=",".join(video_ids)).execute()
@@ -514,6 +521,21 @@ def get_channel_uploads(channel_id, oauth_token):
         vid["favorite_count"] = video_stats.get("favoriteCount", "0")
 
     return videos, channel_name  # Return videos AND channel name
+
+def get_video_durations(video_ids, oauth_token):
+    """Fetch actual durations for videos"""
+    creds = Credentials(token=oauth_token)
+    service = build("youtube", "v3", credentials=creds)
+    
+    response = service.videos().list(part="contentDetails", id=",".join(video_ids)).execute()
+    
+    durations = {}
+    for item in response.get("items", []):
+        video_id = item["id"]
+        iso_duration = item["contentDetails"]["duration"]
+        durations[video_id] = int(isodate.parse_duration(iso_duration).total_seconds())  # Convert to seconds
+    
+    return durations
 
 def create_xml_feed(videos, channel_name):
     feed = ET.Element("feed", {
@@ -594,7 +616,7 @@ def create_xml_feed(videos, channel_name):
                 "time": "00:00:00"
             })
 
-        ET.SubElement(media_group, "yt:duration", {"seconds": "217"})
+        ET.SubElement(media_group, "yt:duration", {"seconds": str(vid["duration"])})
         ET.SubElement(media_group, "yt:videoid", {"id": vid["videoid"]}).text = vid["videoid"]
         ET.SubElement(media_group, "youTubeId", {"id": vid["videoid"]}).text = vid["videoid"]
         ET.SubElement(media_group, "media:credit", {"role": "uploader", "name": vid["uploader"]}).text = vid["uploader"]
