@@ -9,6 +9,9 @@ import subprocess
 import os
 import isodate  # Install with `pip install isodate`
 import jwt  # Install with `pip install PyJWT`
+import datetime
+import time
+import json
 
 OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
 OAUTH2_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -126,13 +129,98 @@ def get_video_info():
 
     video_info = GetVideoInfo().build(video_id)
     return video_info  # Ensure this returns a valid response
-    
-    YOUTUBE_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search?key=YOUR_API_KEY"
+
+YOUTUBEI_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search"
+YOUTUBE_V3_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
+CACHE_DIR = "./assets/cache/search"
 
 HEADERS = {
     "Content-Type": "application/json",
     "User-Agent": "Mozilla/5.0"
 }
+
+# Ensure cache directory exists
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+def get_cache_file(query):
+    return os.path.join(CACHE_DIR, f"{query}.json")
+
+def is_cache_valid(cache_file):
+    if not os.path.exists(cache_file):
+        return False
+    last_modified = os.path.getmtime(cache_file)
+    return (time.time() - last_modified) < (5 * 24 * 60 * 60)  # 5 days
+
+def fetch_videos(query, oauth_token=None):
+    cache_file = get_cache_file(query)
+
+    if is_cache_valid(cache_file):
+        with open(cache_file, "r") as f:
+            return json.load(f)
+
+    if oauth_token:
+        # Use YouTube API v3 with authentication
+        headers = HEADERS.copy()
+        headers["Authorization"] = f"Bearer {oauth_token}"
+        params = {
+            "part": "snippet",
+            "q": query,
+            "type": "video",
+            "maxResults": 20
+        }
+        response = requests.get(YOUTUBE_V3_SEARCH_URL, headers=headers, params=params)
+        data = response.json()
+
+        video_ids = [item["id"]["videoId"] for item in data.get("items", [])]
+
+        if video_ids:
+            stats_response = requests.get(
+                "https://www.googleapis.com/youtube/v3/videos",
+                headers=headers,
+                params={"part": "contentDetails,statistics", "id": ",".join(video_ids)}
+            )
+            stats_data = stats_response.json().get("items", {})
+            video_stats = {item["id"]: item for item in stats_data}
+
+        videos = []
+        for item in data.get("items", []):
+            video_id = item["id"]["videoId"]
+            details = video_stats.get(video_id, {})
+
+            duration = details.get("contentDetails", {}).get("duration", "PT0S")
+            parsed_duration = isodate.parse_duration(duration)
+            duration_seconds = int(parsed_duration.total_seconds())
+
+            view_count = details.get("statistics", {}).get("viewCount", "0")
+
+            videos.append({
+                "title": item["snippet"]["title"],
+                "videoId": video_id,
+                "author": item["snippet"]["channelTitle"],
+                "authorId": item["snippet"]["channelId"],
+                "thumbnailUrl": item["snippet"]["thumbnails"]["high"]["url"],
+                "viewCount": view_count,
+                "duration": str(duration_seconds),
+                "published": item["snippet"]["publishedAt"]
+            })
+
+    # Save the results to cache
+    with open(cache_file, "w") as f:
+        json.dump(videos, f, indent=4)
+
+    return videos
+    
+@app.route("/feeds/api/videos", methods=["GET"])
+def search():
+    query = request.args.get("q")
+    oauth_token = request.args.get("oauth_token")  # Extract OAuth token if provided
+    if not query:
+        return "Query parameter 'q' is required", 400
+
+    videos = fetch_videos(query, oauth_token)
+    xml_response = create_xml_response(videos)
+    
+    return Response(xml_response, mimetype="application/xml")
 
 def create_xml_response(videos):
     root = ET.Element("feed", {
@@ -176,56 +264,27 @@ def create_xml_response(videos):
         })
 
     return ET.tostring(root, encoding="utf-8", method="xml")
-
-@app.route("/feeds/api/videos", methods=["GET"])
-def search():
-    query = request.args.get("q")
-    if not query:
-        return "Query parameter 'q' is required", 400
-
-    payload = {
-        "context": {
-            "client": {
-                "hl": "en",
-                "gl": "US",
-                "clientName": "WEB",
-                "clientVersion": "2.20210714.01.00"
-            }
-        },
-        "query": query
-    }
-
-    response = requests.post(YOUTUBEI_SEARCH_URL, json=payload, headers=HEADERS)
-    data = response.json()
-
-    primary_contents = data.get("contents", {}).get("twoColumnSearchResultsRenderer", {}).get("primaryContents", {}).get("sectionListRenderer", {}).get("contents", [])
-
-    videos = []
-    for section in primary_contents:
-        for item in section.get("itemSectionRenderer", {}).get("contents", []):
-            video = item.get("videoRenderer")
-            if video:
-                videos.append({
-                    "title": video.get("title", {}).get("runs", [{}])[0].get("text", "No Title"),
-                    "videoId": video.get("videoId", "No Video ID"),
-                    "author": video.get("ownerText", {}).get("runs", [{}])[0].get("text", "Unknown Author"),
-                    "authorId": video.get("ownerText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", ""),
-                    "thumbnailUrl": video.get("thumbnail", {}).get("thumbnails", [{}])[0].get("url", ""),
-                    "viewCount": video.get("viewCountText", {}).get("simpleText", "0 views"),
-                    "duration": video.get("lengthText", {}).get("simpleText", "Unknown Duration"),
-                    "published": video.get("publishedTimeText", {}).get("simpleText", "Unknown Time")
-                })
-
-    xml_response = create_xml_response(videos)
-    return Response(xml_response, mimetype="application/xml")
     
 # Ensure 'assets' folder exists
 if not os.path.exists("assets"):
     os.makedirs("assets")
-    
+
 # Ensure the assets folder exists
 ASSETS_FOLDER = 'assets'
 os.makedirs(ASSETS_FOLDER, exist_ok=True)
+
+def get_video_orientation(file_path):
+    """Checks if a video is vertical (height > width)"""
+    probe_cmd = [
+        'ffprobe', '-v', 'error', '-select_streams', 'v:0',
+        '-show_entries', 'stream=width,height', '-of', 'json', file_path
+    ]
+    result = subprocess.run(probe_cmd, capture_output=True, text=True)
+    data = json.loads(result.stdout)
+
+    width = data['streams'][0]['width']
+    height = data['streams'][0]['height']
+    return "vertical" if height > width else "standard"
 
 @app.route('/get_video', methods=['GET'])
 def get_video():
@@ -233,36 +292,44 @@ def get_video():
     if not video_id:
         return "Missing video_id parameter", 400
 
-    video_url = f"https://www.youtube.com/watch?v={video_id}"
+    file_path = os.path.join(ASSETS_FOLDER, f"{video_id}.mp4")
+    processed_file = os.path.join(ASSETS_FOLDER, f"{video_id}.webm")
+
+    if os.path.exists(processed_file):
+        return send_file(processed_file, as_attachment=True)
 
     try:
-        # Define paths for downloaded and processed files
-        file_path = os.path.join(ASSETS_FOLDER, f"{video_id}.mp4")
-        processed_file = os.path.join(ASSETS_FOLDER, f"{video_id}.webm")
-
-        # Check if processed file already exists
-        if os.path.exists(processed_file):
-            return send_file(processed_file, as_attachment=True)
-
-        # Download video using pytube
-        yt = YouTube(video_url)
+        yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
         stream = yt.streams.get_highest_resolution()
         stream.download(output_path=ASSETS_FOLDER, filename=f"{video_id}.mp4")
+    except Exception as e:
+        return f"Error downloading video: {str(e)}", 500
 
-        # Define FFmpeg command to process the video
+    if not os.path.exists(file_path):
+        return "Download failed, file not found", 500
+
+    # Detect orientation
+    orientation = get_video_orientation(file_path)
+
+    # Apply correct FFmpeg processing
+    if orientation == "vertical":  # Convert vertical videos properly
+        ffmpeg_cmd = [
+            'ffmpeg', '-i', file_path,
+            '-vf', 'scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2',
+            '-c:v', 'libvpx', '-b:v', '300k', '-cpu-used', '8',
+            '-pix_fmt', 'yuv420p', '-c:a', 'libvorbis', '-b:a', '128k',
+            '-r', '30', '-g', '30', processed_file
+        ]
+    else:  # Keep standard videos unchanged
         ffmpeg_cmd = [
             'ffmpeg', '-i', file_path, '-c:v', 'libvpx', '-b:v', '300k',
             '-cpu-used', '8', '-pix_fmt', 'yuv420p', '-c:a', 'libvorbis', '-b:a', '128k',
             '-r', '30', '-g', '30', processed_file
         ]
 
-        # Run FFmpeg if processed file is not present
-        subprocess.run(ffmpeg_cmd, check=True)
+    subprocess.run(ffmpeg_cmd)
 
-        return send_file(processed_file, as_attachment=True)
-
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+    return send_file(processed_file, as_attachment=True) if os.path.exists(processed_file) else "Processing failed", 500
 
 @app.route('/o/oauth2/device/code', methods=['POST'])
 def deviceCode():
@@ -774,6 +841,245 @@ def get_liked_videos():
 
     except Exception as e:
         return Response(f"<error>{e}</error>", mimetype="application/xml")
+
+@app.route('/feeds/api/users/default/playlists', methods=['GET'])
+def get_playlists_v2():
+    access_token = request.args.get('oauth_token')
+
+    if not access_token:
+        return Response("<error>Missing OAuth2 token</error>", mimetype="application/xml", status=401)
+
+    # Fetch playlists from YouTube API v3
+    url = "https://www.googleapis.com/youtube/v3/playlists"
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Accept": "application/json"
+    }
+    params = {"part": "snippet", "mine": "true", "maxResults": 25}
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        data = response.json()
+        username = "me"  # Placeholder since v3 doesn't provide usernames
+
+        # Create XML root element (mimicking API v2)
+        root = ET.Element("feed", {
+            "xmlns": "http://www.w3.org/2005/Atom",
+            "xmlns:media": "http://search.yahoo.com/mrss/",
+            "xmlns:openSearch": "http://a9.com/-/spec/opensearchrss/1.0/",
+            "xmlns:gd": "http://schemas.google.com/g/2005",
+            "xmlns:yt": "http://gdata.youtube.com/schemas/2007"
+        })
+
+        ET.SubElement(root, "id").text = f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists"
+        ET.SubElement(root, "updated").text = datetime.datetime.utcnow().isoformat() + "Z"
+        ET.SubElement(root, "category", {
+            "scheme": "http://schemas.google.com/g/2005#kind",
+            "term": "http://gdata.youtube.com/schemas/2007#playlistLink"
+        })
+        ET.SubElement(root, "title", {"type": "text"}).text = f"Playlists of {username}"
+        ET.SubElement(root, "logo").text = "http://www.youtube.com/img/pic_youtubelogo_123x63.gif"
+
+        # Navigation Links
+        for rel, href in [
+            ("related", f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}"),
+            ("alternate", "http://www.youtube.com"),
+            ("http://schemas.google.com/g/2005#feed", f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists"),
+            ("http://schemas.google.com/g/2005#batch", f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists/batch"),
+            ("self", f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists?start-index=1&max-results=25"),
+            ("next", f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists?start-index=26&max-results=25"),
+        ]:
+            ET.SubElement(root, "link", {"rel": rel, "type": "application/atom+xml", "href": href})
+
+        # Author
+        author = ET.SubElement(root, "author")
+        ET.SubElement(author, "name").text = username
+        ET.SubElement(author, "uri").text = f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}"
+
+        ET.SubElement(root, "generator", {"version": "2.1", "uri": "http://gdata.youtube.com"}).text = "YouTube data API"
+        ET.SubElement(root, "openSearch:totalResults").text = str(data.get("pageInfo", {}).get("totalResults", 0))
+        ET.SubElement(root, "openSearch:startIndex").text = "1"
+        ET.SubElement(root, "openSearch:itemsPerPage").text = "25"
+
+        # Convert API v3 data to v2-like XML entries
+        for item in data.get("items", []):
+            entry = ET.SubElement(root, "entry")
+            ET.SubElement(entry, "id").text = f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists/{item['id']}"
+            ET.SubElement(entry, "playlistId").text = item["id"]
+            ET.SubElement(entry, "yt:playlistId").text = item["id"]
+            ET.SubElement(entry, "published").text = item["snippet"]["publishedAt"]
+            ET.SubElement(entry, "updated").text = item["snippet"]["publishedAt"]
+
+            ET.SubElement(entry, "category", {
+                "scheme": "http://schemas.google.com/g/2005#kind",
+                "term": "http://gdata.youtube.com/schemas/2007#playlistLink"
+            })
+            ET.SubElement(entry, "title", {"type": "text"}).text = item["snippet"]["title"]
+            ET.SubElement(entry, "content", {
+                "type": "text",
+                "src": f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists/{item['id']}"
+            }).text = "None"
+
+            ET.SubElement(entry, "link", {"rel": "related", "type": "application/atom+xml", "href": f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}"})
+            ET.SubElement(entry, "link", {"rel": "alternate", "type": "text/html", "href": f"http://www.youtube.com/view_play_list?p={item['id']}"})
+            ET.SubElement(entry, "link", {"rel": "self", "type": "application/atom+xml", "href": f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists/{item['id']}"})
+
+            author = ET.SubElement(entry, "author")
+            ET.SubElement(author, "name").text = item["snippet"]["channelTitle"]
+            ET.SubElement(author, "uri").text = f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}"
+
+            ET.SubElement(entry, "yt:description").text = "None"
+            ET.SubElement(entry, "yt:countHint").text = "5"
+            ET.SubElement(entry, "summary")
+
+        xml_data = ET.tostring(root, encoding="utf-8").decode()
+        return Response(xml_data, mimetype="application/xml")
+
+    else:
+        return Response(f"<error>{response.text}</error>", mimetype="application/xml", status=response.status_code)
+        
+YOUTUBE_PLAYLIST_ITEMS_URL = "https://www.googleapis.com/youtube/v3/playlistItems"
+YOUTUBE_PLAYLIST_URL = "https://www.googleapis.com/youtube/v3/playlists"
+YOUTUBE_VIDEO_URL = "https://www.googleapis.com/youtube/v3/videos"
+        
+@app.route('/feeds/api/playlists/<playlist_id>', methods=['GET'])
+def fetch_playlist_videos(playlist_id):
+    oauth_token = request.args.get('oauth_token')
+
+    if not oauth_token:
+        return Response("<error>Missing oauth_token</error>", status=400, content_type="application/xml")
+
+    headers = {
+        "Authorization": f"Bearer {oauth_token}"
+    }
+
+    # Fetch playlist details
+    playlist_params = {"part": "snippet", "id": playlist_id}
+    playlist_response = requests.get(YOUTUBE_PLAYLIST_URL, headers=headers, params=playlist_params)
+
+    if playlist_response.status_code != 200:
+        return Response(f"<error>Failed to retrieve playlist</error>", status=playlist_response.status_code, content_type="application/xml")
+
+    playlist_data = playlist_response.json()["items"][0]["snippet"]
+
+    # Fetch playlist items (videos)
+    video_params = {"part": "snippet,contentDetails", "playlistId": playlist_id, "maxResults": 50}
+    video_response = requests.get(YOUTUBE_PLAYLIST_ITEMS_URL, headers=headers, params=video_params)
+
+    if video_response.status_code != 200:
+        return Response(f"<error>Failed to retrieve playlist videos</error>", status=video_response.status_code, content_type="application/xml")
+
+    video_data = video_response.json().get("items", [])
+
+    if not video_data:
+        return Response("<error>No videos found in the playlist</error>", status=400, content_type="application/xml")
+
+    # Extract video IDs for statistics lookup
+    video_ids = ",".join([
+        item["snippet"]["resourceId"]["videoId"]
+        for item in video_data
+        if "resourceId" in item["snippet"]
+    ])
+
+    # Fetch video statistics and details
+    stats_params = {"part": "snippet,contentDetails,statistics", "id": video_ids}
+    stats_response = requests.get(YOUTUBE_VIDEO_URL, headers=headers, params=stats_params)
+
+    if stats_response.status_code != 200:
+        return Response(f"<error>Failed to retrieve video stats</error>", status=stats_response.status_code, content_type="application/xml")
+
+    video_details = {item["id"]: item for item in stats_response.json().get("items", [])}
+
+    # Construct XML response with playlist metadata
+    xml_response = f"""<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom' xmlns:app='http://purl.org/atom/app#' xmlns:media='http://search.yahoo.com/mrss/' xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gd='http://schemas.google.com/g/2005' xmlns:yt='http://gdata.youtube.com/schemas/2007'>
+    <id>http://192.168.1.18:80/feeds/youtubei/v1/playlists/{playlist_id}</id>
+    <updated>{playlist_data['publishedAt']}</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#playlist'/>
+    <title type='text'>{playlist_data['title']}</title>
+    <subtitle type='text'>{playlist_data.get('description', '')}</subtitle>
+    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
+    <link rel='alternate' type='text/html' href='http://www.youtube.com/view_play_list?p={playlist_id}'/>
+    <author>
+        <name>{playlist_data['channelTitle']}</name>
+        <uri>http://192.168.1.18:80/feeds/youtubei/v1/users/{playlist_data['channelId']}</uri>
+    </author>
+    <openSearch:totalResults>{len(video_data)}</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>50</openSearch:itemsPerPage>
+    <yt:playlistId>{playlist_id}</yt:playlistId>"""
+
+    # Manually set position starting at 1
+    position_counter = 1
+
+    # Add each video entry with full details
+    for item in video_data:
+        video_id = item['snippet']['resourceId']['videoId']
+        video_info = video_details.get(video_id, {})
+        stats = video_info.get("statistics", {})
+        content_details = video_info.get("contentDetails", {})
+        snippet_details = video_info.get("snippet", {})
+
+        view_count = stats.get("viewCount", "0")
+        favorite_count = stats.get("favoriteCount", "0")
+
+        # Convert ISO duration to seconds
+        iso_duration = content_details.get('duration', "PT0S")  # Default to 'PT0S'
+        parsed_duration = isodate.parse_duration(iso_duration)  # Convert to timedelta
+        duration_seconds = int(parsed_duration.total_seconds())  # Convert to seconds
+
+        uploader_name = snippet_details.get("channelTitle", "Unknown Uploader")
+        uploader_id = snippet_details.get("channelId", "")
+
+        xml_response += f"""
+    <entry>
+        <id>{video_id}</id>
+        <updated>{item['snippet']['publishedAt']}</updated>
+        <title>{item['snippet']['title']}</title>
+        <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={video_id}&amp;feature=youtube_gdata'/>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.responses' type='application/atom+xml' href='http://192.168.1.18:80/feeds/youtubei/v1/videos/{video_id}/responses?v=2'/>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.related' type='application/atom+xml' href='http://192.168.1.18:80/feeds/youtubei/v1/videos/{video_id}/related?v=2'/>
+        <link rel='related' type='application/atom+xml' href='http://192.168.1.18:80/feeds/youtubei/v1/videos/{video_id}?v=2'/>
+        <link rel='self' type='application/atom+xml' href='http://gdata.youtube.com/feeds/youtubei/v1/playlists/0A7ED544A0D9877D/00A37F607671690E?v=2'/>
+        <author>
+            <name>{item['snippet']['videoOwnerChannelTitle']}</name>
+            <uri>http://gdata.youtube.com/feeds/youtubei/v1/users/{item['snippet']['channelId']}</uri>
+        </author>
+        <yt:accessControl action='comment' permission='allowed'/>
+        <yt:accessControl action='commentVote' permission='allowed'/>
+        <yt:accessControl action='videoRespond' permission='moderated'/>
+        <yt:accessControl action='rate' permission='allowed'/>
+        <yt:accessControl action='embed' permission='allowed'/>
+        <yt:accessControl action='syndicate' permission='allowed'/>
+        <yt:accessControl action='list' permission='allowed'/>
+        <gd:comments>
+            <gd:feedLink href='http://gdata.youtube.com/feeds/youtubei/v1/videos/{video_id}/comments?v=2' countHint='1'/>
+        </gd:comments>
+        <media:group>
+            <media:content url='http://192.168.1.18:80/get_video?video_id={video_id}/mp4' type='video/mp4'/>
+            <media:credit role='uploader' scheme='urn:youtube' yt:type='partner'>{item['snippet']['channelTitle']}</media:credit>
+            <media:description type='plain'></media:description>
+            <media:keywords>-</media:keywords>
+            <media:player url='http://www.youtube.com/watch?v={video_id}&amp;feature=youtube_gdata'/>
+            <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+            <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+            <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+            <media:title type='plain'>{item['snippet']['title']}</media:title>
+            <yt:duration seconds='{duration_seconds}'/>
+            <yt:uploaded>{item['snippet']['publishedAt']}</yt:uploaded>
+            <yt:videoid>{video_id}</yt:videoid>
+        </media:group>
+        <gd:rating average='5.0' max='5' min='1' numRaters='1' rel='http://schemas.google.com/g/2005#overall'/>
+        <yt:statistics favoriteCount='{favorite_count}' viewCount='{view_count}'/>
+        <yt:position>{position_counter}</yt:position>
+    </entry>"""
+
+        position_counter += 1  # Increment position for next video
+
+    xml_response += "\n</feed>"
+
+    return Response(xml_response, content_type="application/xml")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
