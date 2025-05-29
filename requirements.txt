@@ -37,6 +37,7 @@ python-dateutil==2.9.0.post0
 pytube==15.0.0
 pytubefix==8.13.1
 pytz==2025.2
+redis==6.2.0
 requests==2.32.3
 requests-oauthlib==2.0.0
 rsa==4.9.1
