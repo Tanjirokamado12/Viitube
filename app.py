@@ -14,6 +14,7 @@ import time
 import json
 import random
 import string
+import threading
 
 OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
 OAUTH2_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -106,6 +107,11 @@ class GetVideoInfo:
 def wiitv():
     return send_file('swf/leanbacklite_wii.swf', mimetype='application/x-shockwave-flash')
 # Flask Routes
+
+# Flask Routes
+@app.route('/tv')
+def tv():
+    return send_file('swf/leanbacklite_v3.swf', mimetype='application/x-shockwave-flash')
 
 @app.route('/complete/search')
 def completesearch():
@@ -284,7 +290,7 @@ def create_xml_response(videos):
         })
 
         author = ET.SubElement(entry, "author")
-        ET.SubElement(author, "name").text = video['authorId']
+        ET.SubElement(author, "name").text = video['author']
         ET.SubElement(author, "uri").text = f"http://{request.host}/feeds/api/users/{video['authorId']}"
 
         ET.SubElement(entry, "gd:comments").append(
@@ -328,7 +334,7 @@ def create_xml_response(videos):
         ET.SubElement(media_group, "youTubeId", {"id": video["videoId"]}).text = video["videoId"]
         ET.SubElement(media_group, "media:credit", {
             "role": "uploader",
-            "name": video["authorId"]
+            "name": video["author"]
         }).text = video["author"]
 
         ET.SubElement(entry, "gd:rating", {
@@ -1249,6 +1255,474 @@ def register_device():
         file.write(f"Serial: {serial_number}\nDeviceId={device_id}\nDeviceKey={device_key}\n\n")
 
     return f"DeviceId={device_id}\nDeviceKey=ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk="  # Simple text response
+    
+HISTORY_CACHE_PATH = "./assets/cache/user/history.json"
+processed_videos = set()  # Track unique entries
+
+def fetch_watch_history(oauth_token):
+    """Retrieve YouTube watch history from the internal API."""
+    url = "https://www.youtube.com/youtubei/v1/browse"
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0",
+        "Authorization": f"Bearer {oauth_token}"
+    }
+    payload = {
+        "context": {
+            "client": {
+                "hl": "en",
+                "gl": "en",
+                "clientName": "TVHTML5",
+                "clientVersion": "7.20250528.14.00",
+                "deviceMake": "Sony",
+                "deviceModel": "BRAVIA 8K UR2",
+                "platform": "TV"
+            }
+        },
+        "browseId": "FEhistory"
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code == 200:
+        return response.json()
+    return None  # Ensure failures don't return JSON
+
+def load_existing_history():
+    """Load cached history from a file."""
+    if os.path.exists(HISTORY_CACHE_PATH):
+        with open(HISTORY_CACHE_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+def save_history(history_data):
+    """Save watch history to a file."""
+    os.makedirs(os.path.dirname(HISTORY_CACHE_PATH), exist_ok=True)
+    with open(HISTORY_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(history_data, f, indent=4)
+
+def build_watch_history_xml(json_data, ip, port, lang):
+    """Convert YouTube history JSON to XML, scanning ALL sections dynamically."""
+    view_count_labels = {
+        'en': 'views', 'es': 'visualizaciones', 'fr': 'vues', 'de': 'Aufrufe',
+        'ja': '回視聴', 'nl': 'weergaven', 'it': 'visualizzazioni'
+    }
+    view_count_label = view_count_labels.get(lang, 'views')
+
+    xml_string = '<?xml version="1.0" encoding="UTF-8"?>'
+    xml_string += '<feed xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:yt="http://www.youtube.com/xml/schemas/2015">'
+    xml_string += '<title type="text">Videos</title>'
+    xml_string += '<generator ver="1.0" uri="http://your-api.com/">Your Data API</generator>'
+
+    entries_found = False
+    processed_videos = set()  # Track unique entries
+
+    def recursive_search(data, xml_string):
+        """Search all nested sections to find videoId and create entries dynamically."""
+        if isinstance(data, dict):
+            if "videoId" in data:
+                xml_string = process_video_entry(data, xml_string)  # Create XML entry
+            
+            for key, value in data.items():
+                if isinstance(value, (dict, list)):
+                    xml_string = recursive_search(value, xml_string)  # Continue deeper search
+
+        elif isinstance(data, list):
+            for item in data:
+                xml_string = recursive_search(item, xml_string)
+
+        return xml_string  # Return updated XML content
+
+    def process_video_entry(video_data, xml_string):
+        """Generate XML entry, ensuring only one entry per unique videoId unless metadata differs."""
+        nonlocal entries_found
+        entries_found = True
+
+        video_id = video_data.get("videoId", "")
+        title = video_data.get("title", {}).get("runs", [{}])[0].get("text", "")
+        length_text = video_data.get("lengthText", {}).get("simpleText", "")
+        view_count = video_data.get("viewCountText", {}).get("simpleText", "")
+        author_name = video_data.get("longBylineText", {}).get("runs", [{}])[0].get("text", "")
+        author_id = video_data.get("longBylineText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
+
+        # Track unique entries using a signature
+        video_signature = f"{video_id}-{title}-{length_text}"  
+        if video_signature in processed_videos:
+            return xml_string  # Ignore if duplicate entry detected
+        processed_videos.add(video_signature)
+
+        xml_string += '<entry>'
+        xml_string += f'<id>http://{ip}:{port}/api/videos/{video_id}</id>'
+        xml_string += f'<published>null</published>'
+        xml_string += f'<title type="text">(title)</title>'
+        xml_string += f'<link rel="alternate" href="http://{ip}:{port}/api/videos/{video_id}/related"/>'
+        xml_string += f'<author><name>(authorName)</name><uri>https://www.youtube.com/channel/{author_id}</uri></author>'
+        xml_string += '<media:group>'
+        xml_string += f'<media:thumbnail url="http://i.ytimg.com/vi/{video_id}/mqdefault.jpg" height="240" width="320"/>'
+        xml_string += f'<yt:duration seconds="{length_text}"/>'
+        xml_string += f'<yt:uploaderId id="{author_id}">{author_id}</yt:uploaderId>'
+        xml_string += f'<yt:videoid id="{video_id}">{video_id}</yt:videoid>'
+        xml_string += f'<media:credit role="uploader" name="(authorName)">(authorName)</media:credit>'
+        xml_string += '</media:group>'
+        xml_string += f'<yt:statistics favoriteCount="0" viewCount="(viewCount)"/>'
+        xml_string += '</entry>'
+
+        return xml_string  # Return modified XML content
+
+    xml_string = recursive_search(json_data, xml_string)
+
+    if not entries_found:
+        xml_string += '<error>No watch history found</error>'
+
+    xml_string += '</feed>'
+    return xml_string
+
+
+    def recursive_search(data):
+        """Search all nested sections to find videoId and create entries dynamically."""
+        if isinstance(data, dict):
+            if "videoId" in data:
+                process_video_entry(data)  # Create XML entry
+            
+            for key, value in data.items():
+                if isinstance(value, (dict, list)):
+                    recursive_search(value)  # Continue deeper search
+
+        elif isinstance(data, list):
+            for item in data:
+                recursive_search(item)
+
+    def process_video_entry(video_data):
+        """Generate XML entry, ensuring only one entry per unique videoId unless metadata differs."""
+        global xml_string, entries_found
+        entries_found = True
+
+        video_id = video_data.get("videoId", "")
+        title = video_data.get("title", {}).get("runs", [{}])[0].get("text", "")
+        length_text = video_data.get("lengthText", {}).get("simpleText", "")
+        view_count = video_data.get("viewCountText", {}).get("simpleText", "")
+        author_name = video_data.get("longBylineText", {}).get("runs", [{}])[0].get("text", "")
+        author_id = video_data.get("longBylineText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
+
+        # Track unique entries using a signature
+        video_signature = f"{video_id}-{title}-{length_text}"  
+        if video_signature in processed_videos:
+            return  # Ignore if duplicate entry detected
+        processed_videos.add(video_signature)
+
+        xml_string += '<entry>'
+        xml_string += f'<id>http://{ip}:{port}/api/videos/{video_id}</id>'
+        xml_string += f'<title type="text">{title}</title>'
+        xml_string += f'<link rel="alternate" href="http://{ip}:{port}/api/videos/{video_id}/related"/>'
+        xml_string += f'<author><name>{author_name}</name><uri>https://www.youtube.com/channel/{author_id}</uri></author>'
+        xml_string += '<media:group>'
+        xml_string += f'<media:thumbnail url="http://i.ytimg.com/vi/{video_id}/mqdefault.jpg" height="240" width="320"/>'
+        xml_string += f'<yt:duration seconds="{length_text}"/>'
+        xml_string += f'<yt:videoid>{video_id}</yt:videoid>'
+        xml_string += f'<media:credit role="uploader" name="{author_name}"/>'
+        xml_string += '</media:group>'
+        xml_string += f'<yt:statistics viewCount="{view_count}"/>'
+        xml_string += '</entry>'
+
+    recursive_search(json_data)
+
+    if not entries_found:
+        xml_string += '<error>No watch history found</error>'
+
+    xml_string += '</feed>'
+    return xml_string
+
+HISTORY_CACHE_PATH = "./assets/cache/history.json"
+CACHE_EXPIRATION = 5 * 3600  # 5 hours (in seconds)
+
+def fetch_watch_history(oauth_token):
+    """Retrieve YouTube watch history using OAuth authentication and save to cache."""
+    url = "https://www.youtube.com/youtubei/v1/browse"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {oauth_token}"
+    }
+    payload = {
+        "context": {
+            "client": {
+                "hl": "en",
+                "gl": "en",
+                "clientName": "TVHTML5",
+                "clientVersion": "7.20250528.14.00",
+                "platform": "TV"
+            }
+        },
+        "browseId": "FEhistory"
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    if response.status_code == 200:
+        history_data = response.json()
+        save_cache(history_data)  # Save response to cache
+        return history_data
+    return None
+
+def save_cache(data):
+    """Save watch history to cache with timestamp."""
+    os.makedirs(os.path.dirname(HISTORY_CACHE_PATH), exist_ok=True)
+    cache_content = {"timestamp": time.time(), "data": data}
+    with open(HISTORY_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(cache_content, f, indent=4)
+
+def load_cache(oauth_token):
+    """Load cached history, checking expiration and refreshing if needed."""
+    if os.path.exists(HISTORY_CACHE_PATH):
+        with open(HISTORY_CACHE_PATH, "r", encoding="utf-8") as f:
+            cache_content = json.load(f)
+
+        # Validate cache structure
+        if "timestamp" not in cache_content or "data" not in cache_content:
+            print("Cache file is invalid or outdated. Refreshing watch history...")
+            return fetch_watch_history(oauth_token)
+
+        # If cache is older than 5 hours, refresh it at next request
+        if time.time() - cache_content["timestamp"] > CACHE_EXPIRATION:
+            print("Cache expired. Fetching new watch history...")
+            return fetch_watch_history(oauth_token)
+
+        return cache_content["data"]  # Use cached data if valid
+    return fetch_watch_history(oauth_token)  # No cache found, fetch fresh data
+
+
+def extract_video_ids(history_data):
+    """Extract unique video IDs ordered by most recent watch time."""
+    video_entries = set()
+
+    def recursive_search(data):
+        """Recursively search for video IDs and timestamps."""
+        if isinstance(data, dict):
+            if "videoId" in data:
+                timestamp = data.get("publishedTimeText", {}).get("simpleText", "0")
+                video_entries.add((timestamp, data["videoId"]))
+            for value in data.values():
+                recursive_search(value)
+        elif isinstance(data, list):
+            for item in data:
+                recursive_search(item)
+
+    recursive_search(history_data)
+    return [video_id for _, video_id in sorted(video_entries, reverse=True, key=lambda x: x[0])]
+
+def fetch_video_details(video_ids, oauth_token):
+    """Retrieve video details using YouTube API v3 with OAuth token."""
+    url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={','.join(video_ids)}"
+    headers = {"Authorization": f"Bearer {oauth_token}"}
+
+    response = requests.get(url, headers=headers)
+    return response.json() if response.status_code == 200 else None
+
+@app.route('/feeds/api/users/default/watch_history', methods=['GET'])
+def get_watch_history_xml():
+    """API endpoint returning ordered watch history with full metadata."""
+    oauth_token = request.args.get('oauth_token')
+    if not oauth_token:
+        return Response('<error>Missing OAuth token</error>', mimetype='application/xml')
+
+    # Load cache, refresh ONLY IF expired (older than 5 hours)
+    history_data = load_cache(oauth_token)
+    if not history_data:
+        return Response('<error>Failed to retrieve watch history</error>', mimetype='application/xml')
+
+    # Extract unique video IDs in reverse chronological order
+    video_ids = extract_video_ids(history_data)
+    if not video_ids:
+        return Response('<error>No video history found</error>', mimetype='application/xml')
+
+    # Fetch video details using OAuth
+    video_details = fetch_video_details(video_ids, oauth_token)
+    if not video_details:
+        return Response('<error>Failed to retrieve video details</error>', mimetype='application/xml')
+
+    # Generate XML response
+    xml_string = '<?xml version="1.0" encoding="UTF-8"?><feed>'
+    for item in video_details.get("items", []):
+        video_id = item["id"]
+        title = item["snippet"]["title"]
+        author_name = item["snippet"]["channelTitle"]
+        uploader_id = item["snippet"]["channelId"]
+        thumbnail_url = item["snippet"]["thumbnails"]["medium"]["url"]
+        published_date = item["snippet"].get("publishedAt", "null")
+        view_count = item["statistics"].get("viewCount", "0")
+        
+        # Convert duration to seconds
+        duration_iso = item.get("contentDetails", {}).get("duration", "PT0S")
+        duration_seconds = int(isodate.parse_duration(duration_iso).total_seconds())
+
+        xml_string += f'''
+        <entry>
+            <id>http://localhost:5000/api/videos/{video_id}</id>
+            <published>{published_date}</published>
+            <title type="text">{title}</title>
+            <link rel="alternate" href="http://localhost:5000/api/videos/{video_id}/related"/>
+            <author>
+                <name>{author_name}</name>
+                <uri>https://www.youtube.com/channel/{uploader_id}</uri>
+            </author>
+            <media:group>
+                <media:thumbnail url="http://i.ytimg.com/vi/{video_id}/mqdefault.jpg" height="240" width="320"/>
+                <yt:duration seconds="{duration_seconds}"/>
+                <yt:uploaderId id="{uploader_id}"/>
+                <yt:videoid id="{video_id}">{video_id}</yt:videoid>
+                <media:credit role="uploader" name="{author_name}">{author_name}</media:credit>
+            </media:group>
+            <yt:statistics favoriteCount="0" viewCount="{view_count}"/>
+        </entry>'''
+    
+    xml_string += '</feed>'
+    return Response(xml_string, mimetype='application/xml')
+    
+WATCH_LATER_CACHE_PATH = "./assets/cache/watch_later.json"
+CACHE_EXPIRATION = 5 * 3600  # 5 hours (in seconds)
+YOUTUBEI_URL = "https://www.youtube.com/youtubei/v1/browse"
+
+def fetch_watch_later(oauth_token):
+    """Retrieve YouTube Watch Later list using OAuth authentication and save to cache."""
+    headers = {
+        "Authorization": f"Bearer {oauth_token}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "context": {
+            "client": {
+                "hl": "en",
+                "gl": "en",
+                "clientName": "TVHTML5",
+                "clientVersion": "7.20250528.14.00",
+                "platform": "TV"
+            }
+        },
+        "browseId": "FEmy_youtube"  # Correct browse ID for Watch Later
+    }
+
+    response = requests.post(YOUTUBEI_URL, headers=headers, json=payload)
+
+    if response.status_code == 200:
+        watch_later_data = response.json()
+        save_watch_later_cache(watch_later_data)
+        return watch_later_data
+        print(response.text)
+    else:
+        print(f"Error fetching Watch Later list: {response.status_code}")
+        print(response.text)
+        return None
+
+def save_watch_later_cache(data):
+    """Save Watch Later list to cache with timestamp."""
+    os.makedirs(os.path.dirname(WATCH_LATER_CACHE_PATH), exist_ok=True)
+    cache_content = {"timestamp": time.time(), "data": data}
+    with open(WATCH_LATER_CACHE_PATH, "w", encoding="utf-8") as f:
+        json.dump(cache_content, f, indent=4)
+
+def load_watch_later_cache(oauth_token):
+    """Load cached Watch Later, checking expiration and refreshing if needed."""
+    if os.path.exists(WATCH_LATER_CACHE_PATH):
+        with open(WATCH_LATER_CACHE_PATH, "r", encoding="utf-8") as f:
+            try:
+                cache_content = json.load(f)
+            except json.JSONDecodeError:
+                print("Cache file corrupted, refreshing data...")
+                return fetch_watch_later(oauth_token)
+
+            if "timestamp" not in cache_content or "data" not in cache_content:
+                print("Cache file invalid, refreshing...")
+                return fetch_watch_later(oauth_token)
+
+            if time.time() - cache_content["timestamp"] > CACHE_EXPIRATION:
+                print("Cache expired. Fetching new Watch Later data...")
+                return fetch_watch_later(oauth_token)
+
+            return cache_content["data"]
+    
+    return fetch_watch_later(oauth_token)
+
+def extract_watch_later_video_ids(watch_later_data):
+    """Extract unique video IDs ordered by most recent addition to Watch Later."""
+    video_entries = set()
+
+    def recursive_search(data):
+        """Recursively search for video IDs."""
+        if isinstance(data, dict):
+            if "videoId" in data:
+                video_entries.add(data["videoId"])
+            for value in data.values():
+                recursive_search(value)
+        elif isinstance(data, list):
+            for item in data:
+                recursive_search(item)
+
+    recursive_search(watch_later_data)
+    return list(video_entries)
+
+def fetch_watch_later_video_details(video_ids, oauth_token):
+    """Retrieve video details using YouTube API v3 with OAuth token."""
+    url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet,statistics,contentDetails&id={','.join(video_ids)}"
+    headers = {"Authorization": f"Bearer {oauth_token}"}
+
+    response = requests.get(url, headers=headers)
+    return response.json() if response.status_code == 200 else None
+
+@app.route('/feeds/api/users/default/watch_later', methods=['GET'])
+def get_watch_later_xml():
+    """API endpoint returning ordered Watch Later list with full metadata."""
+    oauth_token = request.args.get('oauth_token')
+    if not oauth_token:
+        return Response('<error>Missing OAuth token</error>', mimetype='application/xml')
+
+    watch_later_data = load_watch_later_cache(oauth_token)
+    if not watch_later_data:
+        return Response('<error>Failed to retrieve Watch Later list</error>', mimetype='application/xml')
+
+    video_ids = extract_watch_later_video_ids(watch_later_data)
+    if not video_ids:
+        return Response('<error>No Watch Later videos found</error>', mimetype='application/xml')
+
+    video_details = fetch_watch_later_video_details(video_ids, oauth_token)
+    if not video_details:
+        return Response('<error>Failed to retrieve video details</error>', mimetype='application/xml')
+
+    # Generate XML response
+    xml_string = '<?xml version="1.0" encoding="UTF-8"?><feed>'
+    for item in video_details.get("items", []):
+        video_id = item["id"]
+        title = item["snippet"]["title"]
+        author_name = item["snippet"]["channelTitle"]
+        uploader_id = item["snippet"]["channelId"]
+        thumbnail_url = item["snippet"]["thumbnails"]["medium"]["url"]
+        published_date = item["snippet"].get("publishedAt", "null")
+        view_count = item["statistics"].get("viewCount", "0")
+        
+        # Convert duration to seconds
+        duration_iso = item.get("contentDetails", {}).get("duration", "PT0S")
+        duration_seconds = int(isodate.parse_duration(duration_iso).total_seconds())
+
+        xml_string += f'''
+        <entry>
+            <id>http://localhost:5000/api/videos/{video_id}</id>
+            <published>{published_date}</published>
+            <title type="text">{title}</title>
+            <link rel="alternate" href="http://localhost:5000/api/videos/{video_id}/related"/>
+            <author>
+                <name>{author_name}</name>
+                <uri>https://www.youtube.com/channel/{uploader_id}</uri>
+            </author>
+            <media:group>
+                <media:thumbnail url="http://i.ytimg.com/vi/{video_id}/mqdefault.jpg" height="240" width="320"/>
+                <yt:duration seconds="{duration_seconds}"/>
+                <yt:uploaderId id="{uploader_id}"/>
+                <yt:videoid id="{video_id}">{video_id}</yt:videoid>
+                <media:credit role="uploader" name="{author_name}">{author_name}</media:credit>
+            </media:group>
+            <yt:statistics favoriteCount="0" viewCount="{view_count}"/>
+        </entry>'''
+    
+    xml_string += '</feed>'
+    return Response(xml_string, mimetype='application/xml')
     
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
