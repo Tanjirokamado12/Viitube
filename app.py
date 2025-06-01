@@ -896,7 +896,7 @@ def get_liked_videos():
         xml_string += '<feed xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/" '
         xml_string += 'xmlns:media="http://search.yahoo.com/mrss/" xmlns:yt="http://www.youtube.com/xml/schemas/2015">'
         xml_string += '<title type="text">Liked Videos</title>'
-        xml_string += '<generator ver="1.0" uri="http://kamil.cc/">Liinback data API</generator>'
+        xml_string += '<generator ver="1.0" uri="http://kamil.cc/">Viitube data API</generator>'
         xml_string += f'<openSearch:totalResults>{len(video_response.get("items", []))}</openSearch:totalResults>'
         xml_string += '<openSearch:startIndex>1</openSearch:startIndex>'
         xml_string += '<openSearch:itemsPerPage>20</openSearch:itemsPerPage>'
