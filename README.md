@@ -14,11 +14,8 @@ A Project to Revive Old Youtube App on Wii + old youtube Gdata Apps (from 2011-2
 
 Nintendo and google:For The Channel
 
-# Known issue
 
-The channel don't return Search resuls as logged off for some reason
-
-What to Watch,Watch history and Later don't work.I hope a fix is avariable
+What to Watch don't work.I hope a fix is avariable
 
 Most lost of Functionnality works with logon,i will try to get channel working and uploads as offline
 
