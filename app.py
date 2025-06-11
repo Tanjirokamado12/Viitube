@@ -15,6 +15,8 @@ import json
 import random
 import string
 import threading
+from datetime import datetime, timedelta
+import re
 
 OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
 OAUTH2_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -22,6 +24,7 @@ CLIENT_ID = '627431331381.apps.googleusercontent.com'
 CLIENT_SECRET = 'O_HOjELPNFcHO_n_866hamcO'
 REDIRECT_URI = ''
 YOUTUBE_API_URL = "https://www.googleapis.com/youtube/v3/channels"
+CACHE_DIR = os.path.join(os.path.dirname(__file__), "assets", "cache", "search")
 
 app = Flask(__name__)
 
@@ -149,214 +152,6 @@ def get_video_info():
 
     video_info = GetVideoInfo().build(video_id)
     return video_info  # Ensure this returns a valid response
-
-YOUTUBEI_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search"
-YOUTUBE_V3_SEARCH_URL = "https://www.googleapis.com/youtube/v3/search"
-CACHE_DIR = "./assets/cache/search"
-
-HEADERS = {
-    "Content-Type": "application/json",
-    "User-Agent": "Mozilla/5.0"
-}
-
-# Ensure cache directory exists
-os.makedirs(CACHE_DIR, exist_ok=True)
-
-def get_cache_file(query):
-    return os.path.join(CACHE_DIR, f"{query}.json")
-
-def is_cache_valid(cache_file):
-    if not os.path.exists(cache_file):
-        return False
-    last_modified = os.path.getmtime(cache_file)
-    return (time.time() - last_modified) < (5 * 24 * 60 * 60)  # 5 days
-
-def fetch_videos(query, oauth_token=None):
-    cache_file = get_cache_file(query)
-    videos = []  # Ensure videos is initialized
-    
-    # Check cache validity
-    if is_cache_valid(cache_file):
-        with open(cache_file, "r") as f:
-            return json.load(f)
-    
-    if oauth_token:
-        headers = HEADERS.copy()
-        headers["Authorization"] = f"Bearer {oauth_token}"
-        params = {"part": "snippet", "q": query, "type": "video", "maxResults": 50}
-
-        try:
-            response = requests.get(YOUTUBE_V3_SEARCH_URL, headers=headers, params=params)
-            response.raise_for_status()  # Check for HTTP errors
-            data = response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"API request error: {e}")
-            return []  # Return an empty list if API fails
-        
-        video_ids = [item["id"]["videoId"] for item in data.get("items", [])]
-        video_stats = {}
-
-        if video_ids:
-            try:
-                stats_response = requests.get(
-                    "https://www.googleapis.com/youtube/v3/videos",
-                    headers=headers,
-                    params={"part": "contentDetails,statistics", "id": ",".join(video_ids)}
-                )
-                stats_response.raise_for_status()
-                stats_data = stats_response.json().get("items", {})
-                video_stats = {item["id"]: item for item in stats_data}
-            except requests.exceptions.RequestException as e:
-                print(f"Error fetching video stats: {e}")
-
-        for item in data.get("items", []):
-            video_id = item["id"]["videoId"]
-            details = video_stats.get(video_id, {})
-
-            duration = details.get("contentDetails", {}).get("duration", "PT0S")
-            parsed_duration = isodate.parse_duration(duration)
-            duration_seconds = int(parsed_duration.total_seconds())
-
-            view_count = details.get("statistics", {}).get("viewCount", "0")
-
-            videos.append({
-                "title": item["snippet"]["title"],
-                "videoId": video_id,
-                "author": item["snippet"]["channelTitle"],
-                "authorId": item["snippet"]["channelId"],
-                "thumbnailUrl": item["snippet"]["thumbnails"]["high"]["url"],
-                "viewCount": view_count,
-                "duration": str(duration_seconds),
-                "published": item["snippet"]["publishedAt"]
-            })
-    
-    # Save results to cache
-    try:
-        with open(cache_file, "w") as f:
-            json.dump(videos, f, indent=4)
-    except Exception as e:
-        print(f"Error saving to cache: {e}")
-
-    return videos
-
-@app.route("/feeds/api/videos", methods=["GET"])
-def search():
-    query = request.args.get("q")
-    oauth_token = request.args.get("oauth_token")  # Extract OAuth token if provided
-    if not query:
-        return "Query parameter 'q' is required", 400
-
-    videos = fetch_videos(query, oauth_token)
-    xml_response = create_xml_response(videos)
-    
-    return Response(xml_response, mimetype="application/xml")
-
-def create_xml_response(videos):
-    # Extract the request's base host (IP or domain)
-    base_url = f"http://{request.host}/feeds/api/videos/"
-
-    root = ET.Element("feed", {
-        "xmlns:openSearch": "http://a9.com/-/spec/opensearch/1.1/",
-        "xmlns:media": "http://search.yahoo.com/mrss/",
-        "xmlns:yt": "http://www.youtube.com/xml/schemas/2015",
-        "xmlns:gd": "http://schemas.google.com/g/2005"
-    })
-    ET.SubElement(root, "title", {"type": "text"}).text = "Videos"
-    ET.SubElement(root, "generator", {"ver": "1.0", "uri": "http://kamil.cc/"}).text = "Viitube data API"
-    ET.SubElement(root, "openSearch:totalResults").text = str(len(videos))
-    ET.SubElement(root, "openSearch:startIndex").text = "1"
-    ET.SubElement(root, "openSearch:itemsPerPage").text = "20"
-
-    for video in videos:
-        entry = ET.SubElement(root, "entry")
-        video_url = f"{base_url}{video['videoId']}"
-
-        ET.SubElement(entry, "id").text = video_url
-        ET.SubElement(entry, "youTubeId", {"id": video["videoId"]}).text = video["videoId"]
-        ET.SubElement(entry, "published").text = video["published"]
-        ET.SubElement(entry, "updated").text = video["published"]
-        ET.SubElement(entry, "category", {
-            "scheme": "http://gdata.youtube.com/schemas/2007/categories.cat",
-            "label": video.get("category", "Unknown"),
-            "term": video.get("category", "Unknown")
-        }).text = video.get("category", "Unknown")
-
-        ET.SubElement(entry, "title", {"type": "text"}).text = video["title"]
-        ET.SubElement(entry, "content", {"type": "text"}).text = video.get("description", "")
-
-        ET.SubElement(entry, "link", {
-            "rel": "http://gdata.youtube.com/schemas/2007#video.related",
-            "href": f"{video_url}/related"
-        })
-
-        author = ET.SubElement(entry, "author")
-        ET.SubElement(author, "name").text = video['author']
-        ET.SubElement(author, "uri").text = f"http://{request.host}/feeds/api/users/{video['authorId']}"
-
-        ET.SubElement(entry, "gd:comments").append(
-            ET.Element("gd:feedLink", {
-                "href": f"{video_url}/comments",
-                "countHint": "530"
-            })
-        )
-
-        media_group = ET.SubElement(entry, "media:group")
-        ET.SubElement(media_group, "media:category", {
-            "label": video.get("category", "Unknown"),
-            "scheme": "http://gdata.youtube.com/schemas/2007/categories.cat"
-        }).text = video.get("category", "Unknown")
-
-        for fmt, url in [("3", "channel_fh264_getvideo"), ("14", "get_480"), ("8", "exp_hd")]:
-            ET.SubElement(media_group, "media:content", {
-                "url": f"http://{request.host}/{url}?video_id={video['videoId']}",
-                "type": "video/3gpp",
-                "medium": "video",
-                "expression": "full",
-                "duration": video["duration"],
-                "yt:format": fmt
-            })
-
-        ET.SubElement(media_group, "media:description", {"type": "plain"}).text = video.get("description", "")
-        ET.SubElement(media_group, "media:keywords").text = video.get("keywords", "Unknown")
-        ET.SubElement(media_group, "media:player", {"url": f"http://www.youtube.com/watch?v={video['videoId']}"})
-
-        for thumb_type in ["hqdefault", "poster", "default"]:
-            ET.SubElement(media_group, "media:thumbnail", {
-                "yt:name": thumb_type,
-                "url": f"http://i.ytimg.com/vi/{video['videoId']}/{thumb_type}.jpg",
-                "height": "240",
-                "width": "320",
-                "time": "00:00:00"
-            })
-
-        ET.SubElement(media_group, "yt:duration", {"seconds": video["duration"]})
-        ET.SubElement(media_group, "yt:videoid", {"id": video["videoId"]}).text = video["videoId"]
-        ET.SubElement(media_group, "youTubeId", {"id": video["videoId"]}).text = video["videoId"]
-        ET.SubElement(media_group, "media:credit", {
-            "role": "uploader",
-            "name": video["author"]
-        }).text = video["author"]
-
-        ET.SubElement(entry, "gd:rating", {
-            "average": "5",
-            "max": "5",
-            "min": "1",
-            "numRaters": "181",
-            "rel": "http://schemas.google.com/g/2005#overall"
-        })
-
-        ET.SubElement(entry, "yt:statistics", {
-            "favoriteCount": "726",
-            "viewCount": video["viewCount"]
-        })
-        ET.SubElement(entry, "yt:rating", {
-            "numLikes": "6539",
-            "numDislikes": "726"
-        })
-        
-        ET.SubElement(entry, "yt:channelid").text = video["authorId"]
-     
-    return ET.tostring(root, encoding="utf-8", method="xml")
 
     
 # Ensure 'assets' folder exists
@@ -1139,6 +934,7 @@ def fetch_playlist_videos(playlist_id):
         <author>
             <name>{item['snippet']['videoOwnerChannelTitle']}</name>
             <uri>http://gdata.youtube.com/feeds/youtubei/v1/users/{item['snippet']['channelId']}</uri>
+            <yt:userId>{item['snippet']['channelId']}/yt:userId>
         </author>
         <yt:accessControl action='comment' permission='allowed'/>
         <yt:accessControl action='commentVote' permission='allowed'/>
@@ -1175,86 +971,6 @@ def fetch_playlist_videos(playlist_id):
 
     return Response(xml_response, content_type="application/xml")
     
-ASSETS_DIR = "./assets"
-
-ASSETS_FOLDER = "./assets"
-os.makedirs(ASSETS_FOLDER, exist_ok=True)
-
-@app.route('/exp_hd', methods=['GET'])
-def exphd():
-    video_id = request.args.get('video_id')
-    if not video_id:
-        return "Missing video_id parameter", 400
-
-    mp4_path = os.path.join(ASSETS_FOLDER, f"{video_id}.mp4")
-
-    # Serve the .mp4 file if it already exists
-    if os.path.exists(mp4_path):
-        return send_file(mp4_path, as_attachment=True)
-
-    try:
-        # Download the highest-resolution MP4 video using pytubefix
-        yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
-        stream = yt.streams.get_highest_resolution()
-        stream.download(output_path=ASSETS_FOLDER, filename=f"{video_id}.mp4")
-    except Exception as e:
-        return f"Error downloading video: {str(e)}", 500
-
-    # Ensure the file exists before serving
-    if os.path.exists(mp4_path):
-        return send_file(mp4_path, as_attachment=True)
-    
-    return "Download failed, file not found", 500
-
-@app.route('/channel_fh264_getvideo', methods=['GET'])
-def channel_fh264_getvideo():
-    video_id = request.args.get('video_id')
-    if not video_id:
-        return "Missing video_id parameter", 400
-
-    mp4_path = os.path.join(ASSETS_FOLDER, f"{video_id}.mp4")
-
-    # Serve the .mp4 file if it already exists
-    if os.path.exists(mp4_path):
-        return send_file(mp4_path, as_attachment=True)
-
-    try:
-        # Download the highest-resolution MP4 video using pytubefix
-        yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
-        stream = yt.streams.get_highest_resolution()
-        stream.download(output_path=ASSETS_FOLDER, filename=f"{video_id}.mp4")
-    except Exception as e:
-        return f"Error downloading video: {str(e)}", 500
-
-    # Ensure the file exists before serving
-    if os.path.exists(mp4_path):
-        return send_file(mp4_path, as_attachment=True)
-    
-    return "Download failed, file not found", 500
-    
-    # File to store registered devices
-REGISTRATION_FILE = "Registration.txt"
-
-def generate_device_id():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=16))
-
-def generate_device_key():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=32))
-
-@app.route("/youtube/accounts/registerDevice", methods=["POST"])
-def register_device():
-    serial_number = request.args.get("serialNumber")  # Get from query parameters
-
-    if not serial_number:
-        return "Error: Missing serial number", 400  # Simple text response
-
-    device_id = generate_device_id()
-    device_key = generate_device_key()
-
-    with open(REGISTRATION_FILE, "a") as file:
-        file.write(f"Serial: {serial_number}\nDeviceId={device_id}\nDeviceKey={device_key}\n\n")
-
-    return f"DeviceId={device_id}\nDeviceKey=ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk="  # Simple text response
     
 HISTORY_CACHE_PATH = "./assets/cache/user/history.json"
 processed_videos = set()  # Track unique entries
@@ -1724,5 +1440,254 @@ def get_watch_later_xml():
     xml_string += '</feed>'
     return Response(xml_string, mimetype='application/xml')
     
+CACHE_DIR = os.path.join(os.path.dirname(__file__), "assets", "search")
+
+# Ensure cache directory exists
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+class YouTubeSearchAPI:
+    """Handles YouTube API requests."""
+    def __init__(self, ip, port):
+        self.base_url = "https://www.youtube.com/youtubei/v1/search"
+        self.api_key = "YOUR_API_KEY"  # Replace with a valid API key
+        self.ip = ip
+        self.port = port
+
+    def search(self, query, lang="en"):
+        """Fetches search results from YouTube."""
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        }
+        payload = {
+            "context": {
+                "client": {
+                    "hl": lang,
+                    "gl": "US",
+                    "clientName": "WEB",
+                    "clientVersion": "2.20210714.01.00"
+                }
+            },
+            "query": query
+        }
+        try:
+            response = requests.post(f"{self.base_url}?key={self.api_key}", json=payload, headers=headers)
+            response.raise_for_status()  # Raise error for non-200 responses
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching YouTube search results: {e}")
+            return None
+
+def get_cached_results(query):
+    """Checks if cached results exist."""
+    file_path = os.path.join(CACHE_DIR, f"{query}.json")
+    if os.path.exists(file_path):
+        file_age = time.time() - os.path.getmtime(file_path)
+        if file_age < 2 * 24 * 60 * 60:  # 2 days in seconds
+            with open(file_path, "r") as file:
+                return json.load(file)
+    return None
+
+def save_results(query, data):
+    """Stores search results."""
+    file_path = os.path.join(CACHE_DIR, f"{query}.json")
+    with open(file_path, "w") as file:
+        json.dump(data, file, indent=4)
+
+class YouTubeSearchXML:
+    """Formats YouTube search results into Atom XML."""
+    def __init__(self, ip, port):
+        self.ip = ip
+        self.port = port
+
+    def escape_xml(self, text):
+        """Escapes XML special characters."""
+        if not text:
+            return ""
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
+
+    def parse_relative_date(self, text):
+        """Converts relative time ('2 days ago') into ISO 8601 format."""
+        now = datetime.utcnow()
+
+        if "ago" in text:
+            parts = text.split()
+            try:
+                value = int(parts[0])
+            except ValueError:
+                return now.strftime("%Y-%m-%dT%H:%M:%S")  # Handle cases like 'Streamed'
+
+            unit = parts[1].lower()
+            if "minute" in unit:
+                timestamp = now - timedelta(minutes=value)
+            elif "hour" in unit:
+                timestamp = now - timedelta(hours=value)
+            elif "day" in unit:
+                timestamp = now - timedelta(days=value)
+            elif "week" in unit:
+                timestamp = now - timedelta(weeks=value)
+            elif "month" in unit:
+                timestamp = now - timedelta(days=value * 30)
+            elif "year" in unit:
+                timestamp = now - timedelta(days=value * 365)
+            else:
+                timestamp = now
+        else:
+            try:
+                timestamp = datetime.strptime(text, "%b %d, %Y")
+            except ValueError:
+                timestamp = now
+
+        return timestamp.strftime("%Y-%m-%dT%H:%M:%S")
+
+    def format_video_entry(self, video_data):
+        """Formats video entries in XML."""
+        video_id = video_data.get("videoId", "")
+        title = self.escape_xml(video_data.get("title", {}).get("runs", [{}])[0].get("text", ""))
+        published_text = video_data.get("publishedTimeText", {}).get("simpleText", "")
+        formatted_published = self.parse_relative_date(published_text)
+        author_name = video_data.get("longBylineText", {}).get("runs", [{}])[0].get("text", "")
+        author_id = video_data.get("lon<path:subpath>ylineText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
+        lengthText = video_data.get("lengthText", {}).get("simpleText", "")
+
+        return f'''       
+        <entry>
+            <id>http://{self.ip}:{self.port}/feeds/api/videos/{video_id}</id>
+            <youTubeId id='{video_id}'>{video_id}</youTubeId>
+            <published>{formatted_published}.000Z</published>  
+            <updated>{formatted_published}.000Z</updated>  
+            <category scheme="http://{self.ip}:{self.port}/schemas/2007/categories.cat" label="Film &amp; Animation" term="Film &amp; Animation">Film &amp; Animation</category>
+            <title type='text'>{title}</title>
+            <content type='text'></content>
+            <link rel="http://{self.ip}:{self.port}/schemas/2007#video.related" href="http://{self.ip}:{self.port}/feeds/api/videos/{video_id}/related"/>
+            <author>
+                <name>{author_name}</name>
+                <uri>http://{self.ip}:{self.port}/feeds/api/users/{author_name}</uri>
+            </author>
+            <gd:comments>
+                <gd:feedLink href='http://{self.ip}:{self.port}/feeds/api/videos/{video_id}/comments' countHint='530'/>
+            </gd:comments>
+            <media:group>
+                <media:category label='Film &amp; Animation' scheme='http://{self.ip}:{self.port}/schemas/2007/categories.cat'>Film &amp; Animation</media:category>
+                <media:content url='http://{self.ip}:{self.port}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://{self.ip}:{self.port}/get_480?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://{self.ip}:{self.port}/exp_hd?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+                <media:description type='plain'></media:description>
+                <media:keywords>-</media:keywords>
+                <media:player url='http://{self.ip}:{self.port}/watch?v={video_id}'/>
+                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <yt:duration seconds='{lengthText}'/>
+                <yt:videoid id='{video_id}'>{video_id}</yt:videoid>
+                <youTubeId id='{video_id}'>{video_id}</youTubeId>
+                <media:credit role='uploader' name='{author_name}'>{author_name}</media:credit>
+            </media:group>
+            <gd:rating average='5' max='5' min='1' numRaters='79698' rel='http://schemas.google.com/g/2005#overall'/>
+            <yt:statistics favoriteCount="318794" viewCount="47819249"/>
+            <yt:rating numLikes="286915" numDislikes="31879"/>
+        </entry>'''
+
+    def build_search_xml(self, json_data):
+        """Builds an XML response from YouTube search results."""
+        xml_string = '''<?xml version="1.0" encoding="UTF-8"?>\n<feed>'''
+
+        for section in json_data.get("contents", {}).get("twoColumnSearchResultsRenderer", {}).get("primaryContents", {}).get("sectionListRenderer", {}).get("contents", []):
+            if "itemSectionRenderer" in section:
+                for video_item in section.get("itemSectionRenderer", {}).get("contents", []):
+                    if "videoRenderer" in video_item:
+                        xml_string += self.format_video_entry(video_item["videoRenderer"])
+
+        xml_string += "\n</feed>"
+        return xml_string
+
+@app.route("/feeds/api/videos")
+def search():
+    query = request.args.get("q")
+    ip = request.host.split(":")[0]  # Extracts the IP from the request's host
+    port = request.environ.get('SERVER_PORT', '5000')
+
+    if not query:
+        return Response("<error>Missing query parameter</error>", mimetype="text/xml")
+
+    cached_data = get_cached_results(query)
+    if cached_data:
+        json_data = cached_data
+    else:
+        yt_api = YouTubeSearchAPI(ip, port)
+        json_data = yt_api.search(query)
+        if json_data:
+            save_results(query, json_data)
+
+    if json_data:
+        xml_builder = YouTubeSearchXML(ip, port)
+        xml_data = xml_builder.build_search_xml(json_data)
+        return Response(xml_data, mimetype="text/xml")
+
+    return Response("<error>No results found</error>", mimetype="text/xml")
+    
+# Define the storage directory relative to app.py
+SAVE_PATH = os.path.join(os.path.dirname(__file__), "assets")
+os.makedirs(SAVE_PATH, exist_ok=True)
+
+def extract_video_id(request_path):
+    """Extracts the video_id from various URL formats."""
+    match = re.search(r"video_id=([A-Za-z0-9_-]+)", request_path)
+    return match.group(1) if match else None
+
+def download_video(video_id):
+    """Downloads the video using PyTube if it's not already saved."""
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
+    yt = YouTube(video_url)
+    
+    # Define video filename and path
+    video_filename = f"{video_id}.mp4"
+    video_path = os.path.join(SAVE_PATH, video_filename)
+
+    if os.path.exists(video_path):
+        return video_path
+
+    # Download the highest resolution stream
+    stream = yt.streams.get_highest_resolution()
+    stream.download(SAVE_PATH, filename=video_filename)
+    
+    return video_path
+
+@app.route('/get_480', methods=['GET'])
+def get_480():
+    """Handles various endpoint formats and retrieves the requested video."""
+    request_path = request.query_string.decode("utf-8")  # Get the full query string
+    video_id = extract_video_id(request_path)
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
+    
+@app.route('/exp_hd', methods=['GET'])
+def exp_hd():
+    """Handles various endpoint formats and retrieves the requested video."""
+    request_path = request.query_string.decode("utf-8")  # Get the full query string
+    video_id = extract_video_id(request_path)
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
+
+@app.route('/channel_fh264_getvideo', methods=['GET'])
+def channel_fh264_getvideo():
+    """Handles various endpoint formats and retrieves the requested video."""
+    video_id = request.args.get("video_id") or request.args.get("v")  # Handle both cases
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
