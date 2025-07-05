@@ -1,22 +1,21 @@
-from flask import Flask, request, Response, send_file,jsonify, redirect
-import requests
-import xml.etree.ElementTree as ET
-from datetime import datetime
-from pytubefix import YouTube
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
-import subprocess
 import os
-import isodate  # Install with `pip install isodate`
-import jwt  # Install with `pip install PyJWT`
-import datetime
-import time
+import re
 import json
+import time
 import random
 import string
 import threading
+import subprocess
 from datetime import datetime, timedelta
-import re
+import requests
+import jwt              # pip install PyJWT
+import isodate          # pip install isodate
+from flask import Flask, request, Response, send_file, jsonify, redirect
+from pytubefix import YouTube
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+import xml.etree.ElementTree as ET
+
 
 OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
 OAUTH2_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -45,41 +44,66 @@ PAYLOAD_TEMPLATE = {
     }
 }
 
+import os
+import json
+from flask import Response
+
 class GetVideoInfo:
     def build(self, videoId):
-        streamUrl = f"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&videoId={videoId}"
-        headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        payload = {
-            "context": {
-                "client": {
-                    "hl": "en",
-                    "gl": "US",
-                    "clientName": "WEB",
-                    "clientVersion": "2.20210714.01.00"
-                }
-            },
-            "videoId": videoId,
-            "params": ""
-        }
-        response = requests.post(streamUrl, json=payload, headers=headers)
-        if response.status_code != 200:
-            return f"Error retrieving video info: {response.status_code}", response.status_code
-        
+        cache_path = f"./assets/cache/videoinfo/{videoId}.json"
+
+        # 🗂️ Check if cached response exists
+        if os.path.exists(cache_path):
+            with open(cache_path, 'r', encoding='utf-8') as cache_file:
+                json_data = json.load(cache_file)
+        else:
+            # 🌐 Fetch from YouTube
+            streamUrl = f"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&videoId={videoId}"
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+            payload = {
+                "context": {
+                    "client": {
+                        "hl": "en",
+                        "gl": "US",
+                        "clientName": "WEB",
+                        "clientVersion": "2.20210714.01.00"
+                    }
+                },
+                "videoId": videoId,
+                "params": ""
+            }
+            response = requests.post(streamUrl, json=payload, headers=headers)
+
+            if response.status_code != 200:
+                return f"Error retrieving video info: {response.status_code}", response.status_code
+
+            try:
+                json_data = response.json()
+
+                # 💾 Save response to cache
+                os.makedirs(os.path.dirname(cache_path), exist_ok=True)
+                with open(cache_path, 'w', encoding='utf-8') as cache_file:
+                    json.dump(json_data, cache_file, ensure_ascii=False, indent=2)
+            except Exception as e:
+                return f"Failed to parse or save response: {str(e)}", 500
+
+        # 📦 Extract desired video info
         try:
-            json_data = response.json()
             title = json_data['videoDetails']['title']
             length_seconds = json_data['videoDetails']['lengthSeconds']
             author = json_data['videoDetails']['author']
         except KeyError as e:
             return f"Missing key: {e}", 400
-        
+
+        # 📤 Format response string
         fmtList = "43/854x480/9/0/115"
         fmtStreamMap = f"43|"
-        fmtMap = "43/0/7/0/0"    
-        thumbnailUrl = f"http://i.ytimg.com/vi/{videoId}/mqdefault.jpg"        
+        fmtMap = "43/0/7/0/0"
+        thumbnailUrl = f"http://i.ytimg.com/vi/{videoId}/mqdefault.jpg"
+
         response_str = (
             f"status=ok&"
             f"length_seconds={length_seconds}&"
@@ -774,7 +798,7 @@ def get_playlists_v2():
         })
 
         ET.SubElement(root, "id").text = f"http://gdata.youtube.com/feeds/youtubei/v1/users/{username}/playlists"
-        ET.SubElement(root, "updated").text = datetime.datetime.utcnow().isoformat() + "Z"
+        ET.SubElement(root, "updated").text = datetime.utcnow().isoformat() + "Z"
         ET.SubElement(root, "category", {
             "scheme": "http://schemas.google.com/g/2005#kind",
             "term": "http://gdata.youtube.com/schemas/2007#playlistLink"
@@ -946,7 +970,7 @@ def fetch_playlist_videos(playlist_id):
         <author>
             <name>{item['snippet']['videoOwnerChannelTitle']}</name>
             <uri>http://gdata.youtube.com/feeds/youtubei/v1/users/{item['snippet']['channelId']}</uri>
-            <yt:userId>{item['snippet']['channelId']}/yt:userId>
+            <yt:userId>{item['snippet']['channelId']}</yt:userId>
         </author>
         <yt:accessControl action='comment' permission='allowed'/>
         <yt:accessControl action='commentVote' permission='allowed'/>
