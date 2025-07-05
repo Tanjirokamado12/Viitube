@@ -109,7 +109,19 @@ class GetVideoInfo:
 @app.route('/wiitv')
 def wiitv():
     return send_file('swf/leanbacklite_wii.swf', mimetype='application/x-shockwave-flash')
-# Flask Routes
+
+@app.route('/feeds/api/standardfeeds/GB/recently_featured')
+def test():
+    return send_file('test')
+
+@app.route('/feeds/api/standardfeeds/GB/most_viewed')
+def test3():
+    return send_file('test')
+
+@app.route('/schemas/2007/categories.cat')
+def test2():
+    return send_file('categories.cat')
+
 
 # Flask Routes
 @app.route('/tv')
@@ -1549,7 +1561,9 @@ class YouTubeSearchXML:
         author_name = video_data.get("longBylineText", {}).get("runs", [{}])[0].get("text", "")
         author_id = video_data.get("lon<path:subpath>ylineText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
         lengthText = video_data.get("lengthText", {}).get("simpleText", "")
-
+        view_count_raw = video_data.get("viewCountText", {}).get("simpleText", "0")
+        view_count_clean = view_count_raw.replace(" views", "").replace(",", "")
+        
         return f'''       
         <entry>
             <id>http://{self.ip}:{self.port}/feeds/api/videos/{video_id}</id>
@@ -1582,7 +1596,7 @@ class YouTubeSearchXML:
                 <media:credit role='uploader' name='{author_name}'>{author_name}</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='79698' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="318794" viewCount="47819249"/>
+            <yt:statistics favoriteCount="318794" viewCount="{view_count_clean}"/>
             <yt:rating numLikes="286915" numDislikes="31879"/>
         </entry>'''
 
@@ -1688,6 +1702,23 @@ def channel_fh264_getvideo():
     video_path = download_video(video_id)
 
     return send_file(video_path, as_attachment=True)
+
+def generate_device_id():
+    charset = "qwertyuiopasdfghjklzxcvbnm1234567890"
+    return ''.join(random.choices(charset, k=7))
+
+@app.route('/youtube/accounts/registerDevice', methods=['POST'])
+def register_device():
+    device_id = generate_device_id()
+
+    # Simulated check—can be replaced with real logic if needed
+    used_device_ids = set()
+    while device_id in used_device_ids:
+        device_id = generate_device_id()
+
+    # Send response similar to Node.js version
+    response_text = f"DeviceId={device_id}\nDeviceKey=ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk="
+    return response_text
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
