@@ -1,0 +1,20 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom'
+xmlns:media='http://search.yahoo.com/mrss/'
+xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
+xmlns:gd='http://schemas.google.com/g/2005'
+xmlns:yt='http://gdata.youtube.com/schemas/2007'>
+    <id>http://gdata.youtube.com/feeds/api/standardfeeds/us/recently_featured</id>
+    <updated>2010-12-21T18:59:58.000-08:00</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
+    <title type='text'> </title>
+    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
+    <author>
+        <name>YouTube</name>
+        <uri>http://www.youtube.com/</uri>
+    </author>
+    <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+    <openSearch:totalResults>25</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
+</feed>

@@ -137,6 +137,10 @@ def wiitv():
 @app.route('/feeds/api/standardfeeds/GB/recently_featured')
 def test():
     return send_file('test')
+    
+@app.route('/feeds/api/standardfeeds/FR/most_discussed')
+def test4():
+    return send_file('test')
 
 @app.route('/feeds/api/standardfeeds/GB/most_viewed')
 def test3():
@@ -145,7 +149,6 @@ def test3():
 @app.route('/schemas/2007/categories.cat')
 def test2():
     return send_file('categories.cat')
-
 
 # Flask Routes
 @app.route('/tv')
@@ -176,6 +179,18 @@ def apiplayer():
 def player_204():
     return ""
 
+@app.route('/feeds/api/charts/live/events/recently_broadcasted')
+def recentlybroadcasted():
+    return send_file('blank')
+
+@app.route('/feeds/api/charts/live/events/live_now')
+def recentlybroadcasted2():
+    return send_file('blank')
+
+@app.route('/feeds/api/charts/live/events/upcoming')
+def recentlybroadcasted3():
+    return send_file('blank')
+    
 @app.route('/leanback_ajax')
 def leanback_ajax():
     return send_file('leanback_ajax')
@@ -318,7 +333,7 @@ def oauth2_token():
     if response.status_code == 200:
         return jsonify(response.json())
 
-@app.route("/feeds/api/users/default", methods=["GET"])
+@app.route('/feeds/ytwii/users/default', methods=["GET"])
 def get_youtube_info():
     access_token = request.args.get("oauth_token")
 
@@ -351,7 +366,7 @@ def get_youtube_info():
                 "xmlns:yt": "http://gdata.youtube.com/schemas/2007"
             })
 
-            ET.SubElement(root, "id").text = "http://192.168.1.18:80/feeds/api/users/default"
+            ET.SubElement(root, "id").text = "http://192.168.1.18:80/feeds/ytwii/users/default"
             ET.SubElement(root, "published").text = "2010-05-28T09:21:19.000-07:00"
             ET.SubElement(root, "updated").text = "2011-02-09T03:27:42.000-08:00"
 
@@ -370,19 +385,19 @@ def get_youtube_info():
             ET.SubElement(root, "link", {
                 "rel": "self",
                 "type": "application/atom+xml",
-                "href": "http://gdata.youtube.com/feeds/api/users/default"
+                "href": "http://gdata.youtube.com/feeds/ytwii/users/default"
             })
 
             author = ET.SubElement(root, "author")
             ET.SubElement(author, "name").text = channel_name
-            ET.SubElement(author, "uri").text = "http://gdata.youtube.com/feeds/api/users/default"
+            ET.SubElement(author, "uri").text = "http://gdata.youtube.com/feeds/ytwii/users/default"
 
             ET.SubElement(root, "yt:age").text = "1"
             ET.SubElement(root, "yt:description").text = snippet.get("description", "")
 
             ET.SubElement(root, "gd:feedLink", {
                 "rel": "http://gdata.youtube.com/schemas/2007#user.uploads",
-                "href": "http://gdata.youtube.com/feeds/api/users/default/uploads",
+                "href": "http://gdata.youtube.com/feeds/ytwii/users/default/uploads",
                 "countHint": "0"
             })
 
@@ -424,7 +439,7 @@ def build_subscriptions(ip, port, oauth_token):
 
     xml_string = '<?xml version="1.0" encoding="UTF-8"?>'
     xml_string += '<feed xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:yt="http://www.youtube.com/xml/schemas/2015">'
-    xml_string += f'<link>http://{ip}:{port}/feeds/api/users/default/subscriptions?oauth_token={oauth_token}</link>'
+    xml_string += f'<link>http://{ip}:{port}/feeds/ytwii/users/default/subscriptions?oauth_token={oauth_token}</link>'
     xml_string += '<title type="text">Subscriptions</title>'
     xml_string += '<openSearch:totalResults></openSearch:totalResults>'
     xml_string += '<generator ver="1.0" uri="http://kamil.cc/">Viitube data API</generator>'
@@ -444,7 +459,7 @@ def build_subscriptions(ip, port, oauth_token):
     xml_string += '</feed>'
     return xml_string
 
-@app.route('/feeds/api/users/default/subscriptions', methods=['GET'])
+@app.route('/feeds/ytwii/users/default/subscriptions', methods=['GET'])
 def get_subscriptions():
     ip = request.remote_addr
     port = request.environ.get('SERVER_PORT', '5000')
@@ -537,7 +552,7 @@ def create_xml_feed(videos, channel_name):
         "xmlns:gd": "http://schemas.google.com/g/2005"
     })
 
-    ET.SubElement(feed, "id").text = "http://gdata.youtube.com/feeds/api/channel/uploads"
+    ET.SubElement(feed, "id").text = "http://gdata.youtube.com/feeds/ytwii/channel/uploads"
     ET.SubElement(feed, "updated").text = videos[0]["published"] if videos else ""
     ET.SubElement(feed, "title").text = f"{channel_name}"  
 
@@ -566,16 +581,16 @@ def create_xml_feed(videos, channel_name):
 
         ET.SubElement(entry, "link", {
             "rel": "http://gdata.youtube.com/schemas/2007#video.related",
-            "href": f"http://192.168.1.18:80/feeds/api/videos/{vid['videoid']}/related"
+            "href": f"http://192.168.1.18:80/feeds/ytwii/videos/{vid['videoid']}/related"
         })
 
         author = ET.SubElement(entry, "author")
         ET.SubElement(author, "name").text = vid["uploader"]
-        ET.SubElement(author, "uri").text = f"http://192.168.1.18:80/feeds/api/users/{vid['uploader']}"
+        ET.SubElement(author, "uri").text = f"http://192.168.1.18:80/feeds/ytwii/users/{vid['uploader']}"
 
         comments = ET.SubElement(entry, "gd:comments")
         ET.SubElement(comments, "gd:feedLink", {
-            "href": f"http://192.168.1.18:80/feeds/api/videos/{vid['videoid']}/comments",
+            "href": f"http://192.168.1.18:80/feeds/ytwii/videos/{vid['videoid']}/comments",
             "countHint": "530"
         })
 
@@ -634,7 +649,7 @@ def create_xml_feed(videos, channel_name):
     return ET.tostring(feed, encoding="utf-8").decode("utf-8")
 
 
-@app.route("/feeds/api/users/<channel_id>/uploads")
+@app.route('/feeds/ytwii/users/<channel_id>/uploads')
 def uploads(channel_id):
     """Endpoint to generate YouTube XML feed"""
     oauth_token = request.args.get("oauth_token")
@@ -656,7 +671,7 @@ def get_channel_id_from_api(oauth_token):
         return data["items"][0]["id"] if "items" in data else None
     return None
 
-@app.route("/feeds/api/users/default/uploads")
+@app.route('/feeds/ytwii/users/default/uploads')
 def extract_channel_id_and_redirect():
     """Extract Channel ID from OAuth token and redirect while preserving query arguments"""
     oauth_token = request.args.get("oauth_token")
@@ -678,12 +693,12 @@ def extract_channel_id_and_redirect():
 
     # Preserve all original query arguments
     query_params = request.query_string.decode("utf-8")  # Get full query string
-    redirect_url = f"/feeds/api/users/{channel_id}/uploads?{query_params}"  # Append query params
+    redirect_url = f"/feeds/ytwii/users/{channel_id}/uploads?{query_params}"  # Append query params
 
     # Redirect while keeping arguments
     return redirect(redirect_url, code=302)
 
-@app.route("/feeds/api/users/default/favorites", methods=["GET"])
+@app.route('/feeds/ytwii/users/default/favorites', methods=["GET"])
 def get_liked_videos():
     try:
         # Get OAuth token from request URL
@@ -767,7 +782,7 @@ def get_liked_videos():
     except Exception as e:
         return Response(f"<error>{e}</error>", mimetype="application/xml")
 
-@app.route('/feeds/api/users/default/playlists', methods=['GET'])
+@app.route('/feeds/ytwii/users/default/playlists', methods=['GET'])
 def get_playlists_v2():
     access_token = request.args.get('oauth_token')
 
@@ -868,7 +883,7 @@ YOUTUBE_PLAYLIST_ITEMS_URL = "https://www.googleapis.com/youtube/v3/playlistItem
 YOUTUBE_PLAYLIST_URL = "https://www.googleapis.com/youtube/v3/playlists"
 YOUTUBE_VIDEO_URL = "https://www.googleapis.com/youtube/v3/videos"
         
-@app.route('/feeds/api/playlists/<playlist_id>', methods=['GET'])
+@app.route('/feeds/ytwii/playlists/<playlist_id>', methods=['GET'])
 def fetch_playlist_videos(playlist_id):
     oauth_token = request.args.get('oauth_token')
 
@@ -1268,7 +1283,7 @@ def fetch_video_details(video_ids, oauth_token):
     response = requests.get(url, headers=headers)
     return response.json() if response.status_code == 200 else None
 
-@app.route('/feeds/api/users/default/watch_history', methods=['GET'])
+@app.route('/feeds/ytwii/users/default/watch_history', methods=['GET'])
 def get_watch_history_xml():
     """API endpoint returning ordered watch history with full metadata."""
     oauth_token = request.args.get('oauth_token')
@@ -1419,7 +1434,7 @@ def fetch_watch_later_video_details(video_ids, oauth_token):
     response = requests.get(url, headers=headers)
     return response.json() if response.status_code == 200 else None
 
-@app.route('/feeds/api/users/default/watch_later', methods=['GET'])
+@app.route('/feeds/ytwii/users/default/watch_later', methods=['GET'])
 def get_watch_later_xml():
     """API endpoint returning ordered Watch Later list with full metadata."""
     oauth_token = request.args.get('oauth_token')
@@ -1590,20 +1605,20 @@ class YouTubeSearchXML:
         
         return f'''       
         <entry>
-            <id>http://{self.ip}:{self.port}/feeds/api/videos/{video_id}</id>
+            <id>http://{self.ip}:{self.port}/feeds/ytwii/videos/{video_id}</id>
             <youTubeId id='{video_id}'>{video_id}</youTubeId>
             <published>{formatted_published}.000Z</published>  
             <updated>{formatted_published}.000Z</updated>  
             <category scheme="http://{self.ip}:{self.port}/schemas/2007/categories.cat" label="Film &amp; Animation" term="Film &amp; Animation">Film &amp; Animation</category>
             <title type='text'>{title}</title>
             <content type='text'></content>
-            <link rel="http://{self.ip}:{self.port}/schemas/2007#video.related" href="http://{self.ip}:{self.port}/feeds/api/videos/{video_id}/related"/>
+            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://{self.ip}:{self.port}/feeds/api/videos/{video_id}/related"/>
             <author>
                 <name>{author_name}</name>
-                <uri>http://{self.ip}:{self.port}/feeds/api/users/{author_name}</uri>
+                <uri>http://{self.ip}:{self.port}/feeds/ytwii/users/{author_name}</uri>
             </author>
             <gd:comments>
-                <gd:feedLink href='http://{self.ip}:{self.port}/feeds/api/videos/{video_id}/comments' countHint='530'/>
+                <gd:feedLink href='http://{self.ip}:{self.port}/feeds/ytwii/videos/{video_id}/comments' countHint='530'/>
             </gd:comments>
             <media:group>
                 <media:category label='Film &amp; Animation' scheme='http://{self.ip}:{self.port}/schemas/2007/categories.cat'>Film &amp; Animation</media:category>
@@ -1637,7 +1652,7 @@ class YouTubeSearchXML:
         xml_string += "\n</feed>"
         return xml_string
 
-@app.route("/feeds/api/videos")
+@app.route('/feeds/api/videos')
 def search():
     query = request.args.get("q")
     ip = request.host.split(":")[0]  # Extracts the IP from the request's host
@@ -1743,6 +1758,192 @@ def register_device():
     # Send response similar to Node.js version
     response_text = f"DeviceId={device_id}\nDeviceKey=ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk="
     return response_text
+
+# 🧱 Configuration
+API_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
+RELATED_CACHE_DIR = "./assets/cache/Related"
+INFO_CACHE_DIR = "./assets/cache/videoinfo"
+
+# 🧼 XML escape utility
+def escape(text):
+    return (text or "").replace("&", "&amp;") \
+                       .replace("<", "&lt;") \
+                       .replace(">", "&gt;") \
+                       .replace('"', "&quot;") \
+                       .replace("'", "&apos;")
+
+# 📦 Fetch and cache related video IDs
+def fetch_related_video_ids(video_id):
+    os.makedirs(RELATED_CACHE_DIR, exist_ok=True)
+    cache_file = f"{RELATED_CACHE_DIR}/{video_id}.json"
+
+    if os.path.exists(cache_file):
+        with open(cache_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        url = f"https://www.youtube.com/youtubei/v1/next?key={API_KEY}"
+        payload = {
+            "context": {
+                "client": {
+                    "hl": "en",
+                    "clientName": "WEB",
+                    "clientVersion": "2.20210721.00.00"
+                }
+            },
+            "videoId": video_id
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        }
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        data = response.json()
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    related_ids = []
+    for item in data.get("contents", {}) \
+                    .get("twoColumnWatchNextResults", {}) \
+                    .get("secondaryResults", {}) \
+                    .get("secondaryResults", {}) \
+                    .get("results", []):
+        video = item.get("compactVideoRenderer")
+        if video:
+            related_ids.append(video.get("videoId"))
+    return related_ids
+
+# 🎥 Fetch and cache video details
+def get_video_details(video_id):
+    os.makedirs(INFO_CACHE_DIR, exist_ok=True)
+    cache_file = f"{INFO_CACHE_DIR}/{video_id}.json"
+
+    if os.path.exists(cache_file):
+        with open(cache_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        url = f"https://www.youtube.com/youtubei/v1/player?key={API_KEY}"
+        payload = {
+            "context": {
+                "client": {
+                    "hl": "en",
+                    "clientName": "WEB",
+                    "clientVersion": "2.20210721.00.00"
+                }
+            },
+            "videoId": video_id
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        }
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        data = response.json()
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    details = data.get("videoDetails", {})
+    publish_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
+    like_count = details.get("likeCount", "")
+
+    return {
+        "videoId": details.get("videoId", video_id),
+        "title": details.get("title", ""),
+        "description": details.get("shortDescription", ""),
+        "uploader": details.get("author", ""),
+        "publishedDate": publish_date,
+        "durationSeconds": details.get("lengthSeconds", ""),
+        "likeCount": like_count
+    }
+
+# 🌐 Route: /videos/<videoid>/related
+@app.route("/feeds/api/videos/<videoid>/related", methods=["GET"])
+def related(videoid):
+    xml_path = f"{RELATED_CACHE_DIR}/{videoid}.xml"
+
+    # Serve cached XML if it exists
+    if os.path.exists(xml_path):
+        return send_file(xml_path, mimetype="application/xml")
+
+    # Build fresh XML
+    related_ids = fetch_related_video_ids(videoid)
+    base_url = request.host_url.rstrip("/")
+
+    video_template = """<entry>
+            <id>{ur2}/feeds/api/videos/{videoId}</id>
+            <youTubeId id='{videoId}'>{videoId}</youTubeId>
+            <published>{publishedDate}</published>
+            <updated>{publishedDate}</updated>
+            <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="-" term="-">-</category>
+            <title type='text'>{title}</title>
+            <content type='text'>{description}</content>
+            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{ur2}/feeds/api/videos/{videoId}/related"/>
+            <author>
+                <name>{uploader}</name>
+                <uri>{ur2}/feeds/api/users/{uploader}</uri>
+            </author>
+            <gd:comments>
+                <gd:feedLink href='{ur2}/feeds/api/videos/{videoId}/comments' countHint='530'/>
+            </gd:comments>
+            <media:group>
+                <media:category label='-' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>-</media:category>
+                <media:content url='{ur2}/channel_fh264_getvideo?v={videoId}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+                <media:description type='plain'>{description}</media:description>
+                <media:keywords>-</media:keywords>
+                <media:player url='http://www.youtube.com/watch?v={videoId}'/>
+                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{videoId}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{videoId}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{videoId}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <yt:duration seconds='{durationSeconds}'/>
+                <yt:videoid id='{videoId}'>{videoId}</yt:videoid>
+                <youTubeId id='{videoId}'>{videoId}</youTubeId>
+                <media:credit role='uploader' name='{uploader}'>{uploader}</media:credit>
+            </media:group>
+            <gd:rating average='5' max='5' min='1' numRaters='10' rel='http://schemas.google.com/g/2005#overall'/>
+            <yt:statistics favoriteCount="0" viewCount="{durationSeconds}"/>
+            <yt:rating numLikes="0" numDislikes="0"/>
+        </entry>"""
+
+    video_blocks = ""
+    for vid in related_ids:
+        info = get_video_details(vid)
+        block = video_template.format(
+            videoId=escape(info["videoId"]),
+            url=escape(f"{base_url}/watch?v={info['videoId']}"),  # 👈 Dynamic base domain
+            ur2=escape(f"{base_url}"),  # 👈 Dynamic base domain
+            title=escape(info["title"]),
+            description=escape(info["description"]),
+            uploader=escape(info["uploader"]),
+            publishedDate=escape(info["publishedDate"]),
+            durationSeconds=escape(info["durationSeconds"]),
+            likeCount=escape(info["likeCount"])
+        )
+        video_blocks += block + "\n"
+
+    xml_content = f"""<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom'
+xmlns:media='http://search.yahoo.com/mrss/'
+xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
+xmlns:gd='http://schemas.google.com/g/2005'
+xmlns:yt='http://gdata.youtube.com/schemas/2007'>
+    <id>http://gdata.youtube.com/feeds/api/standardfeeds/us/recently_featured</id>
+    <updated>2010-12-21T18:59:58.000-08:00</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
+    <title type='text'> </title>
+    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
+    <author>
+        <name>YouTube</name>
+        <uri>http://www.youtube.com/</uri>
+    </author>
+    <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+    <openSearch:totalResults>25</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
+{video_blocks}</feed>"""
+
+    with open(xml_path, "w", encoding="utf-8") as f:
+        f.write(xml_content)
+
+    return Response(xml_content, content_type="application/xml")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
