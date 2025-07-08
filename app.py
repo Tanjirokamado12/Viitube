@@ -1945,5 +1945,88 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
 
     return Response(xml_content, content_type="application/xml")
 
+CACHE_DIR = "./assets/cache/videoinfo"
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+@app.route("/feeds/api/videos/<video_id>")
+def get_video_xml(video_id):
+    baseurl = request.host
+    cache_path = os.path.join(CACHE_DIR, f"{video_id}.json")
+
+    # Load from cache or fetch from YouTubei
+    if os.path.exists(cache_path):
+        with open(cache_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        yt_url = "https://www.youtube.com/youtubei/v1/player"
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0",
+            "X-Youtube-Client-Name": "1",
+            "X-Youtube-Client-Version": "2.20201021.03.00"
+        }
+        payload = {
+            "context": {
+                "client": {
+                    "clientName": "WEB",
+                    "clientVersion": "2.20201021.03.00"
+                }
+            },
+            "videoId": video_id
+        }
+        r = requests.post(yt_url, headers=headers, data=json.dumps(payload))
+        data = r.json()
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+    # Extract metadata
+    title = data.get("videoDetails", {}).get("title", "")
+    description = data.get("videoDetails", {}).get("shortDescription", "")
+    author = data.get("videoDetails", {}).get("author", "")
+    view_count = data.get("videoDetails", {}).get("viewCount", "0")
+    duration = data.get("videoDetails", {}).get("lengthSeconds", "0")
+    publish_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
+    like_count = data.get("videoDetails", {}).get("likeCount", "0")
+    dislike_count = data.get("videoDetails", {}).get("dislikeCount", "0")
+
+    # Build XML content
+    xmlcontent = f"""<?xml version='1.0' encoding='UTF-8'?>
+        <entry>
+            <id>http://{baseurl}/feeds/api/videos/{video_id}</id>
+            <youTubeId id='{video_id}'>{video_id}</youTubeId>
+            <published>{publish_date}T00:00:00.000Z</published>
+            <updated>{publish_date}T00:00:00.000Z</updated>
+            <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="People &amp; Blogs" term="People &amp; Blogs">People &amp; Blogs</category>
+            <title type='text'>{title}</title>
+            <content type='text'>{description}</content>
+            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://{baseurl}/feeds/api/videos/{video_id}/related"/>
+            <author>
+                <name>{author}</name>
+                <uri>http://{baseurl}/feeds/api/users/{author}</uri>
+            </author>
+            <gd:comments>
+                <gd:feedLink href='http://{baseurl}/feeds/api/videos/{video_id}/comments' countHint='530'/>
+            </gd:comments>
+            <media:group>
+                <media:category label='People &amp; Blogs' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>People &amp; Blogs</media:category>
+                <media:content url='http://{baseurl}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://{baseurl}/get_480?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://{baseurl}/exp_hd?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+                <media:description type='plain'>{description}</media:description>
+                <media:keywords>genshin, mihoyo, hoyomix, hoyoverse, genshinost, music, soundtrack, orchestra</media:keywords>
+                <media:player url='http://www.youtube.com/watch?v={video_id}'/>
+                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <yt:duration seconds='{duration}'/>
+                <yt:videoid id='{video_id}'>{video_id}</yt:videoid>
+                <youTubeId id='{video_id}'>{video_id}</youTubeId>
+                <media:credit role='uploader' name='{author}'>{author}</media:credit>
+            </media:group>
+            <gd:rating average='5' max='5' min='1' numRaters='716' rel='http://schemas.google.com/g/2005#overall'/>
+            <yt:statistics favoriteCount="0" viewCount="{view_count}/>
+            <yt:rating numLikes="0" numDislikes="0"/>
+        </entry>"""
+
+    return Response(xmlcontent, mimetype="application/xml")
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
