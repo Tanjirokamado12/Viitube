@@ -44,10 +44,6 @@ PAYLOAD_TEMPLATE = {
     }
 }
 
-import os
-import json
-from flask import Response
-
 class GetVideoInfo:
     def build(self, videoId):
         cache_path = f"./assets/cache/videoinfo/{videoId}.json"
@@ -134,18 +130,6 @@ class GetVideoInfo:
 def wiitv():
     return send_file('swf/leanbacklite_wii.swf', mimetype='application/x-shockwave-flash')
 
-@app.route('/feeds/api/standardfeeds/GB/recently_featured')
-def test():
-    return send_file('test')
-    
-@app.route('/feeds/api/standardfeeds/FR/most_discussed')
-def test4():
-    return send_file('test')
-
-@app.route('/feeds/api/standardfeeds/GB/most_viewed')
-def test3():
-    return send_file('test')
-
 @app.route('/schemas/2007/categories.cat')
 def test2():
     return send_file('categories.cat')
@@ -178,18 +162,6 @@ def apiplayer():
 @app.route('/player_204')
 def player_204():
     return ""
-
-@app.route('/feeds/api/charts/live/events/recently_broadcasted')
-def recentlybroadcasted():
-    return send_file('blank')
-
-@app.route('/feeds/api/charts/live/events/live_now')
-def recentlybroadcasted2():
-    return send_file('blank')
-
-@app.route('/feeds/api/charts/live/events/upcoming')
-def recentlybroadcasted3():
-    return send_file('blank')
     
 @app.route('/leanback_ajax')
 def leanback_ajax():
@@ -204,7 +176,6 @@ def get_video_info():
     video_info = GetVideoInfo().build(video_id)
     return video_info  # Ensure this returns a valid response
 
-    
 # Ensure 'assets' folder exists
 if not os.path.exists("assets"):
     os.makedirs("assets")
@@ -1597,7 +1568,8 @@ class YouTubeSearchXML:
         title = self.escape_xml(video_data.get("title", {}).get("runs", [{}])[0].get("text", ""))
         published_text = video_data.get("publishedTimeText", {}).get("simpleText", "")
         formatted_published = self.parse_relative_date(published_text)
-        author_name = video_data.get("longBylineText", {}).get("runs", [{}])[0].get("text", "")
+        author_name = video_data.get("ownerText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}) \
+        .get("commandMetadata", {}).get("webCommandMetadata", {}).get("url", "").replace("/@", "")
         author_id = video_data.get("lon<path:subpath>ylineText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
         lengthText = video_data.get("lengthText", {}).get("simpleText", "")
         view_count_raw = video_data.get("viewCountText", {}).get("simpleText", "0")
@@ -2027,6 +1999,187 @@ def get_video_xml(video_id):
         </entry>"""
 
     return Response(xmlcontent, mimetype="application/xml")
+
+# Mobile App EndPoint
+
+@app.route('/feeds/api/standardfeeds/<region>/most_discussed')
+def most_discussed(region):
+    return send_file('Mobile/most_discussed.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/recently_featured')
+def recently_featured(region):
+    return send_file('Mobile/recently_featured.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular')
+def most_popular(region):
+    return send_file('Mobile/most_popular.xml')
+
+SEARCH_DIR = "assets/search"
+USER_DIR = "assets/cache/Users"
+os.makedirs(SEARCH_DIR, exist_ok=True)
+os.makedirs(USER_DIR, exist_ok=True)
+
+def load_json_if_fresh(path: str, max_age: timedelta) -> dict | None:
+    if not os.path.exists(path):
+        return None
+    file_time = datetime.fromtimestamp(os.path.getmtime(path))
+    if datetime.now() - file_time < max_age:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+def fetch_youtubei(endpoint: str, payload: dict) -> dict:
+    url = f"https://www.youtube.com/youtubei/v1/{endpoint}"
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0",
+        "X-Youtube-Client-Name": "1",
+        "X-Youtube-Client-Version": "2.20210721.00.00"
+    }
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+    return response.json()
+
+def resolve_channel_id(handle: str) -> str | None:
+    query = handle.lstrip("@")
+    search_path = f"{SEARCH_DIR}/{query}.json"
+    payload = {
+        "context": { "client": { "clientName": "WEB", "clientVersion": "2.20210721.00.00" } },
+        "query": handle
+    }
+    data = load_json_if_fresh(search_path, timedelta(hours=48)) or fetch_youtubei("search", payload)
+    with open(search_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    try:
+        return data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]\
+            ["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"][0]\
+            ["channelRenderer"]["channelId"]
+    except Exception:
+        return None
+
+def find_metadata_text(obj: dict | list) -> dict:
+    found = {"subscribers": None, "videos": None}
+    def recurse(node):
+        if isinstance(node, dict):
+            txt = node.get("text", {})
+            if isinstance(txt, dict):
+                content = txt.get("content", "")
+                if "subscriber" in content.lower() and not found["subscribers"]:
+                    found["subscribers"] = content
+                if "video" in content.lower() and not found["videos"]:
+                    found["videos"] = content
+            for value in node.values():
+                recurse(value)
+        elif isinstance(node, list):
+            for item in node:
+                recurse(item)
+    recurse(obj)
+    return found
+
+def normalize_count(text: str) -> int:
+    if not text:
+        return 0
+    text = text.strip().upper().replace(",", "")
+    # Remove non-numeric suffixes like "SUBSCRIBERS", "VIDEOS", etc
+    for suffix in ["SUBSCRIBERS", "VIDEOS", "VIEWS"]:
+        if suffix in text:
+            text = text.replace(suffix, "").strip()
+    try:
+        if "K" in text:
+            return int(float(text.replace("K", "")) * 1000)
+        elif "M" in text:
+            return int(float(text.replace("M", "")) * 1000000)
+        elif "B" in text:
+            return int(float(text.replace("B", "")) * 1000000000)
+        return int(float(text))
+    except ValueError:
+        return 0
+
+def extract_avatar_url(data: dict) -> str | None:
+    header = data.get("header", {}).get("c4TabbedHeaderRenderer", {})
+    thumbs = header.get("avatar", {}).get("thumbnails", [])
+    for thumb in thumbs:
+        url = thumb.get("url", "")
+        if "yt3.googleusercontent.com" in url:
+            return url
+    try:
+        microthumbs = data["microformat"]["microformatDataRenderer"]["thumbnail"]["thumbnails"]
+        for item in microthumbs:
+            url = item.get("url", "")
+            if "yt3.googleusercontent.com" in url:
+                return url
+    except Exception:
+        pass
+    return thumbs[0].get("url") if thumbs else None
+
+def extract_user_info(data: dict, channel_id: str) -> dict:
+    header = data.get("header", {}).get("c4TabbedHeaderRenderer", {})
+    fallback = data.get("metadata", {}).get("channelMetadataRenderer", {})
+    stats = find_metadata_text(data)
+    avatar = extract_avatar_url(data)
+    title = header.get("title") or fallback.get("title")
+    return {
+        "channelId": channel_id,
+        "title": title,
+        "description": header.get("description") or fallback.get("description") or "",
+        "subscribers": normalize_count(stats["subscribers"]) if stats["subscribers"] else 0,
+        "videos": normalize_count(stats["videos"]) if stats["videos"] else 0,
+        "pfp": avatar,
+        "userName": title
+    }
+
+def get_user_info(channel_id: str) -> dict:
+    user_path = f"{USER_DIR}/{channel_id}.json"
+    payload = {
+        "context": { "client": { "clientName": "WEB", "clientVersion": "2.20210721.00.00" } },
+        "browseId": channel_id
+    }
+    data = load_json_if_fresh(user_path, timedelta(hours=48)) or fetch_youtubei("browse", payload)
+    with open(user_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    return extract_user_info(data, channel_id)
+
+def generate_atom_xml(info: dict, handle: str, base_url: str) -> str:
+    now = datetime.now().isoformat()
+    id_url = f"{base_url}/feeds/api/users/{handle}"
+    channel_uri = f"{base_url}/users/{info['channelId']}"
+    uploads_uri = f"{channel_uri}/uploads"
+    return f"""<?xml version='1.0' encoding='UTF-8'?>
+<entry
+    xmlns='http://www.w3.org/2005/Atom'
+    xmlns:media='http://search.yahoo.com/mrss/'
+    xmlns:gd='http://schemas.google.com/g/2005'
+    xmlns:yt='http://gdata.youtube.com/schemas/2007'>
+    <id>{id_url}</id>
+    <published>{now}</published>
+    <updated>{now}</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#userProfile'/>
+    <category scheme='http://gdata.youtube.com/schemas/2007/channeltypes.cat' term=''/>
+    <title type='text'>{info['title']}</title>
+    <content type='text'>{info['description']}</content>
+    <link rel='self' type='application/atom+xml' href='{id_url}'/>
+    <author>
+        <name>{info['userName']}</name>
+        <uri>{channel_uri}</uri>
+    </author>
+    <yt:age>1</yt:age>
+    <yt:description>{info['description']}</yt:description>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.uploads' href='{uploads_uri}' countHint='{info['videos']}'/>
+    <yt:statistics lastWebAccess='{now}' subscriberCount='{info['subscribers']}' videoWatchCount='1' viewCount='0' totalUploadViews='0'/>
+    <media:thumbnail url='{info['pfp']}'/>
+    <yt:username>{info['userName']}</yt:username>
+</entry>"""
+
+@app.route("/feeds/api/users/<user_ident>")
+def serve_user(user_ident):
+    handle = f"@{user_ident}"
+    channel_id = resolve_channel_id(handle)
+    if not channel_id:
+        return Response("Channel not found", status=404)
+    info = get_user_info(channel_id)
+    base_url = request.host_url.rstrip("/")
+    xml_response = generate_atom_xml(info, user_ident, base_url)
+    return Response(xml_response, mimetype="application/atom+xml")
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
