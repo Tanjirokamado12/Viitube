@@ -77,7 +77,7 @@ From ytwii of this repo,open on JPEXS
 
 Operation to do with all swf files
 
-Do Click Right and do (Search text) and search for 192.168.1.18
+Do Click Right and do (Search text) and search for 192.168.1.27
 
 Remplace with your ip
 
@@ -87,7 +87,7 @@ And do that for -Leanbacklite_wii.swf
 
 -apiplayer-vflZLm5Vu.swf
 
-And Open Leanback_ajax and switch 192.168.1.18 to your ip
+And Open Leanback_ajax and switch 192.168.1.27 to your ip
 
 ## Setup for mobile
 

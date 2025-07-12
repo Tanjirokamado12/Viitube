@@ -27,8 +27,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/Sv4c4v520NQ/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/Sv4c4v520NQ/comments' countHint='530'/>
@@ -45,7 +45,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='782'/>
                 <yt:videoid id='Sv4c4v520NQ'>Sv4c4v520NQ</yt:videoid>
                 <youTubeId id='Sv4c4v520NQ'>Sv4c4v520NQ</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="3" viewCount="539"/>
@@ -61,8 +61,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/A5L9E5s4njo/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/A5L9E5s4njo/comments' countHint='530'/>
@@ -79,7 +79,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='417'/>
                 <yt:videoid id='A5L9E5s4njo'>A5L9E5s4njo</yt:videoid>
                 <youTubeId id='A5L9E5s4njo'>A5L9E5s4njo</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="2" viewCount="348"/>
@@ -95,8 +95,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/gJ3PcDZtv5E/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/gJ3PcDZtv5E/comments' countHint='530'/>
@@ -113,7 +113,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='678'/>
                 <yt:videoid id='gJ3PcDZtv5E'>gJ3PcDZtv5E</yt:videoid>
                 <youTubeId id='gJ3PcDZtv5E'>gJ3PcDZtv5E</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="2" viewCount="307"/>
@@ -129,8 +129,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/xahWuRVdR80/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/xahWuRVdR80/comments' countHint='530'/>
@@ -147,7 +147,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='258'/>
                 <yt:videoid id='xahWuRVdR80'>xahWuRVdR80</yt:videoid>
                 <youTubeId id='xahWuRVdR80'>xahWuRVdR80</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="1" viewCount="273"/>
@@ -163,8 +163,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/boswnYyPQCI/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/boswnYyPQCI/comments' countHint='530'/>
@@ -181,7 +181,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='266'/>
                 <yt:videoid id='boswnYyPQCI'>boswnYyPQCI</yt:videoid>
                 <youTubeId id='boswnYyPQCI'>boswnYyPQCI</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="1" viewCount="195"/>
@@ -197,8 +197,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/rYbhMaSZ3z8/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/rYbhMaSZ3z8/comments' countHint='530'/>
@@ -215,7 +215,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='2391'/>
                 <yt:videoid id='rYbhMaSZ3z8'>rYbhMaSZ3z8</yt:videoid>
                 <youTubeId id='rYbhMaSZ3z8'>rYbhMaSZ3z8</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="1" viewCount="166"/>
@@ -231,8 +231,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/b5YvuQLw2Zs/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/b5YvuQLw2Zs/comments' countHint='530'/>
@@ -249,7 +249,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='85'/>
                 <yt:videoid id='b5YvuQLw2Zs'>b5YvuQLw2Zs</yt:videoid>
                 <youTubeId id='b5YvuQLw2Zs'>b5YvuQLw2Zs</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="143"/>
@@ -265,8 +265,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/tJonN7Sbbl4/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/tJonN7Sbbl4/comments' countHint='530'/>
@@ -283,7 +283,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='742'/>
                 <yt:videoid id='tJonN7Sbbl4'>tJonN7Sbbl4</yt:videoid>
                 <youTubeId id='tJonN7Sbbl4'>tJonN7Sbbl4</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="141"/>
@@ -299,8 +299,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/vHIzIKwG72Q/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/vHIzIKwG72Q/comments' countHint='530'/>
@@ -317,7 +317,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='816'/>
                 <yt:videoid id='vHIzIKwG72Q'>vHIzIKwG72Q</yt:videoid>
                 <youTubeId id='vHIzIKwG72Q'>vHIzIKwG72Q</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="125"/>
@@ -333,8 +333,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/_FYkdjSR00M/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/_FYkdjSR00M/comments' countHint='530'/>
@@ -351,7 +351,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='18'/>
                 <yt:videoid id='_FYkdjSR00M'>_FYkdjSR00M</yt:videoid>
                 <youTubeId id='_FYkdjSR00M'>_FYkdjSR00M</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="124"/>
@@ -367,8 +367,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/YHppYGEkG3c/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/YHppYGEkG3c/comments' countHint='530'/>
@@ -385,7 +385,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='885'/>
                 <yt:videoid id='YHppYGEkG3c'>YHppYGEkG3c</yt:videoid>
                 <youTubeId id='YHppYGEkG3c'>YHppYGEkG3c</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="107"/>
@@ -401,8 +401,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/QgDfF8N7nN0/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/QgDfF8N7nN0/comments' countHint='530'/>
@@ -419,7 +419,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='1611'/>
                 <yt:videoid id='QgDfF8N7nN0'>QgDfF8N7nN0</yt:videoid>
                 <youTubeId id='QgDfF8N7nN0'>QgDfF8N7nN0</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="81"/>
@@ -435,8 +435,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/703VNFuEW_g/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/703VNFuEW_g/comments' countHint='530'/>
@@ -453,7 +453,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='228'/>
                 <yt:videoid id='703VNFuEW_g'>703VNFuEW_g</yt:videoid>
                 <youTubeId id='703VNFuEW_g'>703VNFuEW_g</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="56"/>
@@ -469,8 +469,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/39WFBUou40A/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/39WFBUou40A/comments' countHint='530'/>
@@ -487,7 +487,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='1234'/>
                 <yt:videoid id='39WFBUou40A'>39WFBUou40A</yt:videoid>
                 <youTubeId id='39WFBUou40A'>39WFBUou40A</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="52"/>
@@ -503,8 +503,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/B2UweK55x68/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/B2UweK55x68/comments' countHint='530'/>
@@ -521,7 +521,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='259'/>
                 <yt:videoid id='B2UweK55x68'>B2UweK55x68</yt:videoid>
                 <youTubeId id='B2UweK55x68'>B2UweK55x68</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="48"/>
@@ -537,8 +537,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/ENvBB1WSjeE/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/ENvBB1WSjeE/comments' countHint='530'/>
@@ -555,7 +555,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='151'/>
                 <yt:videoid id='ENvBB1WSjeE'>ENvBB1WSjeE</yt:videoid>
                 <youTubeId id='ENvBB1WSjeE'>ENvBB1WSjeE</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="36"/>
@@ -571,8 +571,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/a0SFWlZoBwU/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/a0SFWlZoBwU/comments' countHint='530'/>
@@ -589,7 +589,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='69'/>
                 <yt:videoid id='a0SFWlZoBwU'>a0SFWlZoBwU</yt:videoid>
                 <youTubeId id='a0SFWlZoBwU'>a0SFWlZoBwU</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="26"/>
@@ -605,8 +605,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/iomf58mM9Rw/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/iomf58mM9Rw/comments' countHint='530'/>
@@ -623,7 +623,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='30'/>
                 <yt:videoid id='iomf58mM9Rw'>iomf58mM9Rw</yt:videoid>
                 <youTubeId id='iomf58mM9Rw'>iomf58mM9Rw</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="14"/>
@@ -639,8 +639,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
             <content type='text'></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/QwhfmkxWrz4/related"/>
             <author>
-                <name>EllenJoe</name>
-                <uri>http://192.168.1.27/feeds/api/users/EllenJoe</uri>
+                <name>kinich-j3x</name>
+                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/QwhfmkxWrz4/comments' countHint='530'/>
@@ -657,7 +657,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
                 <yt:duration seconds='173'/>
                 <yt:videoid id='QwhfmkxWrz4'>QwhfmkxWrz4</yt:videoid>
                 <youTubeId id='QwhfmkxWrz4'>QwhfmkxWrz4</youTubeId>
-                <media:credit role='uploader' name='EllenJoe'>EllenJoe</media:credit>
+                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="0" viewCount="13"/>

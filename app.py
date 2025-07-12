@@ -143,6 +143,10 @@ def tv():
 def completesearch():
     return send_file('search.js')
 
+@app.route('/feeds/api/channels')
+def channelssearch():
+    return send_file('Test')
+
 
 # Flask Routes
 @app.route('/swf/subtitle_module.swf')
@@ -2014,6 +2018,18 @@ def recently_featured(region):
 def most_popular(region):
     return send_file('Mobile/most_popular.xml')
 
+@app.route('/feeds/api/users/<region>/favorites')
+def mobilefavorites(region):
+    return send_file('Mobile/blank.xml')
+
+@app.route('/feeds/api/charts/live/events/recently_broadcasted')
+def recently_broadcasted():
+    return send_file('Test1')
+
+@app.route('/feeds/api/charts/live/events/live_now')
+def live_now():
+    return send_file('Test1')
+
 SEARCH_DIR = "assets/search"
 USER_DIR = "assets/cache/Users"
 os.makedirs(SEARCH_DIR, exist_ok=True)
@@ -2024,8 +2040,16 @@ def load_json_if_fresh(path: str, max_age: timedelta) -> dict | None:
         return None
     file_time = datetime.fromtimestamp(os.path.getmtime(path))
     if datetime.now() - file_time < max_age:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                content = f.read()
+            return json.loads(content)
+        except json.JSONDecodeError:
+            print(f"⚠️ Corrupted JSON file: {path}")
+            try:
+                os.remove(path)
+            except Exception as e:
+                print(f"⚠️ Failed to delete corrupted file: {e}")
     return None
 
 def fetch_youtubei(endpoint: str, payload: dict) -> dict:
@@ -2057,30 +2081,10 @@ def resolve_channel_id(handle: str) -> str | None:
     except Exception:
         return None
 
-def find_metadata_text(obj: dict | list) -> dict:
-    found = {"subscribers": None, "videos": None}
-    def recurse(node):
-        if isinstance(node, dict):
-            txt = node.get("text", {})
-            if isinstance(txt, dict):
-                content = txt.get("content", "")
-                if "subscriber" in content.lower() and not found["subscribers"]:
-                    found["subscribers"] = content
-                if "video" in content.lower() and not found["videos"]:
-                    found["videos"] = content
-            for value in node.values():
-                recurse(value)
-        elif isinstance(node, list):
-            for item in node:
-                recurse(item)
-    recurse(obj)
-    return found
-
 def normalize_count(text: str) -> int:
     if not text:
         return 0
     text = text.strip().upper().replace(",", "")
-    # Remove non-numeric suffixes like "SUBSCRIBERS", "VIDEOS", etc
     for suffix in ["SUBSCRIBERS", "VIDEOS", "VIEWS"]:
         if suffix in text:
             text = text.replace(suffix, "").strip()
@@ -2094,6 +2098,61 @@ def normalize_count(text: str) -> int:
         return int(float(text))
     except ValueError:
         return 0
+
+def normalize_views(text: str) -> int:
+    if not text:
+        return 0
+    text = text.strip().upper().replace(",", "")
+    for suffix in ["SUBSCRIBERS", "VIDEOS", "VIEWS"]:
+        if suffix in text:
+            text = text.replace(suffix, "").strip()
+    try:
+        if "K" in text:
+            return int(float(text.replace("K", "")) * 1000)
+        elif "M" in text:
+            return int(float(text.replace("M", "")) * 1000000)
+        elif "B" in text:
+            return int(float(text.replace("B", "")) * 1000000000)
+        return int(float(text))
+    except ValueError:
+        return 0
+
+def parse_duration_to_seconds(duration: str) -> int:
+    parts = duration.strip().split(":")
+    try:
+        parts = [int(p) for p in parts]
+        if len(parts) == 3:
+            hours, minutes, seconds = parts
+        elif len(parts) == 2:
+            hours = 0
+            minutes, seconds = parts
+        elif len(parts) == 1:
+            hours = 0
+            minutes = 0
+            seconds = parts[0]
+        else:
+            return 0
+        return hours * 3600 + minutes * 60 + seconds
+    except ValueError:
+        return 0
+
+def parse_published_date(text: str) -> str:
+    if not text:
+        return datetime.now().isoformat()
+    try:
+        return date_parser.parse(text).isoformat()
+    except Exception:
+        pass
+    match = re.match(r"(\d+)\s+(second|minute|hour|day|week|month|year)s?\s+ago", text.lower())
+    if match:
+        value, unit = match.groups()
+        value = int(value)
+        delta_args = {unit + "s": value}
+        try:
+            return (datetime.now() - timedelta(**delta_args)).isoformat()
+        except Exception:
+            pass
+    return datetime.now().isoformat()
 
 def extract_avatar_url(data: dict) -> str | None:
     header = data.get("header", {}).get("c4TabbedHeaderRenderer", {})
@@ -2112,32 +2171,104 @@ def extract_avatar_url(data: dict) -> str | None:
         pass
     return thumbs[0].get("url") if thumbs else None
 
+def find_metadata_text(obj: dict | list) -> dict:
+    found = {"subscribers": None, "videos": None}
+    
+    def recurse(node):
+        if isinstance(node, dict):
+            txt = node.get("text", {})
+            if isinstance(txt, dict):
+                content = txt.get("content", "")
+                if "subscriber" in content.lower() and not found["subscribers"]:
+                    found["subscribers"] = content
+                if "video" in content.lower() and not found["videos"]:
+                    found["videos"] = content
+            for value in node.values():
+                recurse(value)
+        elif isinstance(node, list):
+            for item in node:
+                recurse(item)
+    
+    recurse(obj)
+    return found
+
+
 def extract_user_info(data: dict, channel_id: str) -> dict:
     header = data.get("header", {}).get("c4TabbedHeaderRenderer", {})
     fallback = data.get("metadata", {}).get("channelMetadataRenderer", {})
-    stats = find_metadata_text(data)
-    avatar = extract_avatar_url(data)
-    title = header.get("title") or fallback.get("title")
+    
+    # Title and description
+    title = header.get("title") or fallback.get("title") or "Unknown Channel"
+    description = header.get("description") or fallback.get("description") or ""
+
+    # Avatar (thumbnail)
+    avatar = None
+    thumbs = header.get("avatar", {}).get("thumbnails", [])
+    if thumbs:
+        avatar = thumbs[-1].get("url", "")
+    if not avatar:
+        try:
+            microthumbs = data["microformat"]["microformatDataRenderer"]["thumbnail"]["thumbnails"]
+            avatar = microthumbs[-1].get("url", "")
+        except Exception:
+            avatar = ""
+    if avatar:
+        avatar = avatar.split("?")[0]  # Clean URL
+
+    # Subscriber and video count
+    subs_text = header.get("subscriberCountText", {}).get("simpleText", "")
+    vids_text = header.get("videoCountText", {}).get("simpleText", "")
+    if not subs_text or not vids_text:
+        stats = find_metadata_text(data)
+        subs_text = subs_text or stats.get("subscribers", "")
+        vids_text = vids_text or stats.get("videos", "")
+
+    subscribers = normalize_views(subs_text)
+    videos = normalize_views(vids_text)
+
     return {
         "channelId": channel_id,
         "title": title,
-        "description": header.get("description") or fallback.get("description") or "",
-        "subscribers": normalize_count(stats["subscribers"]) if stats["subscribers"] else 0,
-        "videos": normalize_count(stats["videos"]) if stats["videos"] else 0,
+        "description": description,
+        "subscribers": subscribers,
+        "videos": videos,
         "pfp": avatar,
         "userName": title
     }
 
+
 def get_user_info(channel_id: str) -> dict:
-    user_path = f"{USER_DIR}/{channel_id}.json"
+    path = f"{USER_DIR}/{channel_id}_info.json"
     payload = {
         "context": { "client": { "clientName": "WEB", "clientVersion": "2.20210721.00.00" } },
         "browseId": channel_id
     }
-    data = load_json_if_fresh(user_path, timedelta(hours=48)) or fetch_youtubei("browse", payload)
-    with open(user_path, "w", encoding="utf-8") as f:
+    data = load_json_if_fresh(path, timedelta(hours=48)) or fetch_youtubei("browse", payload)
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
     return extract_user_info(data, channel_id)
+
+def get_uploads(channel_id: str) -> list[dict]:
+    path = f"{USER_DIR}/{channel_id}_uploads.json"
+    payload = {
+        "context": { "client": { "clientName": "WEB", "clientVersion": "2.20210721.00.00" } },
+        "browseId": channel_id,
+        "params": "EgZ2aWRlb3M%3D"
+    }
+    data = load_json_if_fresh(path, timedelta(hours=48)) or fetch_youtubei("browse", payload)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+    try:
+        contents = data["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][1]\
+            ["tabRenderer"]["content"]["richGridRenderer"]["contents"]
+        videos = []
+        for item in contents:
+            video = item.get("richItemRenderer", {}).get("content", {}).get("videoRenderer")
+            if video:
+                videos.append(video)
+        return videos
+    except Exception:
+        return []
 
 def generate_atom_xml(info: dict, handle: str, base_url: str) -> str:
     now = datetime.now().isoformat()
@@ -2170,16 +2301,102 @@ def generate_atom_xml(info: dict, handle: str, base_url: str) -> str:
     <yt:username>{info['userName']}</yt:username>
 </entry>"""
 
+def generate_uploads_atom_xml(info: dict, uploads: list, handle: str, base_url: str) -> str:
+    feed_id = f"{base_url}/feeds/api/users/{handle}/uploads"
+    entries = ""
+
+    for video in uploads:
+        video_id = video.get("videoId")
+        title = video.get("title", {}).get("runs", [{}])[0].get("text", "")
+        description = video.get("descriptionSnippet", {}).get("runs", [{}])[0].get("text", "")
+        duration_str = video.get("lengthText", {}).get("simpleText", "")
+        duration_sec = parse_duration_to_seconds(duration_str)
+        views_str = video.get("viewCountText", {}).get("simpleText", "")
+        views = normalize_views(views_str)
+        published_text = video.get("publishedTimeText", {}).get("simpleText", "")
+        published = parse_published_date(published_text)
+        thumbnail = video.get("thumbnail", {}).get("thumbnails", [{}])[-1].get("url", "")
+            
+        entries += f"""<entry>
+            <id>{base_url}/feeds/api/videos/{video_id}c</id>
+            <youTubeId id='{video_id}c'>{video_id}c</youTubeId>
+			<published>{published}</published>
+			<updated>{published}</updated>
+            <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="-" term="-">-</category>
+            <title type='text'>{title}</title>
+            <content type='text'>{description}</content>
+            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{base_url}/feeds/api/videos/{video_id}c/related"/>
+            <author>
+                <name>{info['userName']}</name>
+                <uri>{base_url}/feeds/api/users/{info['userName']}</uri>
+            </author>
+            <gd:comments>
+                <gd:feedLink href='{base_url}/feeds/api/videos/{video_id}c/comments' countHint='530'/>
+            </gd:comments>
+            <media:group>
+                <media:category label='-' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>-</media:category>
+                <media:content url='{base_url}/channel_fh264_getvideo?v={video_id}c' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+                <media:description type='plain'>{description}</media:description>
+                <media:keywords>-</media:keywords>
+                <media:player url='http://www.youtube.com/watch?v={video_id}c'/>
+                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <yt:duration seconds='{duration_sec}'/>
+                <yt:videoid id='{video_id}c'>{video_id}c</yt:videoid>
+                <youTubeId id='{video_id}c'>{video_id}c</youTubeId>
+                <media:credit role='uploader' name='{info['userName']}'>{info['userName']}</media:credit>
+            </media:group>
+            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
+            <yt:statistics favoriteCount="0" viewCount="{views}"/>
+            <yt:rating numLikes="0" numDislikes="0"/>
+        </entry>"""
+
+    now = datetime.now().isoformat()
+    return f"""<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom'
+xmlns:media='http://search.yahoo.com/mrss/'
+xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
+xmlns:gd='http://schemas.google.com/g/2005'
+xmlns:yt='http://gdata.youtube.com/schemas/2007'>
+    <id>http://gdata.youtube.com/feeds/api/standardfeeds/us/recently_featured</id>
+    <updated>2010-12-21T18:59:58.000-08:00</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
+    <title type='text'> </title>
+    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
+    <author>
+        <name>YouTube</name>
+        <uri>http://www.youtube.com/</uri>
+    </author>
+    <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+    <openSearch:totalResults>25</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>{entries}
+</feed>"""
+
 @app.route("/feeds/api/users/<user_ident>")
-def serve_user(user_ident):
+def serve_user_profile(user_ident):
     handle = f"@{user_ident}"
     channel_id = resolve_channel_id(handle)
     if not channel_id:
         return Response("Channel not found", status=404)
     info = get_user_info(channel_id)
-    base_url = request.host_url.rstrip("/")
+    base_url = f"{request.scheme}://{request.host.split(':')[0]}"
     xml_response = generate_atom_xml(info, user_ident, base_url)
     return Response(xml_response, mimetype="application/atom+xml")
+
+@app.route("/feeds/api/users/<user_ident>/uploads")
+def serve_user_uploads(user_ident):
+    handle = f"@{user_ident}"
+    channel_id = resolve_channel_id(handle)
+    if not channel_id:
+        return Response("Channel not found", status=404)
+    info = get_user_info(channel_id)
+    uploads = get_uploads(channel_id)
+    base_url = f"{request.scheme}://{request.host.split(':')[0]}"
+    xml_response = generate_uploads_atom_xml(info, uploads, user_ident, base_url)
+    return Response(xml_response, mimetype="application/atom+xml")
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
