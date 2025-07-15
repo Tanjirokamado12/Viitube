@@ -112,7 +112,8 @@ change the HTTPS to HTTP if present above the domain name.
 Do same tratement for
 
 -Dev.gdata.youtube.com
--state.gdata.youtube.com
+
+-stage.gdata.youtube.com
 
 Steps Only for 5.x
 
