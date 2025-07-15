@@ -109,6 +109,11 @@ open the file and change the strings. **ONLY INCLUDE THE IP ADDRESS/DOMAIN NAME 
 
 change the HTTPS to HTTP if present above the domain name.
 
+Same Treatement is required for 
+dev.gdata.youtube.com
+stage.gdata.youtube.com
+uploads.gdata.youtube.com
+
 Steps Only for 5.x
 
 For 5.0.21 and 5.1.10 and 5.2.27
