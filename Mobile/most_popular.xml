@@ -1087,8 +1087,8 @@ SOCIAL MEDIA
 #GGCover #GemaGathika #genshinimpact #furina</content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/M1L2WGQyBjA/related"/>
             <author>
-                <name>Gema Gathika【AKA Virtual】</name>
-                <uri>http://192.168.1.27/feeds/api/users/Gema Gathika【AKA Virtual】</uri>
+                <name>gemagathika</name>
+                <uri>http://192.168.1.27/feeds/api/users/gemagathika</uri>
             </author>
             <gd:comments>
                 <gd:feedLink href='http://192.168.1.27/feeds/api/videos/M1L2WGQyBjA/comments' countHint='530'/>
@@ -1145,7 +1145,7 @@ SOCIAL MEDIA
                 <yt:duration seconds='148'/>
                 <yt:videoid id='M1L2WGQyBjA'>M1L2WGQyBjA</yt:videoid>
                 <youTubeId id='M1L2WGQyBjA'>M1L2WGQyBjA</youTubeId>
-                <media:credit role='uploader' name='Gema Gathika【AKA Virtual】'>Gema Gathika【AKA Virtual】</media:credit>
+                <media:credit role='uploader' name='gemagathika'>gemagathika</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='40' rel='http://schemas.google.com/g/2005#overall'/>
             <yt:statistics favoriteCount="162" viewCount="24427"/>

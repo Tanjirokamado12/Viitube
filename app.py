@@ -130,10 +130,6 @@ class GetVideoInfo:
 def wiitv():
     return send_file('swf/leanbacklite_wii.swf', mimetype='application/x-shockwave-flash')
 
-@app.route('/schemas/2007/categories.cat')
-def test2():
-    return send_file('categories.cat')
-
 # Flask Routes
 @app.route('/tv')
 def tv():
@@ -142,11 +138,6 @@ def tv():
 @app.route('/complete/search')
 def completesearch():
     return send_file('search.js')
-
-@app.route('/feeds/api/channels')
-def channelssearch():
-    return send_file('Test')
-
 
 # Flask Routes
 @app.route('/swf/subtitle_module.swf')
@@ -1465,7 +1456,321 @@ def get_watch_later_xml():
     
     xml_string += '</feed>'
     return Response(xml_string, mimetype='application/xml')
-    
+
+# 🧱 Configuration
+API_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
+RELATED_CACHE_DIR = "./assets/cache/Related"
+INFO_CACHE_DIR = "./assets/cache/videoinfo"
+
+# 🧼 XML escape utility
+def escape(text):
+    return (text or "").replace("&", "&amp;") \
+                       .replace("<", "&lt;") \
+                       .replace(">", "&gt;") \
+                       .replace('"', "&quot;") \
+                       .replace("'", "&apos;")
+
+# 📦 Fetch and cache related video IDs
+def fetch_related_video_ids(video_id):
+    os.makedirs(RELATED_CACHE_DIR, exist_ok=True)
+    cache_file = f"{RELATED_CACHE_DIR}/{video_id}.json"
+
+    if os.path.exists(cache_file):
+        with open(cache_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        url = f"https://www.youtube.com/youtubei/v1/next?key={API_KEY}"
+        payload = {
+            "context": {
+                "client": {
+                    "hl": "en",
+                    "clientName": "WEB",
+                    "clientVersion": "2.20210721.00.00"
+                }
+            },
+            "videoId": video_id
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        }
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        data = response.json()
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    related_ids = []
+    for item in data.get("contents", {}) \
+                    .get("twoColumnWatchNextResults", {}) \
+                    .get("secondaryResults", {}) \
+                    .get("secondaryResults", {}) \
+                    .get("results", []):
+        video = item.get("compactVideoRenderer")
+        if video:
+            related_ids.append(video.get("videoId"))
+    return related_ids
+
+# 🎥 Fetch and cache video details
+def get_video_details(video_id):
+    os.makedirs(INFO_CACHE_DIR, exist_ok=True)
+    cache_file = f"{INFO_CACHE_DIR}/{video_id}.json"
+
+    if os.path.exists(cache_file):
+        with open(cache_file, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        url = f"https://www.youtube.com/youtubei/v1/player?key={API_KEY}"
+        payload = {
+            "context": {
+                "client": {
+                    "hl": "en",
+                    "clientName": "WEB",
+                    "clientVersion": "2.20210721.00.00"
+                }
+            },
+            "videoId": video_id
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        }
+        response = requests.post(url, headers=headers, data=json.dumps(payload))
+        data = response.json()
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+
+    details = data.get("videoDetails", {})
+    publish_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
+    like_count = details.get("likeCount", "")
+
+    return {
+        "videoId": details.get("videoId", video_id),
+        "title": details.get("title", ""),
+        "description": details.get("shortDescription", ""),
+        "uploader": details.get("author", ""),
+        "publishedDate": publish_date,
+        "durationSeconds": details.get("lengthSeconds", ""),
+        "likeCount": like_count
+    }
+
+# 🌐 Route: /videos/<videoid>/related
+@app.route("/feeds/api/videos/<videoid>/relatede", methods=["GET"])
+def related(videoid):
+    xml_path = f"{RELATED_CACHE_DIR}/{videoid}.xml"
+
+    # Serve cached XML if it exists
+    if os.path.exists(xml_path):
+        return send_file(xml_path, mimetype="application/xml")
+
+    # Build fresh XML
+    related_ids = fetch_related_video_ids(videoid)
+    base_url = request.host_url.rstrip("/")
+
+    video_template = """   <entry>
+       <id>{ur2}/feeds/api/videos/{videoId}</id>
+       <youTubeId id='{videoId}'>{videoId}</youTubeId>
+       <published>{publishedDate}</published>
+       <updated>{publishedDate}</updated>
+       <category scheme='http://schemas.google.com/g/2005#kind' term='{ur2}/schemas/2007#video'/>
+       <category scheme='{ur2}/schemas/2007/categories.cat' term='Music' label='Music'/>
+       <title type='text'>{title}</title>
+       <content type='text'>{description}</content>
+       <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={videoId}&amp;feature=youtube_gdata'/>
+       <link rel='{ur2}/schemas/2007#video.related' type='application/atom+xml' href='{ur2}/feeds/api/videos/{videoId}/related'/>
+       <link rel='{ur2}/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v={videoId}'/>
+       <link rel='self' type='application/atom+xml' href='{ur2}/feeds/api/videos/--7MeTMkd4s/related/{videoId}'/>
+       <author>
+           <name>{uploader}</name>
+           <uri>{ur2}/feeds/api/users/{uploader}</uri>
+       </author>
+       <gd:comments>
+           <gd:feedLink rel='{ur2}/schemas/2007#comments' href='{ur2}/feeds/api/videos/{videoId}/comments' countHint='1'/>
+       </gd:comments>
+       <georss:where>
+           <gml:Point>
+               <gml:pos>37.0 -122.0</gml:pos>
+           </gml:Point>
+       </georss:where>
+       <yt:hd/>
+       <media:group>
+           <media:category label='Music' scheme='{ur2}/schemas/2007/categories.cat'>Music</media:category>
+	   <media:content url='{ur2}/channel_fh264_getvideo?v={videoId}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+           <media:description type='plain'>{description}</media:description>
+           <media:keywords/>
+           <media:player url='http://www.youtube.com/watch?v={videoId}&amp;feature=youtube_gdata_player'/>
+           <media:thumbnail url='http://i.ytimg.com/vi/{videoId}/0.jpg' height='360' width='480' time='00:02:06'/>
+           <media:thumbnail url='http://i.ytimg.com/vi/{videoId}/1.jpg' height='90' width='120' time='00:01:03'/>
+           <media:thumbnail url='http://i.ytimg.com/vi/{videoId}/2.jpg' height='90' width='120' time='00:02:06'/>
+           <media:thumbnail url='http://i.ytimg.com/vi/{videoId}/3.jpg' height='90' width='120' time='00:03:09'/>
+           <media:title type='plain'>{title}</media:title>
+           <yt:videoid id='{videoId}'>{videoId}</yt:videoid>
+           <youTubeId id='{videoId}'>{videoId}</youTubeId>
+           <yt:duration seconds='{durationSeconds}'/>
+           <media:credit role='uploader' name='{uploader}'>{uploader}</media:credit>
+       </media:group>
+       <gd:rating average='5.0' max='5' min='1' numRaters='5' rel='http://schemas.google.com/g/2005#overall'/>
+       <yt:statistics favoriteCount='0' viewCount='1378'/>
+   </entry>"""
+
+    video_blocks = ""
+    for vid in related_ids:
+        info = get_video_details(vid)
+        block = video_template.format(
+            videoId=escape(info["videoId"]),
+            url=escape(f"{base_url}/watch?v={info['videoId']}"),  # 👈 Dynamic base domain
+            ur2=escape(f"{base_url}"),  # 👈 Dynamic base domain
+            title=escape(info["title"]),
+            description=escape(info["description"]),
+            uploader=escape(info["uploader"]),
+            publishedDate=escape(info["publishedDate"]),
+            durationSeconds=escape(info["durationSeconds"]),
+            likeCount=escape(info["likeCount"])
+        )
+        video_blocks += block + "\n"
+
+    xml_content = f"""<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom' xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' xmlns:gd='http://schemas.google.com/g/2005' xmlns:media='http://search.yahoo.com/mrss/' xmlns:yt='http://gdata.youtube.com/schemas/2007' xmlns:app='http://purl.org/atom/app#' xmlns:georss='http://www.georss.org/georss' xmlns:gml='http://www.opengis.net/gml'>
+   <id>http://gdata.youtube.com/feeds/api/videos/--7MeTMkd4s/related</id>
+   <updated>2015-03-26T00:25:12.448Z</updated>
+   <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
+   <title type='text'>Videos related to 'Kane: "Rain" In-Studio Music Video'</title>
+   <logo>http://www.gstatic.com/youtube/img/logo.png</logo>
+   <link rel='alternate' type='text/html' href='http://www.youtube.com/results?search=related&amp;search_query=&amp;v=--7MeTMkd4s'/>
+   <link rel='related' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/--7MeTMkd4s'/>
+   <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/--7MeTMkd4s/related'/>
+   <link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/--7MeTMkd4s/related/batch'/>
+   <link rel='self' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/--7MeTMkd4s/related?start-index=1&amp;max-results=25'/>
+   <author>
+       <name>YouTube</name>
+       <uri>http://www.youtube.com/</uri>
+   </author>
+   <generator version='2.1' uri='http://gdata.youtube.com'>YouTube data API</generator>
+   <openSearch:totalResults>19</openSearch:totalResults>
+   <openSearch:startIndex>1</openSearch:startIndex>
+   <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
+{video_blocks}</feed>"""
+
+    with open(xml_path, "w", encoding="utf-8") as f:
+        f.write(xml_content)
+
+    return Response(xml_content, content_type="application/xml")
+
+CACHE_DIR = "./assets/cache/videoinfo"
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+@app.route("/feeds/api/videos/<video_id>")
+def get_video_xml(video_id):
+    baseurl = request.host
+    cache_path = os.path.join(CACHE_DIR, f"{video_id}.json")
+
+    # Load from cache or fetch from YouTubei
+    if os.path.exists(cache_path):
+        with open(cache_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        yt_url = "https://www.youtube.com/youtubei/v1/player"
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0",
+            "X-Youtube-Client-Name": "1",
+            "X-Youtube-Client-Version": "2.20201021.03.00"
+        }
+        payload = {
+            "context": {
+                "client": {
+                    "clientName": "WEB",
+                    "clientVersion": "2.20201021.03.00"
+                }
+            },
+            "videoId": video_id
+        }
+        r = requests.post(yt_url, headers=headers, data=json.dumps(payload))
+        data = r.json()
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+    # Extract metadata
+    title = data.get("videoDetails", {}).get("title", "")
+    description = data.get("videoDetails", {}).get("shortDescription", "")
+    author = data.get("videoDetails", {}).get("author", "")
+    view_count = data.get("videoDetails", {}).get("viewCount", "0")
+    duration = data.get("videoDetails", {}).get("lengthSeconds", "0")
+    publish_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
+    like_count = data.get("videoDetails", {}).get("likeCount", "0")
+    dislike_count = data.get("videoDetails", {}).get("dislikeCount", "0")
+
+    # Build XML content
+    xmlcontent = f"""<?xml version='1.0' encoding='UTF-8'?>
+        <entry>
+            <id>http://{baseurl}/feeds/api/videos/{video_id}</id>
+            <youTubeId id='{video_id}'>{video_id}</youTubeId>
+            <published>{publish_date}T00:00:00.000Z</published>
+            <updated>{publish_date}T00:00:00.000Z</updated>
+            <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="People &amp; Blogs" term="People &amp; Blogs">People &amp; Blogs</category>
+            <title type='text'>{title}</title>
+            <content type='text'>{description}</content>
+            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://{baseurl}/feeds/api/videos/{video_id}/related"/>
+            <author>
+                <name>{author}</name>
+                <uri>http://{baseurl}/feeds/api/users/{author}</uri>
+            </author>
+            <gd:comments>
+                <gd:feedLink href='http://{baseurl}/feeds/api/videos/{video_id}/comments' countHint='530'/>
+            </gd:comments>
+            <media:group>
+                <media:category label='People &amp; Blogs' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>People &amp; Blogs</media:category>
+                <media:content url='http://{baseurl}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://{baseurl}/get_480?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://{baseurl}/exp_hd?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+                <media:description type='plain'>{description}</media:description>
+                <media:keywords>genshin, mihoyo, hoyomix, hoyoverse, genshinost, music, soundtrack, orchestra</media:keywords>
+                <media:player url='http://www.youtube.com/watch?v={video_id}'/>
+                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <yt:duration seconds='{duration}'/>
+                <yt:videoid id='{video_id}'>{video_id}</yt:videoid>
+                <youTubeId id='{video_id}'>{video_id}</youTubeId>
+                <media:credit role='uploader' name='{author}'>{author}</media:credit>
+            </media:group>
+            <gd:rating average='5' max='5' min='1' numRaters='716' rel='http://schemas.google.com/g/2005#overall'/>
+            <yt:statistics favoriteCount="0" viewCount="{view_count}/>
+            <yt:rating numLikes="0" numDislikes="0"/>
+        </entry>"""
+
+    return Response(xmlcontent, mimetype="application/xml")
+
+
+@app.route('/deviceregistration/v1/devices', methods=['POST'])
+def upload_hex():
+    return jsonify({
+    "id": "amogus",
+    "key": "AP+lc79/lqV58X9FLDdn7SiOzH8hDb1ItXMmm25Cb4YDLWZkI+gXBiwwOvcssAY"
+}), 200
+
+def generate_device_id():
+    charset = "qwertyuiopasdfghjklzxcvbnm1234567890"
+    return ''.join(random.choices(charset, k=7))
+
+@app.route('/youtube/accounts/registerDevice', methods=['POST'])
+def register_device():
+    device_id = generate_device_id()
+
+    # Simulated check—can be replaced with real logic if needed
+    used_device_ids = set()
+    while device_id in used_device_ids:
+        device_id = generate_device_id()
+
+    # Send response similar to Node.js version
+    response_text = f"DeviceId={device_id}\nDeviceKey=ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk="
+    return response_text
+
+@app.route('/schemas/2007/categories.cat')
+def categories():
+    return send_file('categories.cat')
+
+@app.route('/feeds/api/channels')
+def channelssearch():
+    return send_file('Test')
+
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "assets", "search")
 
 # Ensure cache directory exists
@@ -1652,359 +1957,6 @@ def search():
         return Response(xml_data, mimetype="text/xml")
 
     return Response("<error>No results found</error>", mimetype="text/xml")
-    
-# Define the storage directory relative to app.py
-SAVE_PATH = os.path.join(os.path.dirname(__file__), "assets")
-os.makedirs(SAVE_PATH, exist_ok=True)
-
-def extract_video_id(request_path):
-    """Extracts the video_id from various URL formats."""
-    match = re.search(r"video_id=([A-Za-z0-9_-]+)", request_path)
-    return match.group(1) if match else None
-
-def download_video(video_id):
-    """Downloads the video using PyTube if it's not already saved."""
-    video_url = f"https://www.youtube.com/watch?v={video_id}"
-    yt = YouTube(video_url)
-    
-    # Define video filename and path
-    video_filename = f"{video_id}.mp4"
-    video_path = os.path.join(SAVE_PATH, video_filename)
-
-    if os.path.exists(video_path):
-        return video_path
-
-    # Download the highest resolution stream
-    stream = yt.streams.get_highest_resolution()
-    stream.download(SAVE_PATH, filename=video_filename)
-    
-    return video_path
-
-@app.route('/get_480', methods=['GET'])
-def get_480():
-    """Handles various endpoint formats and retrieves the requested video."""
-    request_path = request.query_string.decode("utf-8")  # Get the full query string
-    video_id = extract_video_id(request_path)
-
-    if not video_id:
-        return "Missing or invalid video_id parameter", 400
-
-    video_path = download_video(video_id)
-
-    return send_file(video_path, as_attachment=True)
-    
-@app.route('/exp_hd', methods=['GET'])
-def exp_hd():
-    """Handles various endpoint formats and retrieves the requested video."""
-    request_path = request.query_string.decode("utf-8")  # Get the full query string
-    video_id = extract_video_id(request_path)
-
-    if not video_id:
-        return "Missing or invalid video_id parameter", 400
-
-    video_path = download_video(video_id)
-
-    return send_file(video_path, as_attachment=True)
-
-@app.route('/channel_fh264_getvideo', methods=['GET'])
-def channel_fh264_getvideo():
-    """Handles various endpoint formats and retrieves the requested video."""
-    video_id = request.args.get("video_id") or request.args.get("v")  # Handle both cases
-
-    if not video_id:
-        return "Missing or invalid video_id parameter", 400
-
-    video_path = download_video(video_id)
-
-    return send_file(video_path, as_attachment=True)
-
-def generate_device_id():
-    charset = "qwertyuiopasdfghjklzxcvbnm1234567890"
-    return ''.join(random.choices(charset, k=7))
-
-@app.route('/youtube/accounts/registerDevice', methods=['POST'])
-def register_device():
-    device_id = generate_device_id()
-
-    # Simulated check—can be replaced with real logic if needed
-    used_device_ids = set()
-    while device_id in used_device_ids:
-        device_id = generate_device_id()
-
-    # Send response similar to Node.js version
-    response_text = f"DeviceId={device_id}\nDeviceKey=ULxlVAAVMhZ2GeqZA/X1GgqEEIP1ibcd3S+42pkWfmk="
-    return response_text
-
-# 🧱 Configuration
-API_KEY = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
-RELATED_CACHE_DIR = "./assets/cache/Related"
-INFO_CACHE_DIR = "./assets/cache/videoinfo"
-
-# 🧼 XML escape utility
-def escape(text):
-    return (text or "").replace("&", "&amp;") \
-                       .replace("<", "&lt;") \
-                       .replace(">", "&gt;") \
-                       .replace('"', "&quot;") \
-                       .replace("'", "&apos;")
-
-# 📦 Fetch and cache related video IDs
-def fetch_related_video_ids(video_id):
-    os.makedirs(RELATED_CACHE_DIR, exist_ok=True)
-    cache_file = f"{RELATED_CACHE_DIR}/{video_id}.json"
-
-    if os.path.exists(cache_file):
-        with open(cache_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    else:
-        url = f"https://www.youtube.com/youtubei/v1/next?key={API_KEY}"
-        payload = {
-            "context": {
-                "client": {
-                    "hl": "en",
-                    "clientName": "WEB",
-                    "clientVersion": "2.20210721.00.00"
-                }
-            },
-            "videoId": video_id
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0"
-        }
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
-        data = response.json()
-        with open(cache_file, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-
-    related_ids = []
-    for item in data.get("contents", {}) \
-                    .get("twoColumnWatchNextResults", {}) \
-                    .get("secondaryResults", {}) \
-                    .get("secondaryResults", {}) \
-                    .get("results", []):
-        video = item.get("compactVideoRenderer")
-        if video:
-            related_ids.append(video.get("videoId"))
-    return related_ids
-
-# 🎥 Fetch and cache video details
-def get_video_details(video_id):
-    os.makedirs(INFO_CACHE_DIR, exist_ok=True)
-    cache_file = f"{INFO_CACHE_DIR}/{video_id}.json"
-
-    if os.path.exists(cache_file):
-        with open(cache_file, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    else:
-        url = f"https://www.youtube.com/youtubei/v1/player?key={API_KEY}"
-        payload = {
-            "context": {
-                "client": {
-                    "hl": "en",
-                    "clientName": "WEB",
-                    "clientVersion": "2.20210721.00.00"
-                }
-            },
-            "videoId": video_id
-        }
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0"
-        }
-        response = requests.post(url, headers=headers, data=json.dumps(payload))
-        data = response.json()
-        with open(cache_file, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
-
-    details = data.get("videoDetails", {})
-    publish_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
-    like_count = details.get("likeCount", "")
-
-    return {
-        "videoId": details.get("videoId", video_id),
-        "title": details.get("title", ""),
-        "description": details.get("shortDescription", ""),
-        "uploader": details.get("author", ""),
-        "publishedDate": publish_date,
-        "durationSeconds": details.get("lengthSeconds", ""),
-        "likeCount": like_count
-    }
-
-# 🌐 Route: /videos/<videoid>/related
-@app.route("/feeds/api/videos/<videoid>/related", methods=["GET"])
-def related(videoid):
-    xml_path = f"{RELATED_CACHE_DIR}/{videoid}.xml"
-
-    # Serve cached XML if it exists
-    if os.path.exists(xml_path):
-        return send_file(xml_path, mimetype="application/xml")
-
-    # Build fresh XML
-    related_ids = fetch_related_video_ids(videoid)
-    base_url = request.host_url.rstrip("/")
-
-    video_template = """<entry>
-            <id>{ur2}/feeds/api/videos/{videoId}</id>
-            <youTubeId id='{videoId}'>{videoId}</youTubeId>
-            <published>{publishedDate}</published>
-            <updated>{publishedDate}</updated>
-            <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>{title}</title>
-            <content type='text'>{description}</content>
-            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{ur2}/feeds/api/videos/{videoId}/related"/>
-            <author>
-                <name>{uploader}</name>
-                <uri>{ur2}/feeds/api/users/{uploader}</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='{ur2}/feeds/api/videos/{videoId}/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='{ur2}/channel_fh264_getvideo?v={videoId}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'>{description}</media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v={videoId}'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{videoId}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{videoId}/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{videoId}/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='{durationSeconds}'/>
-                <yt:videoid id='{videoId}'>{videoId}</yt:videoid>
-                <youTubeId id='{videoId}'>{videoId}</youTubeId>
-                <media:credit role='uploader' name='{uploader}'>{uploader}</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='10' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="{durationSeconds}"/>
-            <yt:rating numLikes="0" numDislikes="0"/>
-        </entry>"""
-
-    video_blocks = ""
-    for vid in related_ids:
-        info = get_video_details(vid)
-        block = video_template.format(
-            videoId=escape(info["videoId"]),
-            url=escape(f"{base_url}/watch?v={info['videoId']}"),  # 👈 Dynamic base domain
-            ur2=escape(f"{base_url}"),  # 👈 Dynamic base domain
-            title=escape(info["title"]),
-            description=escape(info["description"]),
-            uploader=escape(info["uploader"]),
-            publishedDate=escape(info["publishedDate"]),
-            durationSeconds=escape(info["durationSeconds"]),
-            likeCount=escape(info["likeCount"])
-        )
-        video_blocks += block + "\n"
-
-    xml_content = f"""<?xml version='1.0' encoding='UTF-8'?>
-<feed xmlns='http://www.w3.org/2005/Atom'
-xmlns:media='http://search.yahoo.com/mrss/'
-xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
-xmlns:gd='http://schemas.google.com/g/2005'
-xmlns:yt='http://gdata.youtube.com/schemas/2007'>
-    <id>http://gdata.youtube.com/feeds/api/standardfeeds/us/recently_featured</id>
-    <updated>2010-12-21T18:59:58.000-08:00</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
-    <title type='text'> </title>
-    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
-    <author>
-        <name>YouTube</name>
-        <uri>http://www.youtube.com/</uri>
-    </author>
-    <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
-    <openSearch:totalResults>25</openSearch:totalResults>
-    <openSearch:startIndex>1</openSearch:startIndex>
-    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
-{video_blocks}</feed>"""
-
-    with open(xml_path, "w", encoding="utf-8") as f:
-        f.write(xml_content)
-
-    return Response(xml_content, content_type="application/xml")
-
-CACHE_DIR = "./assets/cache/videoinfo"
-os.makedirs(CACHE_DIR, exist_ok=True)
-
-@app.route("/feeds/api/videos/<video_id>")
-def get_video_xml(video_id):
-    baseurl = request.host
-    cache_path = os.path.join(CACHE_DIR, f"{video_id}.json")
-
-    # Load from cache or fetch from YouTubei
-    if os.path.exists(cache_path):
-        with open(cache_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    else:
-        yt_url = "https://www.youtube.com/youtubei/v1/player"
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0",
-            "X-Youtube-Client-Name": "1",
-            "X-Youtube-Client-Version": "2.20201021.03.00"
-        }
-        payload = {
-            "context": {
-                "client": {
-                    "clientName": "WEB",
-                    "clientVersion": "2.20201021.03.00"
-                }
-            },
-            "videoId": video_id
-        }
-        r = requests.post(yt_url, headers=headers, data=json.dumps(payload))
-        data = r.json()
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-
-    # Extract metadata
-    title = data.get("videoDetails", {}).get("title", "")
-    description = data.get("videoDetails", {}).get("shortDescription", "")
-    author = data.get("videoDetails", {}).get("author", "")
-    view_count = data.get("videoDetails", {}).get("viewCount", "0")
-    duration = data.get("videoDetails", {}).get("lengthSeconds", "0")
-    publish_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
-    like_count = data.get("videoDetails", {}).get("likeCount", "0")
-    dislike_count = data.get("videoDetails", {}).get("dislikeCount", "0")
-
-    # Build XML content
-    xmlcontent = f"""<?xml version='1.0' encoding='UTF-8'?>
-        <entry>
-            <id>http://{baseurl}/feeds/api/videos/{video_id}</id>
-            <youTubeId id='{video_id}'>{video_id}</youTubeId>
-            <published>{publish_date}T00:00:00.000Z</published>
-            <updated>{publish_date}T00:00:00.000Z</updated>
-            <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="People &amp; Blogs" term="People &amp; Blogs">People &amp; Blogs</category>
-            <title type='text'>{title}</title>
-            <content type='text'>{description}</content>
-            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://{baseurl}/feeds/api/videos/{video_id}/related"/>
-            <author>
-                <name>{author}</name>
-                <uri>http://{baseurl}/feeds/api/users/{author}</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://{baseurl}/feeds/api/videos/{video_id}/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='People &amp; Blogs' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>People &amp; Blogs</media:category>
-                <media:content url='http://{baseurl}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://{baseurl}/get_480?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://{baseurl}/exp_hd?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
-                <media:description type='plain'>{description}</media:description>
-                <media:keywords>genshin, mihoyo, hoyomix, hoyoverse, genshinost, music, soundtrack, orchestra</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v={video_id}'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='{duration}'/>
-                <yt:videoid id='{video_id}'>{video_id}</yt:videoid>
-                <youTubeId id='{video_id}'>{video_id}</youTubeId>
-                <media:credit role='uploader' name='{author}'>{author}</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='716' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="{view_count}/>
-            <yt:rating numLikes="0" numDislikes="0"/>
-        </entry>"""
-
-    return Response(xmlcontent, mimetype="application/xml")
-
-# Mobile App EndPoint
 
 @app.route('/feeds/api/standardfeeds/<region>/most_discussed')
 def most_discussed(region):
@@ -2016,6 +1968,10 @@ def recently_featured(region):
 
 @app.route('/feeds/api/standardfeeds/<region>/most_popular')
 def most_popular(region):
+    return send_file('Mobile/most_popular.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Autos')
+def most_popular_Autos(region):
     return send_file('Mobile/most_popular.xml')
 
 @app.route('/feeds/api/users/<region>/favorites')
@@ -2287,18 +2243,19 @@ def generate_atom_xml(info: dict, handle: str, base_url: str) -> str:
     <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#userProfile'/>
     <category scheme='http://gdata.youtube.com/schemas/2007/channeltypes.cat' term=''/>
     <title type='text'>{info['title']}</title>
-    <content type='text'>{info['description']}</content>
+    <content type='text'></content>
     <link rel='self' type='application/atom+xml' href='{id_url}'/>
     <author>
         <name>{info['userName']}</name>
         <uri>{channel_uri}</uri>
     </author>
     <yt:age>1</yt:age>
-    <yt:description>{info['description']}</yt:description>
+    <yt:description></yt:description>
     <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.uploads' href='{uploads_uri}' countHint='{info['videos']}'/>
     <yt:statistics lastWebAccess='{now}' subscriberCount='{info['subscribers']}' videoWatchCount='1' viewCount='0' totalUploadViews='0'/>
     <media:thumbnail url='{info['pfp']}'/>
     <yt:username>{info['userName']}</yt:username>
+    <yt:channelId>{info['userName']}</yt:channelId>
 </entry>"""
 
 def generate_uploads_atom_xml(info: dict, uploads: list, handle: str, base_url: str) -> str:
@@ -2396,6 +2353,180 @@ def serve_user_uploads(user_ident):
     base_url = f"{request.scheme}://{request.host.split(':')[0]}"
     xml_response = generate_uploads_atom_xml(info, uploads, user_ident, base_url)
     return Response(xml_response, mimetype="application/atom+xml")
+
+TEMPLATE_PATH = 'player.json'
+CACHE_DIR = 'assets/cache/innertube'
+PLACEHOLDER = b'thevideoiid'  # must be 11 bytes for exact replacement
+
+@app.route('/youtubei/v1/player', methods=['GET', 'POST'])
+def youtube_player():
+    video_id = request.args.get('id', '').strip()
+
+    if not video_id:
+        return jsonify({"error": "Missing 'id' parameter"}), 400
+
+    if len(video_id) != 11:
+        return jsonify({"error": "Video ID must be 11 characters"}), 400
+
+    # Prepare cache path
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    cache_path = os.path.join(CACHE_DIR, f"{video_id}.json")
+
+    # Return cached version if exists
+    if os.path.exists(cache_path):
+        return send_file(cache_path, mimetype='application/octet-stream')
+
+    # Load binary template
+    try:
+        with open(TEMPLATE_PATH, 'rb') as f:
+            data = f.read()
+    except FileNotFoundError:
+        return jsonify({"error": "Template file not found"}), 500
+
+    # Ensure placeholder exists
+    if PLACEHOLDER not in data:
+        return jsonify({"error": "Placeholder not found in binary"}), 500
+
+    # Replace placeholder with video ID
+    try:
+        modified_data = data.replace(PLACEHOLDER, video_id.encode('utf-8'))
+    except Exception as e:
+        return jsonify({"error": f"Replacement failed: {str(e)}"}), 500
+
+    # Save to cache
+    try:
+        with open(cache_path, 'wb') as f:
+            f.write(modified_data)
+    except Exception as e:
+        return jsonify({"error": f"Failed to save: {str(e)}"}), 500
+
+    return send_file(cache_path, mimetype='application/octet-stream')
+
+    # Determine IP-based endpoint
+    client_ip = request.host.split(':')[0]
+    try:
+        last_octet = client_ip.split('.')[-1]
+        digit_count = len(last_octet)
+        e_count = 10 + digit_count
+        endpoint_name = f"g{'e' * e_count}t_video"
+        video_url = f"http://{client_ip}/{endpoint_name}?video_id={video_id}"
+    except Exception:
+        video_url = f"http://{client_ip}/geeeeeeeet_video?video_id={video_id}"
+
+    return jsonify({
+        "status": "ok",
+        "cache_file": cache_path,
+        "video_url": video_url
+    })
+
+
+# Define the storage directory relative to app.py
+SAVE_PATH = os.path.join(os.path.dirname(__file__), "assets")
+os.makedirs(SAVE_PATH, exist_ok=True)
+
+def extract_video_id(request_path):
+    """Extracts the video_id from various URL formats."""
+    match = re.search(r"video_id=([A-Za-z0-9_-]+)", request_path)
+    return match.group(1) if match else None
+
+def download_video(video_id):
+    """Downloads the video using PyTube if it's not already saved."""
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
+    yt = YouTube(video_url)
+    
+    # Define video filename and path
+    video_filename = f"{video_id}.mp4"
+    video_path = os.path.join(SAVE_PATH, video_filename)
+
+    if os.path.exists(video_path):
+        return video_path
+
+    # Download the highest resolution stream
+    stream = yt.streams.get_highest_resolution()
+    stream.download(SAVE_PATH, filename=video_filename)
+    
+    return video_path
+
+@app.route('/get_480', methods=['GET'])
+def get_480():
+    """Handles various endpoint formats and retrieves the requested video."""
+    request_path = request.query_string.decode("utf-8")  # Get the full query string
+    video_id = extract_video_id(request_path)
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
+    
+@app.route('/exp_hd', methods=['GET'])
+def exp_hd():
+    """Handles various endpoint formats and retrieves the requested video."""
+    request_path = request.query_string.decode("utf-8")  # Get the full query string
+    video_id = extract_video_id(request_path)
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
+
+@app.route('/channel_fh264_getvideo', methods=['GET'])
+def channel_fh264_getvideo():
+    """Handles various endpoint formats and retrieves the requested video."""
+    video_id = request.args.get("video_id") or request.args.get("v")  # Handle both cases
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
+
+def generate_device_id():
+    charset = "qwertyuiopasdfghjklzxcvbnm1234567890"
+    return ''.join(random.choices(charset, k=7))
+
+@app.route('/geeeeeeeeeeeeet_video', methods=['GET'])
+def geeeeeeeeeeeeet_video():
+    """Handles various endpoint formats and retrieves the requested video."""
+    request_path = request.query_string.decode("utf-8")  # Get the full query string
+    video_id = extract_video_id(request_path)
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
+
+@app.route('/geeeeeeeeeeeet_video', methods=['GET'])
+def geeeeeeeeeeeet_video():
+    """Handles various endpoint formats and retrieves the requested video."""
+    request_path = request.query_string.decode("utf-8")  # Get the full query string
+    video_id = extract_video_id(request_path)
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
+
+@app.route('/geeeeeeeeeeeeeet_video', methods=['GET'])
+def geeeeeeeeeeeeeet_video():
+    """Handles various endpoint formats and retrieves the requested video."""
+    request_path = request.query_string.decode("utf-8")  # Get the full query string
+    video_id = extract_video_id(request_path)
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    video_path = download_video(video_id)
+
+    return send_file(video_path, as_attachment=True)
 
 
 if __name__ == '__main__':
