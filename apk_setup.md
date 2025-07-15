@@ -182,3 +182,9 @@ this will sign the apk using debug/test keys.
 refer to the help of uber-apk-signer if you need more info.
 
 after you get the signed apk, install as normal on your device.
+
+## Patching Player.json
+
+Player.json cannot be updated using python
+
+So Open Player.json into hxd and remplace 192.168.1.27 to your instance,and overwrite get_video with your ip, and is shoud finich after add ip /gee and sav it
