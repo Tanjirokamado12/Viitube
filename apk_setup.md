@@ -187,4 +187,6 @@ after you get the signed apk, install as normal on your device.
 
 Player.json cannot be updated using python
 
-So Open Player.json into hxd and remplace 192.168.1.27 to your instance,and overwrite get_video with your ip, and is shoud finich after add ip /gee and sav it
+So Open Player.json into hxd and remplace 192.168.1.27 to your instance,and overwrite get_video with your ip, and is shoud finich after add ip /gee and save it
+
+<img width="547" height="33" alt="Capture" src="https://github.com/user-attachments/assets/5749a6f7-43b7-439f-bd73-11a207aa27ad" />
