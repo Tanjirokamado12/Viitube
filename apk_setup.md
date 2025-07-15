@@ -1,5 +1,7 @@
 # ANDROID APP SETUP - Viitube
 
+Before that,Original Patching guide is from yt2009,so credit to owner
+
 if you'd like to have an android app for your instance users, you can get an old youtube apk working (2.x-4.1.23)
 by setting it up to connect to your Viitube server.
 
