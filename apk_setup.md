@@ -111,6 +111,10 @@ change the HTTPS to HTTP if present above the domain name.
 
 Steps Only for 5.x
 
+For 5.0.21 and 5.1.10 and 5.2.27
+
+Remplace http://gdata.youtube.com to your instance
+
 For Playback, it was **www.googleapis.com**. so put that into grep!
 
 ```
@@ -119,9 +123,6 @@ grep -r -i "www.googleapis.com"
 
 **you don't need to change it all!**
 
-For 5.0.21 and 5.1.10 and 5.2.27
-
-Remplace http://gdata.youtube.com to your instance
 
 For 5.0.21 
 
