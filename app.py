@@ -15,6 +15,7 @@ from pytubefix import YouTube
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import xml.etree.ElementTree as ET
+from xml.sax.saxutils import escape
 
 
 OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
@@ -2242,11 +2243,11 @@ def generate_atom_xml(info: dict, handle: str, base_url: str) -> str:
     <updated>{now}</updated>
     <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#userProfile'/>
     <category scheme='http://gdata.youtube.com/schemas/2007/channeltypes.cat' term=''/>
-    <title type='text'>{info['title']}</title>
+    <title type='text'>{escape(info['title'])}</title>
     <content type='text'></content>
     <link rel='self' type='application/atom+xml' href='{id_url}'/>
     <author>
-        <name>{info['userName']}</name>
+        <name>{escape(info['userName'])}</name>
         <uri>{channel_uri}</uri>
     </author>
     <yt:age>1</yt:age>
@@ -2254,8 +2255,8 @@ def generate_atom_xml(info: dict, handle: str, base_url: str) -> str:
     <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.uploads' href='{uploads_uri}' countHint='{info['videos']}'/>
     <yt:statistics lastWebAccess='{now}' subscriberCount='{info['subscribers']}' videoWatchCount='1' viewCount='0' totalUploadViews='0'/>
     <media:thumbnail url='{info['pfp']}'/>
-    <yt:username>{info['userName']}</yt:username>
-    <yt:channelId>{info['userName']}</yt:channelId>
+    <yt:username>{escape(info['userName'])}</yt:username>
+    <yt:channelId>{escape(info['userName'])}</yt:channelId>
 </entry>"""
 
 def generate_uploads_atom_xml(info: dict, uploads: list, handle: str, base_url: str) -> str:
@@ -2264,8 +2265,8 @@ def generate_uploads_atom_xml(info: dict, uploads: list, handle: str, base_url: 
 
     for video in uploads:
         video_id = video.get("videoId")
-        title = video.get("title", {}).get("runs", [{}])[0].get("text", "")
-        description = video.get("descriptionSnippet", {}).get("runs", [{}])[0].get("text", "")
+        title = escape(video.get("title", {}).get("runs", [{}])[0].get("text", ""))
+        description = escape(video.get("descriptionSnippet", {}).get("runs", [{}])[0].get("text", ""))
         duration_str = video.get("lengthText", {}).get("simpleText", "")
         duration_sec = parse_duration_to_seconds(duration_str)
         views_str = video.get("viewCountText", {}).get("simpleText", "")
@@ -2275,33 +2276,33 @@ def generate_uploads_atom_xml(info: dict, uploads: list, handle: str, base_url: 
         thumbnail = video.get("thumbnail", {}).get("thumbnails", [{}])[-1].get("url", "")
             
         entries += f"""<entry>
-            <id>{base_url}/feeds/api/videos/{video_id}c</id>
-            <youTubeId id='{video_id}c'>{video_id}c</youTubeId>
+            <id>{base_url}/feeds/api/videos/{video_id}</id>
+            <youTubeId id='{video_id}'>{video_id}</youTubeId>
 			<published>{published}</published>
 			<updated>{published}</updated>
             <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="-" term="-">-</category>
             <title type='text'>{title}</title>
             <content type='text'>{description}</content>
-            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{base_url}/feeds/api/videos/{video_id}c/related"/>
+            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{base_url}/feeds/api/videos/{video_id}/related"/>
             <author>
                 <name>{info['userName']}</name>
                 <uri>{base_url}/feeds/api/users/{info['userName']}</uri>
             </author>
             <gd:comments>
-                <gd:feedLink href='{base_url}/feeds/api/videos/{video_id}c/comments' countHint='530'/>
+                <gd:feedLink href='{base_url}/feeds/api/videos/{video_id}/comments' countHint='530'/>
             </gd:comments>
             <media:group>
                 <media:category label='-' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='{base_url}/channel_fh264_getvideo?v={video_id}c' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+                <media:content url='{base_url}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
                 <media:description type='plain'>{description}</media:description>
                 <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v={video_id}c'/>
+                <media:player url='http://www.youtube.com/watch?v={video_id}'/>
                 <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
                 <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
                 <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
                 <yt:duration seconds='{duration_sec}'/>
-                <yt:videoid id='{video_id}c'>{video_id}c</yt:videoid>
-                <youTubeId id='{video_id}c'>{video_id}c</youTubeId>
+                <yt:videoid id='{video_id}'>{video_id}</yt:videoid>
+                <youTubeId id='{video_id}'>{video_id}</youTubeId>
                 <media:credit role='uploader' name='{info['userName']}'>{info['userName']}</media:credit>
             </media:group>
             <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
@@ -2342,17 +2343,55 @@ def serve_user_profile(user_ident):
     xml_response = generate_atom_xml(info, user_ident, base_url)
     return Response(xml_response, mimetype="application/atom+xml")
 
-@app.route("/feeds/api/users/<user_ident>/uploads")
-def serve_user_uploads(user_ident):
+@app.route("/feeds/api/channels/<user_ident>")
+def serve_user_profile_channels(user_ident):
     handle = f"@{user_ident}"
     channel_id = resolve_channel_id(handle)
     if not channel_id:
         return Response("Channel not found", status=404)
     info = get_user_info(channel_id)
+    base_url = f"{request.scheme}://{request.host.split(':')[0]}"
+    xml_response = generate_atom_xml(info, user_ident, base_url)
+    return Response(xml_response, mimetype="application/atom+xml")
+
+@app.route("/feeds/api/users/<user_ident>/uploads")
+def serve_user_uploads(user_ident):
+    handle_or_id = user_ident
+    # Check if it's a handle (starts with "@" or not a channel id)
+    if not user_ident.startswith("UC"):  # All YouTube channel IDs start with "UC"
+        handle_or_id = f"@{user_ident}"
+        channel_id = resolve_channel_id(handle_or_id)
+    else:
+        channel_id = user_ident
+
+    if not channel_id:
+        return Response("Channel not found", status=404)
+
+    info = get_user_info(channel_id)
     uploads = get_uploads(channel_id)
     base_url = f"{request.scheme}://{request.host.split(':')[0]}"
     xml_response = generate_uploads_atom_xml(info, uploads, user_ident, base_url)
     return Response(xml_response, mimetype="application/atom+xml")
+
+@app.route("/users/<user_ident>/uploads")
+def serve_user_uploads2(user_ident):
+    handle_or_id = user_ident
+    # Check if it's a handle (starts with "@" or not a channel id)
+    if not user_ident.startswith("UC"):  # All YouTube channel IDs start with "UC"
+        handle_or_id = f"@{user_ident}"
+        channel_id = resolve_channel_id(handle_or_id)
+    else:
+        channel_id = user_ident
+
+    if not channel_id:
+        return Response("Channel not found", status=404)
+
+    info = get_user_info(channel_id)
+    uploads = get_uploads(channel_id)
+    base_url = f"{request.scheme}://{request.host.split(':')[0]}"
+    xml_response = generate_uploads_atom_xml(info, uploads, user_ident, base_url)
+    return Response(xml_response, mimetype="application/atom+xml")
+
 
 TEMPLATE_PATH = 'player.json'
 CACHE_DIR = 'assets/cache/innertube'
