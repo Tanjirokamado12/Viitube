@@ -16,7 +16,8 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 import xml.etree.ElementTree as ET
 from xml.sax.saxutils import escape
-
+from urllib.parse import unquote, urlparse
+import html
 
 OAUTH2_DEVICE_CODE_URL = 'https://oauth2.googleapis.com/device/code'
 OAUTH2_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -1878,8 +1879,12 @@ class YouTubeSearchXML:
         title = self.escape_xml(video_data.get("title", {}).get("runs", [{}])[0].get("text", ""))
         published_text = video_data.get("publishedTimeText", {}).get("simpleText", "")
         formatted_published = self.parse_relative_date(published_text)
-        author_name = video_data.get("ownerText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}) \
-        .get("commandMetadata", {}).get("webCommandMetadata", {}).get("url", "").replace("/@", "")
+        # Extract and clean uploader name
+        author_raw = video_data.get("ownerText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}) \
+        .get("commandMetadata", {}).get("webCommandMetadata", {}).get("url", "")  # e.g., "/c/L%C3%A9toileNoire01"
+        author_name = author_raw.replace("/c/", "").replace("/@", "")  # remove path prefix
+        author_name = unquote(author_name)  # decode UTF-8 URL encoding
+        author_name = self.escape_xml(author_name)
         author_id = video_data.get("lon<path:subpath>ylineText", {}).get("runs", [{}])[0].get("navigationEndpoint", {}).get("browseEndpoint", {}).get("browseId", "")
         lengthText = video_data.get("lengthText", {}).get("simpleText", "")
         view_count_raw = video_data.get("viewCountText", {}).get("simpleText", "0")
@@ -1986,6 +1991,10 @@ def recently_broadcasted():
 @app.route('/feeds/api/charts/live/events/live_now')
 def live_now():
     return send_file('Test1')
+    
+def generate_device_id():
+    charset = "qwertyuiopasdfghjklzxcvbnm1234567890"
+    return ''.join(random.choices(charset, k=7))
 
 SEARCH_DIR = "assets/search"
 USER_DIR = "assets/cache/Users"
@@ -2149,6 +2158,59 @@ def find_metadata_text(obj: dict | list) -> dict:
     recurse(obj)
     return found
 
+def find_channel_id_in_videocache(user_ident: str) -> str | None:
+    ident = html.unescape(user_ident.strip().lower())  # Normalize and unescape user input
+    handle_pattern = re.compile(rf"@{re.escape(ident)}$", re.IGNORECASE)
+
+    for filename in os.listdir("assets/cache/videoinfo"):
+        if not filename.endswith(".json"):
+            continue
+
+        try:
+            with open(os.path.join("assets/cache/videoinfo", filename), "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            video_details = data.get("videoDetails", {})
+            microformat = data.get("microformat", {}).get("playerMicroformatRenderer", {})
+
+            # Unescape and extract URL
+            owner_url = html.unescape(
+                data.get("ownerProfileUrl", "") or
+                video_details.get("ownerProfileUrl", "") or
+                microformat.get("ownerProfileUrl", "")
+            )
+
+            channel_id = (
+                data.get("channelId") or
+                video_details.get("channelId") or
+                microformat.get("externalChannelId")
+            )
+
+            if not owner_url:
+                continue
+
+            owner_url = owner_url.strip().lower()
+            parsed = urlparse(owner_url)
+            path = html.unescape(unquote(parsed.path.lstrip('/')))  # decode and unescape path
+
+            print(f"Checking: {filename} with url: {owner_url} → path: {path}")
+
+            # Match handle URL
+            if handle_pattern.search(owner_url):
+                print(f"Matched handle! Returning channelId: {channel_id}")
+                return channel_id
+
+            # Match custom path
+            if path == f"c/{ident}" or path == f"user/{ident}" or path == ident:
+                print(f"Matched custom URL path! Returning channelId: {channel_id}")
+                return channel_id
+
+        except Exception as e:
+            print(f"Error in {filename}: {e}")
+            continue
+
+    print("No match found.")
+    return None
 
 def extract_user_info(data: dict, channel_id: str) -> dict:
     header = data.get("header", {}).get("c4TabbedHeaderRenderer", {})
@@ -2261,134 +2323,139 @@ def generate_atom_xml(info: dict, handle: str, base_url: str) -> str:
 
 def generate_uploads_atom_xml(info: dict, uploads: list, handle: str, base_url: str) -> str:
     feed_id = f"{base_url}/feeds/api/users/{handle}/uploads"
+    now = datetime.utcnow().isoformat() + "Z"
     entries = ""
 
     for video in uploads:
         video_id = video.get("videoId")
-        title = escape(video.get("title", {}).get("runs", [{}])[0].get("text", ""))
-        description = escape(video.get("descriptionSnippet", {}).get("runs", [{}])[0].get("text", ""))
+        title = video.get("title", {}).get("runs", [{}])[0].get("text", "")
+        description = video.get("descriptionSnippet", {}).get("runs", [{}])[0].get("text", "")
         duration_str = video.get("lengthText", {}).get("simpleText", "")
         duration_sec = parse_duration_to_seconds(duration_str)
         views_str = video.get("viewCountText", {}).get("simpleText", "")
         views = normalize_views(views_str)
         published_text = video.get("publishedTimeText", {}).get("simpleText", "")
-        published = parse_published_date(published_text)
+        published = parse_published_date(published_text)  # should return ISO8601
         thumbnail = video.get("thumbnail", {}).get("thumbnails", [{}])[-1].get("url", "")
-            
-        entries += f"""<entry>
+
+        entries += f"""
+        <entry>
             <id>{base_url}/feeds/api/videos/{video_id}</id>
-            <youTubeId id='{video_id}'>{video_id}</youTubeId>
-			<published>{published}</published>
-			<updated>{published}</updated>
+            <youTubeId id="{video_id}">{video_id}</youTubeId>
+            <published>{published}</published>
+            <updated>{published}</updated>
             <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>{title}</title>
-            <content type='text'>{description}</content>
+            <title type="text"><![CDATA[{title}]]></title>
+            <content type="text"><![CDATA[{description}]]></content>
             <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{base_url}/feeds/api/videos/{video_id}/related"/>
             <author>
                 <name>{info['userName']}</name>
                 <uri>{base_url}/feeds/api/users/{info['userName']}</uri>
             </author>
             <gd:comments>
-                <gd:feedLink href='{base_url}/feeds/api/videos/{video_id}/comments' countHint='530'/>
+                <gd:feedLink href="{base_url}/feeds/api/videos/{video_id}/comments" countHint="530"/>
             </gd:comments>
             <media:group>
-                <media:category label='-' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='{base_url}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'>{description}</media:description>
+                <media:category label="-" scheme="http://gdata.youtube.com/schemas/2007/categories.cat">-</media:category>
+                <media:content url="{base_url}/channel_fh264_getvideo?v={video_id}" type="video/3gpp" medium="video" expression="full" duration="{duration_sec}" yt:format="3"/>
+                <media:description type="plain"><![CDATA[{description}]]></media:description>
                 <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v={video_id}'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='{duration_sec}'/>
-                <yt:videoid id='{video_id}'>{video_id}</yt:videoid>
-                <youTubeId id='{video_id}'>{video_id}</youTubeId>
-                <media:credit role='uploader' name='{info['userName']}'>{info['userName']}</media:credit>
+                <media:player url="http://www.youtube.com/watch?v={video_id}"/>
+                <media:thumbnail yt:name="hqdefault" url="http://i.ytimg.com/vi/{video_id}/hqdefault.jpg" height="240" width="320" time="00:00:00"/>
+                <media:thumbnail yt:name="poster" url="http://i.ytimg.com/vi/{video_id}/0.jpg" height="240" width="320" time="00:00:00"/>
+                <media:thumbnail yt:name="default" url="http://i.ytimg.com/vi/{video_id}/0.jpg" height="240" width="320" time="00:00:00"/>
+                <yt:duration seconds="{duration_sec}"/>
+                <yt:videoid id="{video_id}">{video_id}</yt:videoid>
+                <youTubeId id="{video_id}">{video_id}</youTubeId>
+                <media:credit role="uploader" name="{info['userName']}">{info['userName']}</media:credit>
             </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
+            <gd:rating average="5" max="5" min="1" numRaters="0" rel="http://schemas.google.com/g/2005#overall"/>
             <yt:statistics favoriteCount="0" viewCount="{views}"/>
             <yt:rating numLikes="0" numDislikes="0"/>
-        </entry>"""
+        </entry>
+        """
 
-    now = datetime.now().isoformat()
     return f"""<?xml version='1.0' encoding='UTF-8'?>
 <feed xmlns='http://www.w3.org/2005/Atom'
-xmlns:media='http://search.yahoo.com/mrss/'
-xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
-xmlns:gd='http://schemas.google.com/g/2005'
-xmlns:yt='http://gdata.youtube.com/schemas/2007'>
-    <id>http://gdata.youtube.com/feeds/api/standardfeeds/us/recently_featured</id>
-    <updated>2010-12-21T18:59:58.000-08:00</updated>
+      xmlns:media='http://search.yahoo.com/mrss/'
+      xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
+      xmlns:gd='http://schemas.google.com/g/2005'
+      xmlns:yt='http://gdata.youtube.com/schemas/2007'>
+    <id>{feed_id}</id>
+    <updated>{now}</updated>
     <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
-    <title type='text'> </title>
+    <title type='text'>Uploads by {handle}</title>
     <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
     <author>
-        <name>YouTube</name>
-        <uri>http://www.youtube.com/</uri>
+        <name>{info['userName']}</name>
+        <uri>{base_url}/feeds/api/users/{info['userName']}</uri>
     </author>
     <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
-    <openSearch:totalResults>25</openSearch:totalResults>
+    <openSearch:totalResults>{len(uploads)}</openSearch:totalResults>
     <openSearch:startIndex>1</openSearch:startIndex>
-    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>{entries}
+    <openSearch:itemsPerPage>{len(uploads)}</openSearch:itemsPerPage>
+    {entries}
 </feed>"""
 
 @app.route("/feeds/api/users/<user_ident>")
+@app.route("/feeds/api/channels/<user_ident>")
 def serve_user_profile(user_ident):
     handle = f"@{user_ident}"
-    channel_id = resolve_channel_id(handle)
+    channel_id = resolve_channel_id(handle) or find_channel_id_in_videocache(user_ident)
+
+    if not channel_id:
+        for filename in os.listdir("assets/cache/videoinfo"):
+            if filename.endswith(".json"):
+                try:
+                    with open(os.path.join("assets/cache/videoinfo", filename), "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    cid = data.get("channelId")
+                    cname = data.get("channelName", "").lstrip("@")
+                    if cname.lower() == user_ident.lower() or cid.lower() == user_ident.lower():
+                        channel_id = cid
+                        break
+                except Exception:
+                    continue
+
     if not channel_id:
         return Response("Channel not found", status=404)
+
     info = get_user_info(channel_id)
-    base_url = f"{request.scheme}://{request.host.split(':')[0]}"
+    base_url = f"{request.scheme}://{request.host}"
     xml_response = generate_atom_xml(info, user_ident, base_url)
     return Response(xml_response, mimetype="application/atom+xml")
 
-@app.route("/feeds/api/channels/<user_ident>")
-def serve_user_profile_channels(user_ident):
-    handle = f"@{user_ident}"
-    channel_id = resolve_channel_id(handle)
-    if not channel_id:
-        return Response("Channel not found", status=404)
-    info = get_user_info(channel_id)
-    base_url = f"{request.scheme}://{request.host.split(':')[0]}"
-    xml_response = generate_atom_xml(info, user_ident, base_url)
-    return Response(xml_response, mimetype="application/atom+xml")
 
 @app.route("/feeds/api/users/<user_ident>/uploads")
-def serve_user_uploads(user_ident):
-    handle_or_id = user_ident
-    # Check if it's a handle (starts with "@" or not a channel id)
-    if not user_ident.startswith("UC"):  # All YouTube channel IDs start with "UC"
-        handle_or_id = f"@{user_ident}"
-        channel_id = resolve_channel_id(handle_or_id)
-    else:
-        channel_id = user_ident
-
-    if not channel_id:
-        return Response("Channel not found", status=404)
-
-    info = get_user_info(channel_id)
-    uploads = get_uploads(channel_id)
-    base_url = f"{request.scheme}://{request.host.split(':')[0]}"
-    xml_response = generate_uploads_atom_xml(info, uploads, user_ident, base_url)
-    return Response(xml_response, mimetype="application/atom+xml")
-
 @app.route("/users/<user_ident>/uploads")
-def serve_user_uploads2(user_ident):
-    handle_or_id = user_ident
-    # Check if it's a handle (starts with "@" or not a channel id)
-    if not user_ident.startswith("UC"):  # All YouTube channel IDs start with "UC"
-        handle_or_id = f"@{user_ident}"
-        channel_id = resolve_channel_id(handle_or_id)
+def serve_user_uploads(user_ident):
+    if not user_ident.startswith("UC"):
+        handle = f"@{user_ident}"
+        channel_id = resolve_channel_id(handle) or find_channel_id_in_videocache(user_ident)
     else:
         channel_id = user_ident
+
+
+    if not channel_id:
+        for filename in os.listdir("assets/cache/videoinfo"):
+            if filename.endswith(".json"):
+                try:
+                    with open(os.path.join("assets/cache/videoinfo", filename), "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    cid = data.get("channelId")
+                    cname = data.get("channelName", "").lstrip("@")
+                    if cname.lower() == user_ident.lower() or cid.lower() == user_ident.lower():
+                        channel_id = cid
+                        break
+                except Exception:
+                    continue
 
     if not channel_id:
         return Response("Channel not found", status=404)
 
     info = get_user_info(channel_id)
     uploads = get_uploads(channel_id)
-    base_url = f"{request.scheme}://{request.host.split(':')[0]}"
+    base_url = f"{request.scheme}://{request.host}"
     xml_response = generate_uploads_atom_xml(info, uploads, user_ident, base_url)
     return Response(xml_response, mimetype="application/atom+xml")
 
@@ -2458,115 +2525,106 @@ def youtube_player():
         "video_url": video_url
     })
 
+# 📁 Define storage paths
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SAVE_PATH = os.path.join(BASE_DIR, "assets")
+CACHE_PATH = os.path.join(SAVE_PATH, "cache", "videoinfo")
 
-# Define the storage directory relative to app.py
-SAVE_PATH = os.path.join(os.path.dirname(__file__), "assets")
 os.makedirs(SAVE_PATH, exist_ok=True)
+os.makedirs(CACHE_PATH, exist_ok=True)
 
-def extract_video_id(request_path):
-    """Extracts the video_id from various URL formats."""
-    match = re.search(r"video_id=([A-Za-z0-9_-]+)", request_path)
-    return match.group(1) if match else None
 
+# ✅ Helper class to fetch video info
+class GetVideoInfo:
+    def build(self, video_id):
+        cache_file = os.path.join(CACHE_PATH, f"{video_id}.json")
+
+        if os.path.exists(cache_file):
+            with open(cache_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+
+        # 🌐 Fetch from YouTube internal API
+        url = "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0'
+        }
+        payload = {
+            "context": {
+                "client": {
+                    "hl": "en",
+                    "gl": "US",
+                    "clientName": "WEB",
+                    "clientVersion": "2.20210714.01.00"
+                }
+            },
+            "videoId": video_id
+        }
+
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code != 200:
+            print(f"[ERROR] Failed to fetch info: {response.status_code}")
+            return {"error": "Failed to fetch video info"}
+
+        try:
+            data = response.json()
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return data
+        except Exception as e:
+            print(f"[ERROR] JSON parse error: {e}")
+            return {"error": str(e)}
+
+
+# 🎥 Download video and fetch info
 def download_video(video_id):
-    """Downloads the video using PyTube if it's not already saved."""
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     yt = YouTube(video_url)
-    
-    # Define video filename and path
+
     video_filename = f"{video_id}.mp4"
     video_path = os.path.join(SAVE_PATH, video_filename)
 
-    if os.path.exists(video_path):
-        return video_path
+    if not os.path.exists(video_path):
+        stream = yt.streams.get_highest_resolution()
+        stream.download(SAVE_PATH, filename=video_filename)
 
-    # Download the highest resolution stream
-    stream = yt.streams.get_highest_resolution()
-    stream.download(SAVE_PATH, filename=video_filename)
-    
+    # 💾 Also get video info
+    GetVideoInfo().build(video_id)
+
     return video_path
 
+
+# 🔍 Extract clean video ID
+def get_clean_video_id():
+    raw_id = request.args.get("video_id", "") or request.args.get("v", "")
+    match = re.match(r"^[A-Za-z0-9_-]{11}", raw_id)
+    return match.group(0) if match else None
+
+
+# 📡 All endpoints below
 @app.route('/get_480', methods=['GET'])
-def get_480():
-    """Handles various endpoint formats and retrieves the requested video."""
-    request_path = request.query_string.decode("utf-8")  # Get the full query string
-    video_id = extract_video_id(request_path)
-
-    if not video_id:
-        return "Missing or invalid video_id parameter", 400
-
-    video_path = download_video(video_id)
-
-    return send_file(video_path, as_attachment=True)
-    
 @app.route('/exp_hd', methods=['GET'])
-def exp_hd():
-    """Handles various endpoint formats and retrieves the requested video."""
-    request_path = request.query_string.decode("utf-8")  # Get the full query string
-    video_id = extract_video_id(request_path)
-
-    if not video_id:
-        return "Missing or invalid video_id parameter", 400
-
-    video_path = download_video(video_id)
-
-    return send_file(video_path, as_attachment=True)
-
 @app.route('/channel_fh264_getvideo', methods=['GET'])
-def channel_fh264_getvideo():
-    """Handles various endpoint formats and retrieves the requested video."""
-    video_id = request.args.get("video_id") or request.args.get("v")  # Handle both cases
-
-    if not video_id:
-        return "Missing or invalid video_id parameter", 400
-
-    video_path = download_video(video_id)
-
-    return send_file(video_path, as_attachment=True)
-
-def generate_device_id():
-    charset = "qwertyuiopasdfghjklzxcvbnm1234567890"
-    return ''.join(random.choices(charset, k=7))
-
 @app.route('/geeeeeeeeeeeeet_video', methods=['GET'])
-def geeeeeeeeeeeeet_video():
-    """Handles various endpoint formats and retrieves the requested video."""
-    request_path = request.query_string.decode("utf-8")  # Get the full query string
-    video_id = extract_video_id(request_path)
-
-    if not video_id:
-        return "Missing or invalid video_id parameter", 400
-
-    video_path = download_video(video_id)
-
-    return send_file(video_path, as_attachment=True)
-
 @app.route('/geeeeeeeeeeeet_video', methods=['GET'])
-def geeeeeeeeeeeet_video():
-    """Handles various endpoint formats and retrieves the requested video."""
-    request_path = request.query_string.decode("utf-8")  # Get the full query string
-    video_id = extract_video_id(request_path)
-
-    if not video_id:
-        return "Missing or invalid video_id parameter", 400
-
-    video_path = download_video(video_id)
-
-    return send_file(video_path, as_attachment=True)
-
 @app.route('/geeeeeeeeeeeeeet_video', methods=['GET'])
-def geeeeeeeeeeeeeet_video():
-    """Handles various endpoint formats and retrieves the requested video."""
-    request_path = request.query_string.decode("utf-8")  # Get the full query string
-    video_id = extract_video_id(request_path)
+def serve_video():
+    video_id = get_clean_video_id()
 
     if not video_id:
         return "Missing or invalid video_id parameter", 400
 
-    video_path = download_video(video_id)
+    try:
+        video_path = download_video(video_id)
+        return send_file(video_path, as_attachment=True)
+    except Exception as e:
+        print(f"[SERVER ERROR] {e}")
+        return "Internal server error", 500
 
-    return send_file(video_path, as_attachment=True)
-
+# Flask Routes
+@app.route('/youtube/v3/activities')
+def activites():
+    return send_file('browse.json', mimetype='application/x-shockwave-flash')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
