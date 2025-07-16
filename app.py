@@ -264,7 +264,7 @@ def deviceCode():
         'expires_in': expires_in,
         'message': message
     })
-    print(message)
+    #print(message)
 @app.route('/o/oauth2/device/code/status', methods=['POST'])
 def checkStatus():
     device_code = request.json.get('device_code')
@@ -1212,12 +1212,12 @@ def load_cache(oauth_token):
 
         # Validate cache structure
         if "timestamp" not in cache_content or "data" not in cache_content:
-            print("Cache file is invalid or outdated. Refreshing watch history...")
+            #print("Cache file is invalid or outdated. Refreshing watch history...")
             return fetch_watch_history(oauth_token)
 
         # If cache is older than 5 hours, refresh it at next request
         if time.time() - cache_content["timestamp"] > CACHE_EXPIRATION:
-            print("Cache expired. Fetching new watch history...")
+            #print("Cache expired. Fetching new watch history...")
             return fetch_watch_history(oauth_token)
 
         return cache_content["data"]  # Use cached data if valid
@@ -1341,10 +1341,10 @@ def fetch_watch_later(oauth_token):
         watch_later_data = response.json()
         save_watch_later_cache(watch_later_data)
         return watch_later_data
-        print(response.text)
+        #print(response.text)
     else:
-        print(f"Error fetching Watch Later list: {response.status_code}")
-        print(response.text)
+        #print(f"Error fetching Watch Later list: {response.status_code}")
+        #print(response.text)
         return None
 
 def save_watch_later_cache(data):
@@ -1361,15 +1361,15 @@ def load_watch_later_cache(oauth_token):
             try:
                 cache_content = json.load(f)
             except json.JSONDecodeError:
-                print("Cache file corrupted, refreshing data...")
+                #print("Cache file corrupted, refreshing data...")
                 return fetch_watch_later(oauth_token)
 
             if "timestamp" not in cache_content or "data" not in cache_content:
-                print("Cache file invalid, refreshing...")
+                #print("Cache file invalid, refreshing...")
                 return fetch_watch_later(oauth_token)
 
             if time.time() - cache_content["timestamp"] > CACHE_EXPIRATION:
-                print("Cache expired. Fetching new Watch Later data...")
+                #print("Cache expired. Fetching new Watch Later data...")
                 return fetch_watch_later(oauth_token)
 
             return cache_content["data"]
@@ -1808,7 +1808,7 @@ class YouTubeSearchAPI:
             response.raise_for_status()  # Raise error for non-200 responses
             return response.json()
         except requests.exceptions.RequestException as e:
-            print(f"Error fetching YouTube search results: {e}")
+            #print(f"Error fetching YouTube search results: {e}")
             return None
 
 def get_cached_results(query):
@@ -2004,6 +2004,7 @@ os.makedirs(USER_DIR, exist_ok=True)
 def load_json_if_fresh(path: str, max_age: timedelta) -> dict | None:
     if not os.path.exists(path):
         return None
+
     file_time = datetime.fromtimestamp(os.path.getmtime(path))
     if datetime.now() - file_time < max_age:
         try:
@@ -2011,13 +2012,14 @@ def load_json_if_fresh(path: str, max_age: timedelta) -> dict | None:
                 content = f.read()
             return json.loads(content)
         except json.JSONDecodeError:
-            print(f"⚠️ Corrupted JSON file: {path}")
+            # print(f"⚠️ Corrupted JSON file: {path}")
             try:
                 os.remove(path)
             except Exception as e:
-                print(f"⚠️ Failed to delete corrupted file: {e}")
+                # print(f"⚠️ Failed to delete corrupted file: {e}")
+                pass  # 👈 This line was missing
     return None
-
+    
 def fetch_youtubei(endpoint: str, payload: dict) -> dict:
     url = f"https://www.youtube.com/youtubei/v1/{endpoint}"
     headers = {
@@ -2159,7 +2161,7 @@ def find_metadata_text(obj: dict | list) -> dict:
     return found
 
 def find_channel_id_in_videocache(user_ident: str) -> str | None:
-    ident = html.unescape(user_ident.strip().lower())  # Normalize and unescape user input
+    ident = user_ident.strip().lower()
     handle_pattern = re.compile(rf"@{re.escape(ident)}$", re.IGNORECASE)
 
     for filename in os.listdir("assets/cache/videoinfo"):
@@ -2173,8 +2175,7 @@ def find_channel_id_in_videocache(user_ident: str) -> str | None:
             video_details = data.get("videoDetails", {})
             microformat = data.get("microformat", {}).get("playerMicroformatRenderer", {})
 
-            # Unescape and extract URL
-            owner_url = html.unescape(
+            owner_url = (
                 data.get("ownerProfileUrl", "") or
                 video_details.get("ownerProfileUrl", "") or
                 microformat.get("ownerProfileUrl", "")
@@ -2186,30 +2187,41 @@ def find_channel_id_in_videocache(user_ident: str) -> str | None:
                 microformat.get("externalChannelId")
             )
 
-            if not owner_url:
+            display_name = (
+                video_details.get("author", "") or
+                microformat.get("author", "")
+            ).strip().lower()
+
+            if not owner_url and not display_name:
                 continue
 
-            owner_url = owner_url.strip().lower()
-            parsed = urlparse(owner_url)
-            path = html.unescape(unquote(parsed.path.lstrip('/')))  # decode and unescape path
+            # Decode and normalize URL path
+            parsed = urlparse(owner_url.lower())
+            path = unquote(parsed.path).lstrip('/')
+            path = path.lower()
 
-            print(f"Checking: {filename} with url: {owner_url} → path: {path}")
+            #print(f"Checking: {filename} with url: {owner_url} → path: {path}")
 
-            # Match handle URL
-            if handle_pattern.search(owner_url):
-                print(f"Matched handle! Returning channelId: {channel_id}")
+            # Match @handle
+            if handle_pattern.search(path):
+                #print(f"Matched handle! Returning channelId: {channel_id}")
                 return channel_id
 
             # Match custom path
-            if path == f"c/{ident}" or path == f"user/{ident}" or path == ident:
-                print(f"Matched custom URL path! Returning channelId: {channel_id}")
+            if path in {f"c/{ident}", f"user/{ident}", ident}:
+                #print(f"Matched custom URL path! Returning channelId: {channel_id}")
+                return channel_id
+
+            # Match display name
+            if display_name == ident:
+                #print(f"Matched display name! Returning channelId: {channel_id}")
                 return channel_id
 
         except Exception as e:
-            print(f"Error in {filename}: {e}")
+            #print(f"Error in {filename}: {e}")
             continue
 
-    print("No match found.")
+    #print("No match found.")
     return None
 
 def extract_user_info(data: dict, channel_id: str) -> dict:
@@ -2563,7 +2575,7 @@ class GetVideoInfo:
 
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code != 200:
-            print(f"[ERROR] Failed to fetch info: {response.status_code}")
+            #print(f"[ERROR] Failed to fetch info: {response.status_code}")
             return {"error": "Failed to fetch video info"}
 
         try:
@@ -2572,7 +2584,7 @@ class GetVideoInfo:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             return data
         except Exception as e:
-            print(f"[ERROR] JSON parse error: {e}")
+            #print(f"[ERROR] JSON parse error: {e}")
             return {"error": str(e)}
 
 
@@ -2618,7 +2630,7 @@ def serve_video():
         video_path = download_video(video_id)
         return send_file(video_path, as_attachment=True)
     except Exception as e:
-        print(f"[SERVER ERROR] {e}")
+        #print(f"[SERVER ERROR] {e}")
         return "Internal server error", 500
 
 # Flask Routes
