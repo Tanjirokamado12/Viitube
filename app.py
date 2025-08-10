@@ -80,8 +80,8 @@ app = Flask(__name__)
 @app.route('/deviceregistration/v1/devices', methods=['POST'])
 def upload_hex():
     return jsonify({
-    "id": "amogus",
-    "key": "AP+lc79/lqV58X9FLDdn7SiOzH8hDb1ItXMmm25Cb4YDLWZkI+gXBiwwOvcssAY"
+    "id": "AP+lc78BjKeJW5h+DRL/JIQA7RWj1iq8KzTeYzOxDe9dV6OX/LraIwUX2JiV91A",
+    "key": "AP+lc7+4QeLHuvmoYL4IiyU0GJDP1Ub8iWm786sTXD1z+g9MSOULGBkeXdCvYsbQpxc2gxd1shAzvqU29or/Osmh0NRUfliReepIKtJozUju+1Bmre1a+s/5Pj69F51DpbFi427qLrH6tQ"
 }), 200
 
 # === CONFIG ===
@@ -213,7 +213,6 @@ def viitube_playlist_fetch_video_details(video_id):
                 try:
                     resp = json.load(f)  # Try loading the JSON data
                 except json.JSONDecodeError as e:
-                    print(f"Error loading JSON from cache: {e}")
                     resp = None
                     # Handle further, such as re-fetching the data
         else:
@@ -223,10 +222,8 @@ def viitube_playlist_fetch_video_details(video_id):
                 response = requests.post(f"{VIITUBE_PLAYLiST_CONTENT_YOUTUBEI_URL}/player", headers=HEADERS, json=payload)
                 resp = response.json()  # Attempt to parse JSON response
             except requests.exceptions.RequestException as e:
-                print(f"Request failed: {e}")
                 return None  # Handle network error, like timeout or unreachable URL
             except json.JSONDecodeError as e:
-                print(f"Error decoding JSON from response: {e}")
                 return None  # Handle error in case response is not valid JSON
             
             # Save to cache
@@ -262,7 +259,6 @@ def viitube_playlist_fetch_video_details(video_id):
         }
 
     except Exception as e:
-        print(f"An unexpected error occurred: {e}")
         return None
         
 # === XML Generator ===
@@ -323,6 +319,7 @@ def viitube_playlist_generate_video_entry(video, base_url):
 		<yt:statistics favoriteCount='0' viewCount='{video['viewCount']}'/>
 		<yt:rating numDislikes='{video['dislikeCount']}' numLikes='{video['likeCount']}'/>
 		<yt:position>{video['position']}</yt:position>
+        
 	</entry>"""
 
 def viitube_playlist_generate_xml_feed(videos, base_url, playlist_id, playlist_title):
@@ -446,8 +443,9 @@ Innertube_CACHE_DIR = 'assets/cache/innertube'
 PLACEHOLDER = b'thevideoiid'  # must be 11 bytes for exact replacement
 
 @app.route('/youtubei/v1/player', methods=['GET', 'POST'])
+@app.route('/youtube/v3/players', methods=['GET', 'POST'])
 def youtube_player():
-    video_id = request.args.get('id', '').strip()
+    video_id = request.args.get('id', '').strip() 
 
     if not video_id:
         return jsonify({"error": "Missing 'id' parameter"}), 400
@@ -544,7 +542,6 @@ class GetVideoInfo:
 
         response = requests.post(url, json=payload, headers=headers)
         if response.status_code != 200:
-            #print(f"[ERROR] Failed to fetch info: {response.status_code}")
             return {"error": "Failed to fetch video info"}
 
         try:
@@ -553,7 +550,6 @@ class GetVideoInfo:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             return data
         except Exception as e:
-            #print(f"[ERROR] JSON parse error: {e}")
             return {"error": str(e)}
 
 
@@ -600,13 +596,20 @@ def serve_video():
         video_path = download_video(video_id)
         return send_file(video_path, as_attachment=True)
     except Exception as e:
-        #print(f"[SERVER ERROR] {e}")
         return "Internal server error", 500
 
 @app.route('/wiitv')
 def wiitv():
     return send_file('swf/leanbacklite_wii.swf', mimetype='application/x-shockwave-flash')
-  
+
+@app.route('/s/tv/wii/config')
+def config():
+    return send_file('swf/yt_lbl.swf', mimetype='application/x-shockwave-flash')
+    
+@app.route('/youtube/v3/activities')
+def river1():
+    return send_file('Mobile/browse.json')
+ 
 @app.route('/apiplayer')
 def apiloader():
     return send_from_directory('swf', 'apiloader.swf')
@@ -615,14 +618,158 @@ def apiloader():
 @app.route('/videoplayback')
 def videoplayback():
     return send_from_directory('swf', 'apiplayer.swf')
-    
+  
+@app.route('/leanbacklite')
 @app.route('/tv')
 def tv():
     return send_from_directory('swf', 'leanbacklite_v3.swf')
    
+@app.route('/device_204')
 @app.route('/leanback_ajax')
 def leanback_ajax():
     return send_from_directory('swf', 'leanback_ajax.json')
+    
+def river_clean_xml_text(text):
+    illegal_xml_re = re.compile(
+        r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]'
+    )
+    if text:
+        return illegal_xml_re.sub('', text)
+    return ''
+
+Startofxml = """<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:media="http://search.yahoo.com/mrss/"
+      xmlns:yt="http://gdata.youtube.com/schemas/2007"
+      xmlns:openSearch="http://a9.com/-/spec/opensearchrss/1.0/">
+  <openSearch:totalResults>20</openSearch:totalResults>
+  <link rel="next" href="..."/>"""
+
+ending = """</feed>"""
+
+xmltemplate = """    <entry>
+    <link>
+      <entry>
+        <id>tag:youtube.com,2008:video:{videoId}</id>
+        <title>{title}</title>
+        <published>{published}</published>
+        <author><name>{author}</name></author>
+        <media:group>
+          <media:thumbnail yt:name="mqdefault" url="http://i.ytimg.com/vi/{videoId}/mqdefault.jpg"/>
+          <yt:duration seconds="{duration}"/>
+          <yt:uploaderId>EE{channelId}</yt:uploaderId>
+          <media:description>{description}</media:description>
+          <yt:videoid>{videoId}</yt:videoid>
+        </media:group>
+        <yt:statistics viewCount="{viewCount}"/>
+        <yt:hd/>
+      </entry>
+    </link>
+  </entry>"""
+
+CACHE_PATH = os.path.join("assets", "cache", "users", "river.xml")
+
+@app.route('/feeds/api/users/default/river', methods=['GET'])
+def river():
+    oauth_token = request.args.get('oauth_token')
+
+    if not oauth_token:
+        # Return cached XML if exists
+        if os.path.exists(CACHE_PATH):
+            with open(CACHE_PATH, "r", encoding="utf-8") as f:
+                cached_xml = f.read()
+            return Response(cached_xml, content_type='application/xml')
+        else:
+            return Response("No cached data available and no oauth_token provided.", status=404)
+
+    try:
+        creds = Credentials(oauth_token)
+        youtube = build('youtube', 'v3', credentials=creds)
+
+        subs_request = youtube.subscriptions().list(
+            part='snippet',
+            mine=True,
+            maxResults=50
+        )
+        subs_response = subs_request.execute()
+        channel_ids = [item['snippet']['resourceId']['channelId'] for item in subs_response['items']]
+
+        seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+        published_after = seven_days_ago.isoformat()
+
+        all_entries = []
+        max_videos_total = 20
+        videos_fetched = 0
+
+        for channel_id in channel_ids:
+            if videos_fetched >= max_videos_total:
+                break
+
+            search_request = youtube.search().list(
+                part='snippet',
+                channelId=channel_id,
+                maxResults=10,
+                order='date',
+                publishedAfter=published_after,
+                type='video'
+            )
+            search_response = search_request.execute()
+
+            video_ids = [item['id']['videoId'] for item in search_response['items']]
+            if not video_ids:
+                continue
+
+            videos_request = youtube.videos().list(
+                part='contentDetails,snippet,statistics',
+                id=','.join(video_ids)
+            )
+            videos_response = videos_request.execute()
+
+            for video in videos_response['items']:
+                if videos_fetched >= max_videos_total:
+                    break
+
+                snippet = video['snippet']
+                stats = video.get('statistics', {})
+                content = video['contentDetails']
+
+                video_id = video['id']
+                title = snippet['title']
+                published = snippet['publishedAt']
+                author = snippet['channelTitle']
+                channel_id = snippet['channelId']
+                description = snippet.get('description', '')
+
+                duration_iso = content['duration']
+                duration_seconds = int(isodate.parse_duration(duration_iso).total_seconds())
+
+                view_count = stats.get('viewCount', '0')
+
+                entry = xmltemplate.format(
+                    videoId=river_clean_xml_text(video_id),
+                    title=river_clean_xml_text(title),
+                    published=river_clean_xml_text(published),
+                    author=river_clean_xml_text(author),
+                    duration=duration_seconds,
+                    channelId=river_clean_xml_text(channel_id),
+                    description=river_clean_xml_text(description),
+                    viewCount=view_count
+                )
+                all_entries.append(entry)
+
+                videos_fetched += 1
+
+        full_xml = Startofxml + "\n".join(all_entries) + ending
+
+        # Save fresh XML to cache
+        os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
+        with open(CACHE_PATH, "w", encoding="utf-8") as f:
+            f.write(full_xml)
+
+        return Response(full_xml, content_type='application/xml')
+
+    except Exception as e:
+        return Response(f"Error: {str(e)}", status=500)
+
 
 PROFILE_PICTURE_DIR = './assets/cache/pfp'
 os.makedirs(PROFILE_PICTURE_DIR, exist_ok=True)
@@ -648,7 +795,6 @@ def get_channel_pfp_url(channel_id):
         else:
             return None
     except Exception as e:
-        print(f"Error fetching channel pfp URL: {e}")
         return None
 
 def save_pfp(channel_id):
@@ -688,16 +834,16 @@ def serve_pfp(channel_id):
 
 
 # Constants and cache dirs
-CHANNELINFO_CACHE = Path("./assets/cache/channelinfo")
-CHANNEL_SEARCH_DIR = Path("./assets/cache/search")
-CHANNELINFO_CACHE.mkdir(parents=True, exist_ok=True)
-CHANNEL_SEARCH_DIR.mkdir(parents=True, exist_ok=True)
+MOBILE_CHANNEL_INFO_CACHE = Path("./assets/cache/channelinfo")
+MOBILE_CHANNEL_SEARCH = Path("./assets/cache/search")
+MOBILE_CHANNEL_INFO_CACHE.mkdir(parents=True, exist_ok=True)
+MOBILE_CHANNEL_SEARCH.mkdir(parents=True, exist_ok=True)
 
-YOUTUBEI_BROWSE_URL = "https://www.youtube.com/youtubei/v1/browse"
-YOUTUBEI_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search"
-CLIENT_VERSION = "2.20230801.00.00"
-MAX_RETRIES = 3
-RETRY_DELAY = 1  # seconds
+MOBILE_YOUTUBEI_BROWSE_URL = "https://www.youtube.com/youtubei/v1/browse"
+MOBILE_YOUTUBEI_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search"
+MOBILE_CLIENT_VERSION = "2.20230801.00.00"
+MOBILE_MAX_RETRIES = 3
+MOBILE_RETRY_DELAY = 1  # seconds
 
 HEADERS = {
     "Content-Type": "application/json",
@@ -707,66 +853,65 @@ HEADERS = {
         "Chrome/115.0.0.0 Safari/537.36"
     ),
     "X-Youtube-Client-Name": "1",
-    "X-Youtube-Client-Version": CLIENT_VERSION,
+    "X-Youtube-Client-Version": MOBILE_CLIENT_VERSION,
     "Origin": "https://www.youtube.com"
 }
 
-def get_cache_path_channelinfo(channel_id):
-    return CHANNELINFO_CACHE / f"{channel_id}.json"
+def mobile_get_cache_path_channelinfo(channel_id):
+    return MOBILE_CHANNEL_INFO_CACHE / f"{channel_id}.json"
 
-def get_cache_path_search(handle):
+def mobile_get_cache_path_search(handle):
     sanitized = handle.lower().lstrip("@").replace(" ", "_")
-    return CHANNEL_SEARCH_DIR / f"{sanitized}.json"
+    return MOBILE_CHANNEL_SEARCH / f"{sanitized}.json"
 
-def is_cache_valid(path):
+def mobile_is_cache_valid(path):
     if not path.exists():
         return False
     age_hours = (time.time() - path.stat().st_mtime) / 3600
     return age_hours < 48  # 48 hours cache expiry
 
-def post_with_retries(url, headers, json_payload):
-    for attempt in range(1, MAX_RETRIES + 1):
+def mobile_post_with_retries(url, headers, json_payload):
+    for attempt in range(1, MOBILE_MAX_RETRIES + 1):
         try:
             response = requests.post(url, headers=headers, json=json_payload, timeout=10)
             response.raise_for_status()
             return response.json()
         except (requests.RequestException, json.JSONDecodeError) as e:
-            print(f"Request attempt {attempt} failed: {e}")
-            if attempt < MAX_RETRIES:
-                time.sleep(RETRY_DELAY * attempt)
+            if attempt < MOBILE_MAX_RETRIES:
+                time.sleep(MOBILE_RETRY_DELAY * attempt)
             else:
                 raise
 
-def fetch_channel_info(channel_id):
+def mobile_fetch_channel_info(channel_id):
     payload = {
         "context": {
             "client": {
                 "clientName": "WEB",
-                "clientVersion": CLIENT_VERSION
+                "clientVersion": MOBILE_CLIENT_VERSION
             }
         },
         "browseId": channel_id
     }
-    return post_with_retries(YOUTUBEI_BROWSE_URL, HEADERS, payload)
+    return mobile_post_with_retries(MOBILE_YOUTUBEI_BROWSE_URL, HEADERS, payload)
 
-def fetch_search_results(handle):
+def mobile_fetch_search_results(handle):
     payload = {
         "context": {
             "client": {
                 "clientName": "WEB",
-                "clientVersion": CLIENT_VERSION
+                "clientVersion": MOBILE_CLIENT_VERSION
             }
         },
         "query": handle,
         "params": "EgIQAg%3D%3D"  # This filters the search to channels only
     }
-    return post_with_retries(YOUTUBEI_SEARCH_URL, HEADERS, payload)
+    return mobile_post_with_retries(MOBILE_YOUTUBEI_SEARCH_URL, HEADERS, payload)
 
 
-def normalize_handle(handle: str) -> str:
+def mobile_normalize_handle(handle: str) -> str:
     return handle.lower().lstrip("@")
 
-def parse_number(text):
+def mobile_parse_number(text):
     if not text or text == "0":
         return "0"
     text = text.lower().replace("subscribers", "").replace("videos", "").strip()
@@ -783,7 +928,7 @@ def parse_number(text):
     except Exception:
         return "0"
 
-def parse_channel_data(data):
+def mobile_parse_channel_data(data):
     try:
         header = data.get("header", {}).get("pageHeaderRenderer", {})
 
@@ -816,9 +961,9 @@ def parse_channel_data(data):
         description = data.get("metadata", {}).get("channelMetadataRenderer", {}).get("description", "0")
         channel_id = data.get("metadata", {}).get("channelMetadataRenderer", {}).get("externalId", "0")
 
-        subscribers_num = parse_number(subscribers)
-        uploads_num = parse_number(total_uploads)
-        total_views_num = parse_number(total_views_text)
+        subscribers_num = mobile_parse_number(subscribers)
+        uploads_num = mobile_parse_number(total_uploads)
+        total_views_num = mobile_parse_number(total_views_text)
 
         return {
             "channel_id": channel_id,
@@ -832,32 +977,33 @@ def parse_channel_data(data):
         }
 
     except Exception as e:
-        print(f"Error parsing channel data: {e}")
         return {}
 
-def search_channel_handle(handle):
-    cache_path = get_cache_path_search(handle)
+def mobile_search_channel_handle(handle):
+    cache_path = mobile_get_cache_path_search(handle)
 
     data = None
-    if is_cache_valid(cache_path):
+    if mobile_is_cache_valid(cache_path):
         try:
             with open(cache_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
         except json.JSONDecodeError:
-            print(f"Cache file corrupted: {cache_path}. Refetching data.")
             # Optionally delete corrupted cache file
             try:
                 os.remove(cache_path)
-            except OSError as e:
-                print(f"Error deleting corrupted cache file: {e}")
+            except OSError:
+                # Could log the error here or silently ignore
+                pass
+            data = None  # or handle re-fetching the data
+    else:
+        data = None  # Cache invalid, handle accordingly
 
     if data is None:
-        print(f"Searching YouTube for handle: {handle}")
-        data = fetch_search_results(handle)
+        data = mobile_fetch_search_results(handle)
         with open(cache_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-    norm_handle = normalize_handle(handle)
+    norm_handle = mobile_normalize_handle(handle)
 
     try:
         sections = data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"]
@@ -881,45 +1027,43 @@ def search_channel_handle(handle):
                     return channel.get("channelId")
 
     except Exception as e:
-        print(f"Error parsing search results: {e}")
+        pass
 
     return None
 
 
-def get_channel_info(channel_id):
-    cache_path = get_cache_path_channelinfo(channel_id)
+def mobile_get_channel_info(channel_id):
+    cache_path = mobile_get_cache_path_channelinfo(channel_id)
 
-    if is_cache_valid(cache_path):
+    if mobile_is_cache_valid(cache_path):
         with open(cache_path, "r", encoding="utf-8") as f:
             data = json.load(f)
     else:
-        print(f"Fetching fresh info for channel ID: {channel_id}")
-        data = fetch_channel_info(channel_id)
+        data = mobile_fetch_channel_info(channel_id)
         with open(cache_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
-    return parse_channel_data(data)
+    return mobile_parse_channel_data(data)
 
-def get_info_by_handle(handle):
+def mobile_get_info_by_handle(handle):
     if handle.startswith("UC") and len(handle) == 24:
-        return get_channel_info(handle)
+        return mobile_get_channel_info(handle)
     else:
-        channel_id = search_channel_handle(handle)
+        channel_id = mobile_search_channel_handle(handle)
         if not channel_id:
-            print(f"No channel found for handle '{handle}'")
             return None
-        return get_channel_info(channel_id)
+        return mobile_get_channel_info(channel_id)
 
 @app.route("/feeds/api/channels/<handle>", methods=["GET"])
 @app.route("/feeds/api/users/<handle>", methods=["GET"])
-def user_info(handle):
-    info = get_info_by_handle(handle)
+def mobile_user_info(handle):
+    info = mobile_get_info_by_handle(handle)
     if not info:
         return Response("Channel not found", status=404, mimetype="text/plain")
 
     base_url = f"{request.scheme}://{request.host}"
 
-    def xml_escape(text):
+    def mobile_xml_escape(text):
         if not text:
             return ""
         return (text.replace("&", "&amp;")
@@ -934,36 +1078,36 @@ def user_info(handle):
     xmlns:gd='http://schemas.google.com/g/2005'
     xmlns:yt='http://gdata.youtube.com/schemas/2007'
     xmlns:media='http://search.yahoo.com/mrss/' gd:etag='W/&quot;D0YMQX47eCp7I2A9XRdbEkQ.&quot;'>
-    <id>tag:youtube.com,2008:user:{xml_escape(info.get('channel_id', '0'))}</id>
+    <id>tag:youtube.com,2008:user:{mobile_xml_escape(info.get('channel_id', '0'))}</id>
     <published>2007-10-11T09:27:42.000Z</published>
     <updated>2014-12-11T10:53:00.000Z</updated>
     <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#userProfile'/>
     <category scheme='http://gdata.youtube.com/schemas/2007/channeltypes.cat' term='GURU'/>
-    <title>{xml_escape(info.get('name', '0'))}</title>
-    <summary>{xml_escape(info.get('description', ''))}</summary>
-    <link rel='alternate' type='text/html' href='http://www.youtube.com/channel/{xml_escape(info.get('channel_id', '0'))}'/>
-    <link rel='self' type='applicatio0tom+xml' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('channel_id', '0'))}?v=2'/>
+    <title>{mobile_xml_escape(info.get('name', '0'))}</title>
+    <summary>{mobile_xml_escape(info.get('description', ''))}</summary>
+    <link rel='alternate' type='text/html' href='http://www.youtube.com/channel/{mobile_xml_escape(info.get('channel_id', '0'))}'/>
+    <link rel='self' type='applicatio0tom+xml' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('channel_id', '0'))}?v=2'/>
     <author>
-        <name>{xml_escape(info.get('name', '0'))}</name>
-        <uri>{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}</uri>
-        <yt:userId>{xml_escape(info.get('channel_id', '0'))}</yt:userId>
+        <name>{mobile_xml_escape(info.get('name', '0'))}</name>
+        <uri>{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}</uri>
+        <yt:userId>{mobile_xml_escape(info.get('channel_id', '0'))}</yt:userId>
     </author>
-    <yt:channelId>{xml_escape(info.get('channel_id', '0'))}</yt:channelId>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.subscriptions' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/subscriptions?v=2' countHint='377'/>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.liveevent' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/live/events?v=2' countHint='0'/>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.favorites' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/favorites?v=2' countHint='99'/>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.contacts' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/contacts?v=2' countHint='284'/>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.inbox' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/inbox?v=2'/>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.playlists' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/playlists?v=2'/>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.uploads' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/uploads?v=2' countHint='321'/>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.newsubscriptionvideos' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/newsubscriptionvideos?v=2'/>
-    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.watchwhileactivity' href='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('handle', '0'))}/newsubscriptionvideos?v=2'/>
+    <yt:channelId>{mobile_xml_escape(info.get('channel_id', '0'))}</yt:channelId>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.subscriptions' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/subscriptions?v=2' countHint='377'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.liveevent' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/live/events?v=2' countHint='0'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.favorites' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/favorites?v=2' countHint='99'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.contacts' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/contacts?v=2' countHint='284'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.inbox' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/inbox?v=2'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.playlists' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/playlists?v=2'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.uploads' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/uploads?v=2' countHint='321'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.newsubscriptionvideos' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/newsubscriptionvideos?v=2'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.watchwhileactivity' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('handle', '0'))}/newsubscriptionvideos?v=2'/>
     <yt:googlePlusUserId>105395577935858592015</yt:googlePlusUserId>
     <yt:location>NL</yt:location>
-    <yt:statistics lastWebAccess='1970-01-01T00:00:00.000Z' subscriberCount='{xml_escape(info.get('subscribers', '0'))}' videoWatchCount='0' viewCount='0' totalUploadViews='{xml_escape(info.get('total_uploads', '0'))}'/>
-    <media:thumbnail url='{xml_escape(base_url)}/feeds/api/users/{xml_escape(info.get('channel_id', '0'))}/icon'/>
-    <yt:userId>{xml_escape(info.get('channel_id', '0'))}</yt:userId>
-    <yt:username display='{xml_escape(info.get('name', '0'))}'>{xml_escape(info.get('name', '0'))}</yt:username>
+    <yt:statistics lastWebAccess='1970-01-01T00:00:00.000Z' subscriberCount='{mobile_xml_escape(info.get('subscribers', '0'))}' videoWatchCount='0' viewCount='0' totalUploadViews='{mobile_xml_escape(info.get('total_uploads', '0'))}'/>
+    <media:thumbnail url='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('channel_id', '0'))}/icon'/>
+    <yt:userId>{mobile_xml_escape(info.get('channel_id', '0'))}</yt:userId>
+    <yt:username display='{mobile_xml_escape(info.get('name', '0'))}'>{mobile_xml_escape(info.get('name', '0'))}</yt:username>
 </entry>"""
 
     return Response(xml_response, mimetype="application/xml")
@@ -997,7 +1141,7 @@ def deviceCode():
         'expires_in': expires_in,
         'message': message
     })
-    #print(message)
+
 @app.route('/o/oauth2/device/code/status', methods=['POST'])
 def checkStatus():
     device_code = request.json.get('device_code')
@@ -1612,6 +1756,12 @@ def get_video_xml(video_id):
     # Attempt to extract both date and upload time if possible
     upload_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("uploadDate", "")
     publish_time_str = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
+    title_esc = escape(title)
+    description_esc = escape(description)
+    author_esc = escape(author)
+    view_count_esc = escape(view_count)
+    duration_esc = escape(duration)
+
 
     # Combine with a default time if no time is given
     if publish_time_str:
@@ -1626,81 +1776,100 @@ def get_video_xml(video_id):
     # Format as RFC3339 (ISO 8601)
     published_time = published_dt.isoformat().replace("+00:00", "Z")
 
-    # Build XML content
+# Use escaped variables inside the XML string:
     xmlcontent = f"""<?xml version='1.0' encoding='UTF-8'?>
-        <entry>
-            <id>http://{baseurl}/feeds/api/videos/{video_id}</id>
+    <entry>
+        <id>http://{baseurl}/feeds/api/videos/{video_id}</id>
+        <youTubeId id='{video_id}'>{video_id}</youTubeId>
+        <published>{published_time}</published>
+        <updated>{published_time}</updated>
+        <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="People &amp; Blogs" term="People &amp; Blogs">People &amp; Blogs</category>
+        <title type='text'>{title_esc}</title>
+        <content type='text'>{description_esc}</content>
+        <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://{baseurl}/feeds/api/videos/{video_id}/related"/>
+        <author>
+            <name>{author_esc}</name>
+            <uri>http://{baseurl}/feeds/api/users/{author_esc}</uri>
+        </author>
+        <gd:comments>
+            <gd:feedLink href='http://{baseurl}/feeds/api/videos/{video_id}/comments' countHint='530'/>
+        </gd:comments>
+        <media:group>
+            <media:category label='People &amp; Blogs' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>People &amp; Blogs</media:category>
+            <media:content url='http://{baseurl}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+            <media:content url='http://{baseurl}/get_480?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/>
+            <media:description type='plain'>{description_esc}</media:description>
+            <media:keywords>-</media:keywords>
+            <media:player url='http://www.youtube.com/watch?v={video_id}'/>
+            <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+            <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+            <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
+            <yt:duration seconds='{duration_esc}'/>
+            <yt:videoid id='{video_id}'>{video_id}</yt:videoid>
             <youTubeId id='{video_id}'>{video_id}</youTubeId>
-            <published>{published_time}</published>
-            <updated>{published_time}</updated>
-            <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="People &amp; Blogs" term="People &amp; Blogs">People &amp; Blogs</category>
-            <title type='text'>{title}</title>
-            <content type='text'>{description}</content>
-            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="http://{baseurl}/feeds/api/videos/{video_id}/related"/>
-            <author>
-                <name>{author}</name>
-                <uri>http://{baseurl}/feeds/api/users/{author}</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://{baseurl}/feeds/api/videos/{video_id}/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='People &amp; Blogs' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>People &amp; Blogs</media:category>
-                <media:content url='http://{baseurl}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://{baseurl}/get_480?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/>
-                <media:description type='plain'>{description}</media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v={video_id}'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{video_id}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{video_id}/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='{duration}'/>
-                <yt:videoid id='{video_id}'>{video_id}</yt:videoid>
-                <youTubeId id='{video_id}'>{video_id}</youTubeId>
-                <media:credit role='uploader' name='{author}'>{author}</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='4' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="17" viewCount="{view_count}"/>
-            <yt:rating numLikes="153" numDislikes="16"/>
-        </entry>"""
+            <media:credit role='uploader' name='{author_esc}'>{author_esc}</media:credit>
+        </media:group>
+        <gd:rating average='5' max='5' min='1' numRaters='4' rel='http://schemas.google.com/g/2005#overall'/>
+        <yt:statistics favoriteCount="17" viewCount="{view_count_esc}"/>
+        <yt:rating numLikes="153" numDislikes="16"/>
+    </entry>"""
 
     return Response(xmlcontent, mimetype="application/xml")
 
 
 class GetVideoInfoWii:
+    WII_GET_VIDEO_INFO = "./assets/cache/videoinfo"
+
     def build(self, videoId):
-        streamUrl = f"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&videoId={videoId}"
-        headers = {
-            'Content-Type': 'application/json',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        payload = {
-            "context": {
-                "client": {
-                    "hl": "en",
-                    "gl": "US",
-                    "clientName": "WEB",
-                    "clientVersion": "2.20210714.01.00"
-                }
-            },
-            "videoId": videoId,
-            "params": ""
-        }
-        response = requests.post(streamUrl, json=payload, headers=headers)
-        if response.status_code != 200:
-            return f"Error retrieving video info: {response.status_code}", response.status_code
-        
-        try:
+        os.makedirs(self.WII_GET_VIDEO_INFO, exist_ok=True)
+        cache_path = os.path.join(self.WII_GET_VIDEO_INFO, f"{videoId}.json")
+
+        # Try loading from cache
+        if os.path.exists(cache_path):
+            with open(cache_path, 'r', encoding='utf-8') as f:
+                json_data = json.load(f)
+        else:
+            # Fetch from API
+            streamUrl = f"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&videoId={videoId}"
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            payload = {
+                "context": {
+                    "client": {
+                        "hl": "en",
+                        "gl": "US",
+                        "clientName": "WEB",
+                        "clientVersion": "2.20210714.01.00"
+                    }
+                },
+                "videoId": videoId,
+                "params": ""
+            }
+
+            response = requests.post(streamUrl, json=payload, headers=headers)
+            if response.status_code != 200:
+                return f"Error retrieving video info: {response.status_code}", response.status_code
+            
             json_data = response.json()
+
+            # Save to cache
+            with open(cache_path, 'w', encoding='utf-8') as f:
+                json.dump(json_data, f)
+
+        try:
             title = json_data['videoDetails']['title']
             length_seconds = json_data['videoDetails']['lengthSeconds']
             author = json_data['videoDetails']['author']
         except KeyError as e:
             return f"Missing key: {e}", 400
-        
+
         fmtList = "43/854x480/9/0/115"
         fmtStreamMap = f"43|"
-        fmtMap = "43/0/7/0/0"    
-        thumbnailUrl = f"http://i.ytimg.com/vi/{videoId}/mqdefault.jpg"        
+        fmtMap = "43/0/7/0/0"
+        thumbnailUrl = f"http://i.ytimg.com/vi/{videoId}/mqdefault.jpg"
+        
         response_str = (
             f"status=ok&"
             f"length_seconds={length_seconds}&"
@@ -1725,6 +1894,7 @@ class GetVideoInfoWii:
             f"fmtStreamMap={fmtStreamMap.split()[0]}"
         )
         return Response(response_str, content_type='text/plain')
+
 	
 @app.route('/get_video_info', methods=['GET'])
 def get_video_info():
@@ -2034,10 +2204,11 @@ def get_dislike_count(video_id):
         file_mtime = datetime.fromtimestamp(os.path.getmtime(cache_file))
         if datetime.now() - file_mtime < timedelta(seconds=CACHE_TTL_SECONDS):
             try:
-                with open(cache_file, "r") as f:
+                with open(cache_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     return str(data.get("dislikes", "0"))
-            except Exception:
+            except (json.JSONDecodeError, IOError):
+                # Corrupted cache or file reading issue, ignore and fetch fresh
                 pass
 
     try:
@@ -2045,15 +2216,18 @@ def get_dislike_count(video_id):
         response = requests.get(url, timeout=5)
         if response.status_code == 200:
             data = response.json()
-            with open(cache_file, "w") as f:
+            with open(cache_file, "w", encoding="utf-8") as f:
                 json.dump(data, f)
             return str(data.get("dislikes", "0"))
-    except Exception as e:
-        print(f"Dislike API error for {video_id}: {e}")
+    except requests.RequestException:
+        # Network issue, timeout, etc.
+        pass
+    except (json.JSONDecodeError, IOError):
+        # Issues reading/writing cache or parsing JSON from response
+        pass
 
     return "0"
-
-
+    
 def create_xml_feed(videos, channel_id, channel_name, base_url):
     # Ensure no trailing slash
     base_url = base_url.rstrip("/")
@@ -2502,10 +2676,7 @@ def fetch_watch_later(oauth_token):
         watch_later_data = response.json()
         save_watch_later_cache(watch_later_data)
         return watch_later_data
-        #print(response.text)
     else:
-        #print(f"Error fetching Watch Later list: {response.status_code}")
-        #print(response.text)
         return None
 
 def save_watch_later_cache(data):
@@ -2522,15 +2693,12 @@ def load_watch_later_cache(oauth_token):
             try:
                 cache_content = json.load(f)
             except json.JSONDecodeError:
-                #print("Cache file corrupted, refreshing data...")
                 return fetch_watch_later(oauth_token)
 
             if "timestamp" not in cache_content or "data" not in cache_content:
-                #print("Cache file invalid, refreshing...")
                 return fetch_watch_later(oauth_token)
 
             if time.time() - cache_content["timestamp"] > CACHE_EXPIRATION:
-                #print("Cache expired. Fetching new Watch Later data...")
                 return fetch_watch_later(oauth_token)
 
             return cache_content["data"]
@@ -2658,11 +2826,9 @@ def load_cache(path):
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     except json.JSONDecodeError as e:
-        print(f"[!] Corrupted JSON in cache file {path}: {e}")
         os.remove(path)  # delete broken file
         return None
     except Exception as e:
-        print(f"[!] Unexpected error reading cache {path}: {e}")
         return None
 
 
@@ -2782,9 +2948,11 @@ def enrich_video_data(video):
         video["channel_id"] = microformat.get("externalChannelId", "") or details.get("channelId", "")
         video["view_count"] = int(details.get("viewCount", 0))
 
-    except Exception as e:
-        print(f"[!] Error enriching video {video_id}: {e}")
+    except Exception:
+        pass
+
     return video
+
 
 
 def build_xml_response(videos, baseurl):
@@ -2865,6 +3033,7 @@ def build_xml_response(videos, baseurl):
 		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
 		<yt:statistics favoriteCount='0' viewCount='{view_count}'/>
 		<yt:rating numDislikes='{dislikes}' numLikes='{likes}'/>
+		<yt:cc>1</yt:cc>
 	</entry>"""
         items_xml.append(item_xml.strip())
     
@@ -3336,12 +3505,10 @@ def load_history_cache(oauth_token):
 
         # Validate cache structure
         if "timestamp" not in cache_content or "data" not in cache_content:
-            #print("Cache file is invalid or outdated. Refreshing watch history...")
             return viitube_fetch_watch_history(oauth_token)
 
         # If cache is older than 5 hours, refresh it at next request
         if time.time() - cache_content["timestamp"] > VIITUBE_HISTORY_CACHE_EXPIRATION:
-            #print("Cache expired. Fetching new watch history...")
             return viitube_fetch_watch_history(oauth_token)
 
         return cache_content["data"]  # Use cached data if valid
@@ -3795,205 +3962,195 @@ def channelfavorites(channelfavorites):
 def releatedvideos(videosid):
     return send_file('mobile/blank.xml')
 
-COMMENTS_CACHE_DIR = './assets/cache/comments'
+@app.route('/feeds/api/charts/live/events/<region>')
+def live(region):
+    return send_file('Mobile/blank.xml')
 
-def comments_escape_cdata(text):
-    """Split CDATA if ]]> is found."""
-    return text.replace("]]>", "]]]]><![CDATA[>")
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed')
+def most_viewed(region):
+    return send_file('Mobile/most_viewed.xml')
 
-def comments_escape_xml_attr(text):
-    """Escape XML attribute values."""
-    return saxutils.escape(text, {'"': '&quot;', "'": '&apos;'})
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Education')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Education')
+def most_viewed_Education(region):
+    return send_file('Mobile/most_viewed_Education.xml')
 
-def comments_parse_french_relative_time(text, ref_date=None):
-    if ref_date is None:
-        ref_date = datetime.now()
-    cleaned = text.split('(')[0].strip()
-    m = re.search(r'il y a (\d+) (\w+)', cleaned)
-    if not m:
-        return datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-    num, unit = int(m.group(1)), m.group(2).lower()
-    if unit.startswith('an'):      delta = timedelta(days=num*365)
-    elif unit.startswith('mois'):   delta = timedelta(days=num*30)
-    elif unit.startswith('jour'):   delta = timedelta(days=num)
-    elif unit.startswith('heure'):  delta = timedelta(hours=num)
-    elif unit.startswith('minute'): delta = timedelta(minutes=num)
-    else: return datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-    return (ref_date - delta).strftime('%Y-%m-%dT%H:%M:%S')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Comedy')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Comedy')
+def most_viewed_Comedy(region):
+    return send_file('Mobile/most_viewed_Comedy.xml')
 
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Tech')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Tech')
+def most_viewed_Tech(region):
+    return send_file('Mobile/most_viewed_Tech.xml')
 
-def comments_parse_french_relative_time(text, ref_date=None):
-    if ref_date is None:
-        ref_date = datetime.now()
-    cleaned = text.split('(')[0].strip()
-    m = re.search(r'il y a (\d+) (\w+)', cleaned)
-    if not m:
-        return datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-    num, unit = int(m.group(1)), m.group(2).lower()
-    if unit.startswith('an'):      delta = timedelta(days=num*365)
-    elif unit.startswith('mois'):   delta = timedelta(days=num*30)
-    elif unit.startswith('jour'):   delta = timedelta(days=num)
-    elif unit.startswith('heure'):  delta = timedelta(hours=num)
-    elif unit.startswith('minute'): delta = timedelta(minutes=num)
-    else: return datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
-    return (ref_date - delta).strftime('%Y-%m-%dT%H:%M:%S')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Entertainment')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Entertainment')
+def most_viewed_Entertainment(region):
+    return send_file('Mobile/most_viewed_Entertainment.xml')
 
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Animals')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Animals')
+def most_viewed_Animals(region):
+    return send_file('Mobile/most_viewed_Animals.xml')
 
-def comments_fetch_comments_full_body(videoid):
-    url = "https://www.youtube.com/youtubei/v1/next"
-    # Your full client context payload from your snippet
-    client_context = {
-        "screenWidthPoints": 1361,
-        "screenHeightPoints": 962,
-        "utcOffsetMinutes": 120,
-        "hl": "en",
-        "gl": "US",
-        "remoteHost": "2a01:cb08:6af:1000:441:caaa:6e1a:1869",
-        "deviceMake": "Samsung",
-        "deviceModel": "SmartTV",
-        "visitorData": "CgtyOWVuUDg5ZlpzOCjyvc7EBjInCgJGUhIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiAo",
-        "userAgent": ("Mozilla/5.0 (SMART-TV; LINUX; Tizen 5.5) AppleWebKit/537.36 "
-                      "(KHTML, like Gecko) 69.0.3497.106.1/5.5 TV Safari/537.36,gzip(gfe)"),
-        "clientName": "TVHTML5",
-        "clientVersion": "7.20250730.14.00",
-        "osName": "Tizen",
-        "osVersion": "5.5",
-        "originalUrl": "https://www.youtube.com/tv?is_account_switch=1&hrld=2",
-        "theme": "CLASSIC",
-        "platform": "TV",
-        "clientFormFactor": "UNKNOWN_FORM_FACTOR",
-        "webpSupport": False,
-        "configInfo": {
-            "appInstallData": "CPO9zsQGEIeszhwQ4srPHBDjvs8cEO_UzxwQ5snPHBDa984cEIiHsAUQlP6wBRCkiIATEKHXzxwQ9J6AExCKgoATELzZzxwQmZixBRDevM4cEO3VzxwQzqzPHBCXoYATEImwzhwQmLnPHBD2q7AFELfq_hIQ9svPHBDFw88cEJmNsQUQvZmwBRDT4a8FEMn3rwUQxcvPHBC90M8cEOCCgBMQvbauBRC45M4cELvZzhwQ_LLOHBCBzc4cEMzfrgUQqZmAExDw4s4cEMuazhwQndCwBRC61s8cELnZzhwQvoqwBRCvhs8cEK7WzxwQzrXPHBCR0s8cEKzPzxwQu42AEyokQ0FNU0Z4VVUtWnEtRFByaUVlX3o3QXVCbFEweW9Ld0VBeDBI"
-        },
-        "tvAppInfo": {
-            "appQuality": "TV_APP_QUALITY_LIMITED_ANIMATION",
-            "cobaltAppVersion": "69.0.3497.106.1",
-            "voiceCapability": {
-                "hasSoftMicSupport": False,
-                "hasHardMicSupport": False
-            },
-            "supportsNativeScrolling": False
-        },
-        "timeZone": "Europe/Paris",
-        "browserName": "TV Safari",
-        "browserVersion": "537.36",
-        "acceptHeader": ("text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,"
-                         "image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"),
-        "deviceExperimentId": "ChxOelV6TlRBeU9EWTBOemMzT0RNMk9EUTBOZz09EPK9zsQGGKKZx8QG",
-        "rolloutToken": "CMCMyfGO1dXP7AEQnN--qILzjgMYjNGh3d_1jgM%3D",
-        "screenDensityFloat": 1
-    }
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Music')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Music')
+def most_viewed_Music(region):
+    return send_file('Mobile/most_viewed_Music.xml')
 
-    payload = {
-        "context": {"client": client_context},
-        "videoId": videoid,
-        "user": {"enableSafetyMode": False},
-        "request": {
-            "internalExperimentFlags": [],
-            "consistencyTokenJars": []
-        },
-        "clickTracking": {
-            "clickTrackingParams": "CEQQxqYCIhMI7dPxo-j2jgMVuycGAB3-ixAB"
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Film')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Film')
+def most_viewed_Film(region):
+    return send_file('Mobile/most_viewed_Film.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Autos')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Autos')
+def most_viewed_Autos(region):
+    return send_file('Mobile/most_viewed_Autos.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_News')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_News')
+def most_viewed_News(region):
+    return send_file('Mobile/most_viewed_News.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Howto')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Howto')
+def most_viewed_Howto(region):
+    return send_file('Mobile/most_viewed_Howto.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Games')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Games')
+def most_viewed_Games(region):
+    return send_file('Mobile/most_viewed_Games.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_People')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_People')
+def most_viewed_People(region):
+    return send_file('Mobile/most_viewed_People.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Travel')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Travel')
+def most_viewed_Travel(region):
+    return send_file('Mobile/most_viewed_Travel.xml')
+
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Sports')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Sports')
+def most_viewed_Sports(region):
+    return send_file('Mobile/most_viewed_Sports.xml')
+	
+@app.route('/feeds/api/standardfeeds/<region>/most_discussed')
+def most_discussed(region):
+    return send_file('Mobile/most_discussed.xml')
+    
+@app.route('/feeds/api/standardfeeds/<region>/most_popular')
+def most_popular(region):
+    return send_file('Mobile/most_popular.xml')
+	
+@app.route('/feeds/api/standardfeeds/<region>/recently_featured')
+def recently_featured(region):
+    return send_file('Mobile/recently_featured.xml')
+
+# 📁 Define storage paths
+MOBILE_VIDEO_DIR = os.path.dirname(os.path.abspath(__file__))
+MOBILE_VIDEO_SAVE_DIR= os.path.join(MOBILE_VIDEO_DIR, "assets")
+MOBILE_VIDEO_CACHE_DIR = os.path.join(MOBILE_VIDEO_DIR, "assets", "cache", "videoinfo")
+
+os.makedirs(MOBILE_VIDEO_DIR, exist_ok=True)
+os.makedirs(MOBILE_VIDEO_CACHE_DIR, exist_ok=True)  
+
+# ✅ Helper class to fetch video info
+class MobileVideoInfo:
+    def MobilePlayback(self, video_id):
+        cache_file = os.path.join(MOBILE_VIDEO_CACHE_DIR, f"{video_id}.json")
+
+        if os.path.exists(cache_file):
+            with open(cache_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+
+        # 🌐 Fetch from YouTube internal API
+        url = "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8"
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': 'Mozilla/5.0'
         }
-    }
-    headers = { "Content-Type": "application/json", "User-Agent": client_context['userAgent'] }
-
-    comments = []
-    while True:
-        resp = requests.post(url, json=payload, headers=headers)
-        resp.raise_for_status()
-        data = resp.json()
-
-        # Extract comments on current page
-        contents = data.get('continuationContents', {}).get('itemSectionContinuation', {}).get('contents', [])
-        for item in contents:
-            tr = item.get('commentThreadRenderer')
-            if not tr:
-                continue
-            cr = tr['comment']['commentRenderer']
-            author = cr.get('authorText', {}).get('simpleText', '').lstrip('@')
-            published_raw = cr.get('publishedTimeText', {}).get('simpleText', '')
-            iso = comments_parse_french_relative_time(published_raw)
-            text = ''.join(run.get('text', '') for run in cr.get('contentText', {}).get('runs', []))
-            comments.append({'author': author, 'published': iso, 'text': text})
-
-        # Check for continuation token to fetch next page
-        continuations = data.get('continuationContents', {}).get('itemSectionContinuation', {}).get('continuations', [])
-        if not continuations:
-            break
-
-        next_continuation = continuations[0].get('nextContinuationData', {}).get('continuation')
-        if not next_continuation:
-            break
-
-        # Update payload to use continuation token for next request
         payload = {
-            "context": {"client": client_context},
-            "continuation": next_continuation
+            "context": {
+                "client": {
+                    "hl": "en",
+                    "gl": "US",
+                    "clientName": "WEB",
+                    "clientVersion": "2.20210714.01.00"
+                }
+            },
+            "videoId": video_id
         }
 
-    return comments
+        response = requests.post(url, json=payload, headers=headers)
+        if response.status_code != 200:
+            return {"error": "Failed to fetch video info"}
 
-def comments_load_cache(videoid):
-    path = os.path.join(COMMENTS_CACHE_DIR, f"{videoid}.json")
-    if os.path.exists(path):
-        return json.load(open(path, encoding='utf-8'))
-    return None
+        try:
+            data = response.json()
+            with open(cache_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            return data
+        except Exception as e:
+            return {"error": str(e)}
 
-def comments_save_cache(videoid, comments):
-    os.makedirs(COMMENTS_CACHE_DIR, exist_ok=True)
-    path = os.path.join(COMMENTS_CACHE_DIR, f"{videoid}.json")
-    json.dump(comments, open(path, 'w', encoding='utf-8'), ensure_ascii=False, indent=2)
 
-def comments_to_atom_xml(videoid, comments):
-    header = f"""<?xml version='1.0' encoding='UTF-8'?>
-<feed xmlns='http://www.w3.org/2005/Atom'
-xmlns:media='http://search.yahoo.com/mrss/'
-xmlns:gd='http://schemas.google.com/g/2005'
-xmlns:yt='http://gdata.youtube.com/schemas/2007'>
-  <id>http://gdata.youtube.com/feeds/api/videos/{videoid}/comments</id>
-  <title type='text'>YouTube comments for {videoid}</title>
-  <updated>{datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}</updated>"""
+# 🎥 Download video and fetch info
+def mobiledownloadvideo(video_id):
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
+    yt = YouTube(video_url)
 
-    entries = []
-    for c in comments:
-        author_clean = c['author'].lstrip('@')  # Remove @
-        author_escaped = comments_escape_xml_attr(author_clean)
-        published = comments_escape_xml_attr(c['published'])
-        content = comments_escape_cdata(c['text'])
+    video_filename = f"{video_id}.mp4"
+    video_path = os.path.join(MOBILE_SAVE_DIR, video_filename)
 
-        ent = f"""
-  <entry gd:etag=' '>
-    <id>tag:youtube.com,2008:video:{videoid}:comment</id>
-    <published>{published}</published>
-    <updated>{published}</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#comment'/>
-    <content type="html"><![CDATA[{content}]]></content>
-    <author>
-      <name>{author_escaped}</name>
-      <uri>http://gdata.youtube.com/feeds/api/users/{author_escaped}</uri>
-    </author>
-  </entry>"""
-        entries.append(ent)
+    if not os.path.exists(video_path):
+        stream = yt.streams.get_highest_resolution()
+        stream.download(MOBILE_SAVE_DIR, filename=video_filename)
 
-    footer = "\n</feed>"
-    return header + "\n".join(entries) + footer
+    # 💾 Also get video info
+    MobileVideoInfo().MobilePlayback(video_id)
 
-@app.route('/feeds/api/videos/<videoid>/comments')
-def comments_serve_comments(videoid):
-    comments = comments_load_cache(videoid)
-    if comments is None:
-        comments = comments_fetch_comments_full_body(videoid)
-        comments_save_cache(videoid, comments)
-    xml = comments_to_atom_xml(videoid, comments)
-    return Response(xml, mimetype='application/xml')
+    return video_path
 
-PLAYLIST_API_URL = "https://www.youtube.com/youtubei/v1/browse"
-SEARCH_PLAYLIST_API_URL = "https://www.youtube.com/youtubei/v1/search"
-PLAYLIST_API_KEY = "YOUR_PLAYLIST_API_KEY_HERE"  # Replace with your YouTube API key
-PLAYLIST_CACHE_DIR = "./assets/cache/playlists/users"
-SEARCH_PLAYLIST_CACHE_DIR = "./assets/cache/channelsearch"
+
+# 🔍 Extract clean video ID
+def mobile_get_clean_video_id():
+    raw_id = request.args.get("video_id", "") or request.args.get("v", "")
+    match = re.match(r"^[A-Za-z0-9_-]{11}", raw_id)
+    return match.group(0) if match else None
+
+
+# 📡 All endpoints below
+@app.route('/get_480', methods=['GET'])
+@app.route('/exp_hd', methods=['GET'])
+@app.route('/channel_fh264_getvideo', methods=['GET'])
+@app.route('/geeeeeeeeeeeeet_video', methods=['GET'])
+@app.route('/geeeeeeeeeeeet_video', methods=['GET'])
+@app.route('/get_video', methods=['GET'])
+@app.route('/geeeeeeeeeeeeeet_video', methods=['GET'])
+def mobile_serve_video():
+    video_id = mobile_get_clean_video_id()
+
+    if not video_id:
+        return "Missing or invalid video_id parameter", 400
+
+    try:
+        video_path = mobiledownloadvideo(video_id)
+        return send_file(video_path, as_attachment=True)
+    except Exception as e:
+        return "Internal server error", 500
+    
+
+VIITUBE_MOBILE_PLAYLIST_URL = "https://www.youtube.com/youtubei/v1/browse"
+SEARCH_VIITUBE_MOBILE_PLAYLIST_URL = "https://www.youtube.com/youtubei/v1/search"
+MOBILE_PLAYLIST_API_KEY = "YOUR_MOBILE_PLAYLIST_API_KEY_HERE"  # Replace with your YouTube API key
+MOBILE_PLAYLIST_DIR = "./assets/cache/playlists/users"
+MOBILE_PLAYLIST_SEARCH_DIR = "./assets/cache/channelsearch"
 
 CONTEXT = {
     "client": {
@@ -4015,20 +4172,20 @@ CONTEXT = {
     "clickTracking": {}
 }
 
-def playlist_fetch_browse_data(PLAYLIST_API_KEY, browse_id):
-    cache_file = f"{PLAYLIST_CACHE_DIR}/{browse_id}.json"
+def mobile_felsh_playlist_data(MOBILE_PLAYLIST_API_KEY, browse_id):
+    cache_file = f"{MOBILE_PLAYLIST_DIR}/{browse_id}.json"
     if os.path.exists(cache_file):
         with open(cache_file, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    url = f"{PLAYLIST_API_URL}?key={PLAYLIST_API_KEY}"
+    url = f"{VIITUBE_MOBILE_PLAYLIST_URL}?key={MOBILE_PLAYLIST_API_KEY}"
     payload = {"browseId": browse_id, "context": CONTEXT}
     headers = {"Content-Type": "application/json"}
 
     r = requests.post(url, headers=headers, json=payload)
     if r.status_code == 200:
         data = r.json()
-        os.makedirs(PLAYLIST_CACHE_DIR, exist_ok=True)
+        os.makedirs(MOBILE_PLAYLIST_DIR, exist_ok=True)
         with open(cache_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
         return data
@@ -4036,7 +4193,7 @@ def playlist_fetch_browse_data(PLAYLIST_API_KEY, browse_id):
         return None
 
 def playlist_search_channel_id(query):
-    cache_file = f"{SEARCH_PLAYLIST_CACHE_DIR}/{query}.json"
+    cache_file = f"{MOBILE_PLAYLIST_SEARCH_DIR}/{query}.json"
     if os.path.exists(cache_file):
         with open(cache_file, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -4047,13 +4204,13 @@ def playlist_search_channel_id(query):
             "params": "EgZjaGFubmVs"  # Base64 encoded param to filter channels
         }
         headers = {"Content-Type": "application/json"}
-        url = f"{SEARCH_PLAYLIST_API_URL}?key={PLAYLIST_API_KEY}"
+        url = f"{SEARCH_VIITUBE_MOBILE_PLAYLIST_URL}?key={MOBILE_PLAYLIST_API_KEY}"
 
         r = requests.post(url, headers=headers, json=payload)
         if r.status_code != 200:
             return None
         data = r.json()
-        os.makedirs(SEARCH_PLAYLIST_CACHE_DIR, exist_ok=True)
+        os.makedirs(MOBILE_PLAYLIST_SEARCH_DIR, exist_ok=True)
         with open(cache_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -4258,7 +4415,7 @@ def mobile_get_playlists(channelid):
             return abort(404, description=f"No channel found for search '{channelid}'")
         channelid = searched_channel_id
 
-    data = playlist_fetch_browse_data(PLAYLIST_API_KEY, channelid)
+    data = mobile_felsh_playlist_data(MOBILE_PLAYLIST_API_KEY, channelid)
     if not data:
         return abort(404, description="Channel not found or failed to fetch data")
 
@@ -4268,97 +4425,8 @@ def mobile_get_playlists(channelid):
     xml_output = converting_playlists_to_xml(all_playlists, base_url=base_url)
     return Response(xml_output, content_type="application/xml; charset=utf-8")
 
-
-@app.route('/feeds/api/charts/live/events/<region>')
-def live(region):
-    return send_file('Mobile/blank.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed')
-def most_viewed(region):
-    return send_file('Mobile/most_viewed.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Education')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Education')
-def most_viewed_Education(region):
-    return send_file('Mobile/most_viewed_Education.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Comedy')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Comedy')
-def most_viewed_Comedy(region):
-    return send_file('Mobile/most_viewed_Comedy.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Tech')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Tech')
-def most_viewed_Tech(region):
-    return send_file('Mobile/most_viewed_Tech.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Entertainment')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Entertainment')
-def most_viewed_Entertainment(region):
-    return send_file('Mobile/most_viewed_Entertainment.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Animals')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Animals')
-def most_viewed_Animals(region):
-    return send_file('Mobile/most_viewed_Animals.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Music')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Music')
-def most_viewed_Music(region):
-    return send_file('Mobile/most_viewed_Music.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Film')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Film')
-def most_viewed_Film(region):
-    return send_file('Mobile/most_viewed_Film.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Autos')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Autos')
-def most_viewed_Autos(region):
-    return send_file('Mobile/most_viewed_Autos.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_News')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_News')
-def most_viewed_News(region):
-    return send_file('Mobile/most_viewed_News.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Howto')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Howto')
-def most_viewed_Howto(region):
-    return send_file('Mobile/most_viewed_Howto.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Games')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Games')
-def most_viewed_Games(region):
-    return send_file('Mobile/most_viewed_Games.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_People')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_People')
-def most_viewed_People(region):
-    return send_file('Mobile/most_viewed_People.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Travel')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Travel')
-def most_viewed_Travel(region):
-    return send_file('Mobile/most_viewed_Travel.xml')
-
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Sports')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Sports')
-def most_viewed_Sports(region):
-    return send_file('Mobile/most_viewed_Sports.xml')
-	
-@app.route('/feeds/api/standardfeeds/<region>/most_discussed')
-def most_discussed(region):
-    return send_file('Mobile/most_discussed.xml')
     
-@app.route('/feeds/api/standardfeeds/<region>/most_popular')
-def most_popular(region):
-    return send_file('Mobile/most_popular.xml')
-	
-@app.route('/feeds/api/standardfeeds/<region>/recently_featured')
-def recently_featured(region):
-    return send_file('Mobile/recently_featured.xml')
-
+    
 # === Run ===
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
