@@ -2988,7 +2988,9 @@ def build_xml_response(videos, baseurl):
 		<title>{title}</title>
 		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/{video_id}?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
 		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={video_id}&amp;feature=youtube_gdata'/>
-		<link rel='{baseurl_escaped}/schemas/2007#video.related' type='applicatio0tom+xml' href='{baseurl_escaped}/feeds/api/videos/{video_id}/related?v=2'/>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.related' type='application/atom+xml' href='{baseurl_escaped}/feeds/api/videos/{video_id}/related'/>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.captionTracks' type='application/xml' href='{baseurl_escaped}/timedtext/{video_id}/related'/>
+        <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{baseurl_escaped}/feeds/api/videos/{video_id}/related"/>
 		<link rel='{baseurl_escaped}/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v={video_id}'/>
 		<link rel='{baseurl_escaped}/schemas/2007#uploader' type='applicatio0tom+xml' href='{baseurl_escaped}/feeds/api/users/{channel_id}?v=2'/>
 		<link rel='self' type='applicatio0tom+xml' href='{baseurl_escaped}/feeds/api/users/{channel_id}/uploads/{video_id}?v=2'/>
@@ -3026,6 +3028,7 @@ def build_xml_response(videos, baseurl):
 			<media:thumbnail url='http://i.ytimg.com/vi/{video_id}/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
 			<media:title type='plain'>{title}</media:title>
 			<yt:duration seconds='{duration}'/>
+            <yt:caption status="serving" />
 	        {ytpublish_date_tag}
 			<yt:uploaderId>EE{channel_id}</yt:uploaderId>
 			<yt:videoid>{video_id}</yt:videoid>
@@ -3958,9 +3961,6 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
 def channelfavorites(channelfavorites):
     return send_file('mobile/blank.xml')
 
-@app.route('/feeds/api/videos/<videosid>/related')
-def releatedvideos(videosid):
-    return send_file('mobile/blank.xml')
 
 @app.route('/feeds/api/charts/live/events/<region>')
 def live(region):
@@ -4425,6 +4425,250 @@ def mobile_get_playlists(channelid):
     xml_output = converting_playlists_to_xml(all_playlists, base_url=base_url)
     return Response(xml_output, content_type="application/xml; charset=utf-8")
 
+# Define the URLs and headers for fetching related videos and video details
+related_url_next = "https://www.youtube.com/youtubei/v1/next"
+related_url_player = "https://www.youtube.com/youtubei/v1/player"
+headers = {
+    'Content-Type': 'application/json',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+}
+
+# Define the payloads for the requests
+def related_create_next_payload(video_id):
+    return {
+        "context": {
+            "client": {
+                "hl": "en",
+                "gl": "US",
+                "clientName": "WEB",
+                "clientVersion": "2.20210714.01.00"
+            }
+        },
+        "videoId": video_id
+    }
+
+def related_create_player_payload(video_id):
+    return {
+        "context": {
+            "client": {
+                "hl": "en",
+                "gl": "US",
+                "clientName": "WEB",
+                "clientVersion": "2.20210714.01.00"
+            }
+        },
+        "videoId": video_id,
+        "tinnedMediaPlayback": True
+    }
+
+# Define paths for saving and loading cached responses
+cache_dir_related = 'assets/cache/related'
+cache_dir_videoinfo = 'assets/cache/videoinfo'
+
+# Save response to a file in the cache directory
+def related_save_response_to_file(response_json, video_id, cache_dir):
+    os.makedirs(cache_dir, exist_ok=True)
+    file_path = os.path.join(cache_dir, f"{video_id}.json")
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(response_json, file, ensure_ascii=False, indent=4)
+    print(f"Response saved to {file_path}")
+
+# Load cached response if available
+def related_load_cached_response(video_id, cache_dir):
+    cache_path = os.path.join(cache_dir, f"{video_id}.json")
+    if os.path.exists(cache_path):
+        print(f"Cache found for video ID {video_id}. Loading from cache...")
+        with open(cache_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
+    else:
+        return None
+
+# Recursively find all video IDs in the JSON response
+def related_find_all_video_ids_in_json(json_obj):
+    video_ids = []
+
+    if isinstance(json_obj, dict):
+        for key, value in json_obj.items():
+            if key == 'videoId':
+                video_ids.append(value)
+            elif isinstance(value, (dict, list)):
+                video_ids.extend(related_find_all_video_ids_in_json(value))
+
+    elif isinstance(json_obj, list):
+        for item in json_obj:
+            video_ids.extend(related_find_all_video_ids_in_json(item))
+
+    return video_ids
+
+# Fetch related videos or use cached response
+def related_fetch_related_videos(video_id):
+    try:
+        # Check cache first
+        print("Checking for cached data for related videos...")
+        cached_response = related_load_cached_response(video_id, cache_dir_related)
+
+        if cached_response:
+            # Use cached response
+            response_json = cached_response
+            print("Using cached related videos response.")
+        else:
+            # If no cache, make API request
+            print("Sending request to YouTube API for related videos...")
+            response = requests.post(related_url_next, headers=headers, json=related_create_next_payload(video_id))
+
+            if response.status_code == 200:
+                response_json = response.json()
+                related_save_response_to_file(response_json, video_id, cache_dir_related)
+                print("Response fetched from API and saved to cache.")
+            else:
+                print(f"Request failed with status code: {response.status_code}")
+                return []
+
+        # Find all video IDs in the response
+        video_ids = related_find_all_video_ids_in_json(response_json)
+
+        # Remove duplicates by converting to a set
+        unique_video_ids = set(video_ids)
+
+        if unique_video_ids:
+            print("\nUnique related video IDs found:")
+            for vid in unique_video_ids:
+                print(vid)
+            return unique_video_ids
+        else:
+            print("No videoId found in the response.")
+            return []
+
+    except requests.exceptions.RequestException as e:
+        print(f"An error occurred: {e}")
+        return []
+
+# Fetch video details by video ID or use cached response
+def related_fetch_video_details(video_id):
+    cached_response = related_load_cached_response(video_id, cache_dir_videoinfo)
+
+    if cached_response:
+        print(f"Using cached details for video ID {video_id}")
+        return cached_response
+    else:
+        print(f"Fetching video details for {video_id} from API...")
+        response = requests.post(related_url_player, headers=headers, json=related_create_player_payload(video_id))
+
+        if response.status_code == 200:
+            response_json = response.json()
+            related_save_response_to_file(response_json, video_id, cache_dir_videoinfo)
+            print(f"Details for video {video_id} fetched and saved to cache.")
+            return response_json
+        else:
+            print(f"Request failed for video ID {video_id} with status code: {response.status_code}")
+            return None
+
+# Convert video details to XML format, with error handling for missing keys
+def related_convert_to_xml(video_id, video_details, base_url):
+    try:
+        video_data = video_details.get('videoDetails', {})
+        microformat_data = video_details.get('microformat', {}).get('playerMicroformatRenderer', {})
+
+        # Escape special characters using xml.sax.saxutils.escape
+        title = escape(video_data.get('title', 'N/A'))
+        description = escape(video_data.get('shortDescription', 'N/A'))
+        author = escape(video_data.get('author', 'N/A'))
+        view_count = escape(str(video_data.get('viewCount', 'N/A')))
+        length_seconds = escape(str(video_data.get('lengthSeconds', 'N/A')))
+        publish_date = escape(microformat_data.get('publishDate', 'Not available'))
+        channel_id = escape(microformat_data.get('externalChannelId', 'N/A'))
+        like_count = escape(str(microformat_data.get('likeCount', 'N/A')))
+        dislike_count = escape(str(microformat_data.get('dislikeCount', 'N/A')))
+
+        # Return formatted XML
+        xml_response = f"""  <entry>
+  <id>{escape(base_url)}feeds/api/videos/{escape(video_id)}</id>
+  <published>{publish_date}</published>
+  <updated>{publish_date}</updated>
+  <category scheme="http://gdata.youtube.com/schemas/2007/categories" label="Music" term="Music">Music</category>
+  <title type='text'>{title}</title>
+  <content type='text'>{description}</content>
+  <link rel='http://gdata.youtube.com/schemas/2007#video.in-response-to' type='application/atom+xml' href='{escape(base_url)}feeds/api/videos/{escape(video_id)}'/>
+  <link rel='alternate' type='text/html' href='http://vidtape.lol/watch?v={escape(video_id)}&amp;feature=youtube_gdata'/>
+  <link rel='http://gdata.youtube.com/schemas/2007#video.responses' type='application/atom+xml' href='{escape(base_url)}feeds/api/videos/{escape(video_id)}/responses'/>
+  <link rel='http://gdata.youtube.com/schemas/2007#video.related' type='application/atom+xml' href='{escape(base_url)}feeds/api/videos/{escape(video_id)}/related'/>
+  <link rel='http://gdata.youtube.com/schemas/2007#video.captionTracks' type='application/xml' href='{escape(base_url)}timedtext{escape(video_id)}/related'/>
+  <link rel='http://gdata.youtube.com/schemas/2007#mobile' type='text/html' href='http://vidtape.lol/details?v={escape(video_id)}'/>
+  <link rel='self' type='application/atom+xml' href='{escape(base_url)}feeds/api/videos/{escape(video_id)}'/>
+      <author>
+        <name>{channel_id}</name>
+        <uri>{escape(base_url)}feeds/api/users/{channel_id}</uri>
+        <yt:userId>EE{channel_id}</yt:userId>
+    </author>
+  <gd:comments>
+    <gd:feedLink href='{escape(base_url)}feeds/api/videos/{escape(video_id)}/comments' countHint='530'/>
+  </gd:comments>
+  <yt:hd/>
+  <media:group>
+    <media:category label='Music' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>Music</media:category>
+    <media:content url='{escape(base_url)}channel_fh264_getvideo?v={escape(video_id)}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='{escape(base_url)}get_480?video_id={escape(video_id)}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='{escape(base_url)}exp_hd?video_id={escape(video_id)}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>	
+	<media:title type='plain'>{title}</media:title>
+    <media:description type='plain'>{description}</media:description>
+    <media:keywords></media:keywords>
+    <media:player url='http://vidtape.lol/get_video?video_id={escape(video_id)}'/>
+    <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{escape(video_id)}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+    <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{escape(video_id)}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+    <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{escape(video_id)}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+    <yt:duration seconds='{length_seconds}'/>
+    <yt:videoid>{escape(video_id)}</yt:videoid>
+    <media:credit role='uploader' scheme='urn:youtube' yt:display="{author}" yt:type='partner'>{channel_id}</media:credit>
+    <yt:uploaderId>EE{channel_id}</yt:uploaderId>
+  </media:group>
+  <gd:rating average='5' max='5' min='1' numRaters='5828' rel='http://schemas.google.com/g/2005#overall'/>
+  <yt:statistics favoriteCount="{like_count}" viewCount="{view_count}"/>
+  <yt:rating numLikes="{like_count}" numDislikes="{dislike_count}"/>
+</entry>"""
+        return xml_response.strip()
+
+    except Exception as e:
+        print(f"Error processing video {video_id}: {e}")
+        return f"<video><title>Error fetching details for {video_id}</title></video>"
+
+# Fetch and display video details for all related videos
+def related_fetch_and_display_related_videos(video_id, base_url):
+    related_video_ids = related_fetch_related_videos(video_id)
+    xml_responses = []
+
+    for related_video_id in related_video_ids:
+        video_details = related_fetch_video_details(related_video_id)
+        if video_details:
+            xml_response = related_convert_to_xml(related_video_id, video_details, base_url)
+            xml_responses.append(xml_response)
+
+    xml_final_response = """<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"
+      xmlns:media="http://search.yahoo.com/mrss/"
+      xmlns:gd="http://schemas.google.com/g/2005"
+      xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/">
+  <id>http://gdata.youtube.com/feeds/api/videos</id>
+  <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
+  <title type='text'>YouTube Videos</title>
+  <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
+  <link rel='alternate' type='text/html' href='http://www.youtube.com'/>
+  <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos'/>
+  <link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/batch'/>
+  <author><name>YouTube/yt2009</name><uri>http://www.youtube.com/</uri></author>
+  <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+  <openSearch:totalResults>5360034</openSearch:totalResults>
+  <openSearch:startIndex>1</openSearch:startIndex>
+  <openSearch:itemsPerPage>6</openSearch:itemsPerPage>""" + "\n".join(xml_responses) + """\n</feed>"""
+    return xml_final_response
+
+# Define the Flask route to fetch related videos in XML format, using the base URL '/api'
+@app.route('/feeds/api/videos/<video_id>/related', methods=['GET'])
+def related_get_related_videos(video_id):
+    try:
+        base_url = request.host_url  # Get the base URL of the request
+        xml_response = related_fetch_and_display_related_videos(video_id, base_url)
+        return xml_response, 200, {'Content-Type': 'application/xml'}
+    except Exception as e:
+        print(f"Error: {e}")
+        return "<error>Error fetching related videos</error>", 500, {'Content-Type': 'application/xml'}
     
     
 # === Run ===
