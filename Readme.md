@@ -17,7 +17,7 @@ Google:For Youtube Mobiles Apps
 
 ## Issues
 
-Youtube on wii=Except What to watch not working Everything Working not problem to report
+Youtube on Wii=This part has been Entirely Revived
 
 Mobile App (Commun)
 
@@ -42,4 +42,5 @@ For 5.X:Only 5.1.10 and 5.2.27 works,5.0.21 return "Unsupported video format" an
 - [apk_setup.md](apk_setup.md) - set early youtube android APKs to work with Viitube
 
 - [wii_setup.md](wii_setup.md) - Setup Viitube For TV/Wii App
+
 
