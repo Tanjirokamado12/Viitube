@@ -25,15 +25,9 @@ Some Uploads Return No video found,Even if user has Uploaded videos
 
 Some Channels Could return 404 even if is present
 
-Activity Part Return on Some video This video is Unavariable
-
-Clicking on a video on Favorites Part Makes App Crash
-
-No Releated videos or Comments
+No Comments
 
 Watch Later don't work
-
-Subscribers Show Channelid And not channel name
 
 For 2.X:Channel names are channelid for all Things (Such as Home Screen,Category,Search....)
 
@@ -48,3 +42,4 @@ For 5.X:Only 5.1.10 and 5.2.27 works,5.0.21 return "Unsupported video format" an
 - [apk_setup.md](apk_setup.md) - set early youtube android APKs to work with Viitube
 
 - [wii_setup.md](wii_setup.md) - Setup Viitube For TV/Wii App
+
