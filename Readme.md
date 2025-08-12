@@ -39,6 +39,13 @@ For 5.X:Only 5.1.10 and 5.2.27 works,5.0.21 return "Unsupported video format" an
 
 ## Setup
 
+In first time install Python and Make sur is in path
+
+Seconly run pip install -r requirments.txt
+
+after run python app.py
+
 - [apk_setup.md](apk_setup.md) - set early youtube android APKs to work with Viitube
 
 - [wii_setup.md](wii_setup.md) - Setup Viitube For TV/Wii App
+
