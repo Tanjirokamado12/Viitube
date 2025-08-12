@@ -1032,19 +1032,6 @@ def mobile_search_channel_handle(handle):
     return None
 
 
-def mobile_get_channel_info(channel_id):
-    cache_path = mobile_get_cache_path_channelinfo(channel_id)
-
-    if mobile_is_cache_valid(cache_path):
-        with open(cache_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    else:
-        data = mobile_fetch_channel_info(channel_id)
-        with open(cache_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
-
-    return mobile_parse_channel_data(data)
-
 def mobile_get_info_by_handle(handle):
     if handle.startswith("UC") and len(handle) == 24:
         return mobile_get_channel_info(handle)
@@ -1053,6 +1040,32 @@ def mobile_get_info_by_handle(handle):
         if not channel_id:
             return None
         return mobile_get_channel_info(channel_id)
+
+def mobile_get_channel_info(channel_id):
+    cache_path = mobile_get_cache_path_channelinfo(channel_id)
+
+    if mobile_is_cache_valid(cache_path):
+        try:
+            with open(cache_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except json.JSONDecodeError:
+            # Corrupted cache file detected, attempt to delete and re-fetch
+            try:
+                os.remove(cache_path)  # Remove corrupted file
+            except OSError:
+                pass  # Handle the error silently or log it if needed
+            data = None
+    else:
+        data = None  # Cache invalid, re-fetch data
+
+    if data is None:
+        # Fetch fresh data if cache is invalid or corrupted
+        data = mobile_fetch_channel_info(channel_id)
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+
+    return mobile_parse_channel_data(data)
+
 
 @app.route("/feeds/api/channels/<handle>", methods=["GET"])
 @app.route("/feeds/api/users/<handle>", methods=["GET"])
@@ -2512,7 +2525,7 @@ def fetch_liked_videos_xml(oauth_token, base_url):
     pl_response = youtube.playlistItems().list(
         part='snippet',
         playlistId='LL',
-        maxResults=25
+        maxResults=20
     ).execute()
 
     video_ids = [item['snippet']['resourceId']['videoId'] for item in pl_response.get('items', [])]
@@ -2544,58 +2557,38 @@ def fetch_liked_videos_xml(oauth_token, base_url):
         view_count = int(stats.get('viewCount', 0))
         dislike_count, _ = get_dislike_and_views(item['id'])
 
-        xml_items.append(f"""<entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
-		<id>tag:youtube.com,2008:video:{item['id']}</id>
-		<published>{published}</published>
-		<updated>{published}</updated>
-		<category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
-		<category scheme='{base_url}/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
-		<title>{sn.get('title')}</title>
-		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/{item['id']}?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
-		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={item['id']}&amp;feature=youtube_gdata'/>
-		<link rel='{base_url}/schemas/2007#video.related' type='application/atom+xml' href='{base_url}/feeds/api/videos/{item['id']}/related?v=2'/>
-		<link rel='{base_url}/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v={item['id']}'/>
-		<link rel='{base_url}/schemas/2007#uploader' type='application/atom+xml' href='{base_url}/feeds/api/users/9yMWgQf2_xMhbdKPo7Ljrw?v=2'/>
-		<link rel='self' type='application/atom+xml' href='{base_url}/feeds/api/users/19cachicha/uploads/{item['id']}?v=2'/>
-		<author>
-			<name>{sn.get('channelTitle')}</name>
-			<uri>{base_url}/feeds/api/users/19cachicha</uri>
-			<yt:userId>RR{sn.get('channelId')}</yt:userId>
-		</author>
-		<yt:accessControl action='comment' permission='allowed'/>
-		<yt:accessControl action='commentVote' permission='allowed'/>
-		<yt:accessControl action='videoRespond' permission='moderated'/>
-		<yt:accessControl action='rate' permission='allowed'/>
-		<yt:accessControl action='embed' permission='allowed'/>
-		<yt:accessControl action='list' permission='allowed'/>
-		<yt:accessControl action='autoPlay' permission='allowed'/>
-		<yt:accessControl action='syndicate' permission='allowed'/>
-		<gd:comments>
-			<gd:feedLink rel='{base_url}/schemas/2007#comments' href='{base_url}/feeds/api/videos/{item['id']}/comments?v=2' countHint='24'/>
-		</gd:comments>
-		<media:group>
-			<media:category label='News &amp; Politics' scheme='{base_url}/schemas/2007/categories.cat'>News</media:category>
-			<media:content url='http://www.youtube.com/v/{item['id']}?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
-			<media:content url='rtsp://r5---sn-jc47eu7k.c.youtube.com/CigLENy73wIaHwm6igMVojTENRMYDSANFEgGUgx1c2VyX3VwbG9hZHMM/0/0/0/video.3gp' type='video/3gpp' medium='video' expression='full' duration='2506' yt:format='1'/>
-			<media:content url='rtsp://r5---sn-jc47eu7k.c.youtube.com/CigLENy73wIaHwm6igMVojTENRMYESARFEgGUgx1c2VyX3VwbG9hZHMM/0/0/0/video.3gp' type='video/3gpp' medium='video' expression='full' duration='2506' yt:format='6'/>
-			<media:credit role='uploader' scheme='urn:youtube' yt:display="{escaped_author_name}" yt:type='partner'>19cachicha</media:credit>
-			<media:description type='plain'/>
-			<media:keywords/>
-			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
-			<media:player url='http://www.youtube.com/watch?v={item['id']}&amp;feature=youtube_gdata_player'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{item['id']}/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{item['id']}/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{item['id']}/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{item['id']}/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{item['id']}/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{item['id']}/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{item['id']}/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
-			<media:title type='plain'>{sn.get('title')}</media:title>
-			<yt:duration seconds='{duration_seconds}'/>
-			<yt:uploaded>{published}</yt:uploaded>
-			<yt:uploaderId>EE{sn.get('channelId')}</yt:uploaderId>
-			<yt:videoid>{item['id']}</yt:videoid>
-		</media:group>
+        xml_items.append(f"""<entry>
+            <id>{base_url}/feeds/api/videos/{item['id']}</id>
+            <youTubeId id='{item['id']}'>{item['id']}</youTubeId>
+			<published>{published}</published>
+			<updated>{published}</updated>
+            <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" label="-" term="-">-</category>
+            <title type='text'>{sn.get('title')}</title>
+            <content type='text'>-</content>
+            <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{base_url}/feeds/api/videos/{item['id']}/related"/><link rel="edit" href="{base_url}/feeds/api/videos/{item['id']}/edit"/>
+            <author>
+                <name>{sn.get('channelId')}</name>
+                <uri>{base_url}/feeds/api/users/{sn.get('channelId')}</uri>
+				<yt:userId>RR{sn.get('channelId')}</yt:userId>
+            </author>
+            <gd:comments>
+                <gd:feedLink href='{base_url}/feeds/api/videos/{item['id']}/comments' countHint='530'/>
+            </gd:comments>
+            <media:group>
+                <media:category label='-' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>-</media:category>
+                <media:content url='{base_url}/channel_fh264_getvideo?v={item['id']}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+                <media:description type='plain'></media:description>
+                <media:keywords></media:keywords>
+                <media:player url='http://www.youtube.com/watch?v={item['id']}'/>
+                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{item['id']}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{item['id']}/0.jpg' height='240' width='320' time='00:00:00'/>
+                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{item['id']}/0.jpg' height='240' width='320' time='00:00:00'/>
+				<yt:duration seconds='{duration_seconds}'/>
+                <yt:videoid id='{item['id']}'>{item['id']}</yt:videoid>
+				<yt:uploaderId>EE{sn.get('channelId')}</yt:uploaderId>
+                <youTubeId id='{item['id']}'>{item['id']}</youTubeId>
+				<media:credit role='uploader' scheme='urn:youtube' yt:display="{escaped_author_name}" yt:type='partner'>{sn.get('channelId')}</media:credit>
+            </media:group>
 		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
 		<yt:statistics favoriteCount='0' viewCount='{view_count}'/>
 		<yt:rating numDislikes='{dislike_count}' numLikes='{like_count}'/>
@@ -2658,7 +2651,7 @@ def favorites():
         else:
             return Response("<videos></videos>", mimetype="application/xml")
 
-CACHE_PATH = os.path.join(os.getcwd(), "assets", "cache", "users", "uploads.xml")
+CACHE_PATH = os.path.join(os.getcwd(), "assets", "cache", "users", "usersuploads.xml")
 
 
 
