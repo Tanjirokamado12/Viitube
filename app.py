@@ -1971,6 +1971,7 @@ def get_video():
 
     return send_file(processed_file, as_attachment=True) if os.path.exists(processed_file) else "Processing failed", 500
 
+
 SUBSCRIPTIONS_CACHE_PATH = "./assets/cache/users/subscriptions.xml"
 os.makedirs(os.path.dirname(SUBSCRIPTIONS_CACHE_PATH), exist_ok=True)
 
@@ -1979,7 +1980,7 @@ def escape_xml(text):
                 .replace("<", "&lt;")
                 .replace(">", "&gt;"))
 
-def build_xml(subscriptions, base_url):
+def build_xml(subscriptions, base_url, oauth_token):
     xml_template = f"""<?xml version='1.0' encoding='UTF-8'?>
 <feed>
 {{channels}}
@@ -1990,10 +1991,9 @@ def build_xml(subscriptions, base_url):
     <category scheme='http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat' term='channel'/>
     <content type='application/atom+xml;type=feed' src='http://{base_url}/feeds/api/users/{channel_id}/videos'/>
     <link rel='edit' href='http://{base_url}/edit'/>
-    <yt:username>{channel_id}</yt:username>
+    <yt:username>{username}</yt:username>
     <y9id>{channel_id}</y9id>
     <yt:channelId>{channel_id}</yt:channelId>
-    <yt:display>{name}</yt:display>
 </entry>"""
 
     channel_entries = []
@@ -2002,18 +2002,136 @@ def build_xml(subscriptions, base_url):
         resource = snippet.get("resourceId", {})
 
         if snippet and resource:
-            name = escape_xml(snippet.get("title", ""))
             channel_id = resource.get("channelId", "")
+            
+            # Fetch channel details using oauth_token to get the custom URL (handle)
+            if channel_id:
+                # YouTube API request to get channel info using oauth_token in headers
+                channel_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet&id={channel_id}"
+                headers = {
+                    "Authorization": f"Bearer {oauth_token}"
+                }
+                response = requests.get(channel_url, headers=headers)
+                channel_data = response.json()
+                
+                # Extract the custom URL (channel handle) from the response
+                username = "Unknown"
+                if 'items' in channel_data and len(channel_data['items']) > 0:
+                    custom_url = channel_data['items'][0].get('snippet', {}).get('customUrl', '')
+                    if custom_url:
+                        username = custom_url  # Use the custom URL as the channel handle
+                    else:
+                        # Fallback to channelTitle if no custom URL is available
+                        username = channel_data['items'][0].get('snippet', {}).get('title', '')
+            
+            # Format the username without the @ symbol
             entry = channel_template.format(
-                name=name,
+                username=escape_xml(username),  # This is the channel handle (without @)
                 channel_id=channel_id,
-            base_url=base_url
+                base_url=base_url
             )
 
             channel_entries.append(entry)
 
     return xml_template.format(channels="\n".join(channel_entries))
 
+
+SUBSCRIPTIONS_CACHE_PATH = "./assets/cache/users/subscriptions.xml"
+CHANNELS_CACHE_PATH = "./assets/cache/users/subscriptionsinfos"
+os.makedirs(os.path.dirname(SUBSCRIPTIONS_CACHE_PATH), exist_ok=True)
+os.makedirs(CHANNELS_CACHE_PATH, exist_ok=True)
+
+CACHE_LIFETIME = 24 * 60 * 60  # 24 hours in seconds
+
+def escape_xml(text):
+    return (text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;"))
+
+def get_channel_info(channel_id, oauth_token):
+    # Path to save the channel info
+    channel_cache_path = os.path.join(CHANNELS_CACHE_PATH, f"{channel_id}.json")
+
+    # Check if the cache file exists and if it's older than 24 hours
+    if os.path.isfile(channel_cache_path):
+        file_creation_time = os.path.getmtime(channel_cache_path)
+        if time.time() - file_creation_time < CACHE_LIFETIME:
+            # Cache is valid, read and return the cached data
+            with open(channel_cache_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+
+    # Cache is outdated or does not exist, fetch the data from YouTube API
+    channel_url = f"https://www.googleapis.com/youtube/v3/channels?part=snippet&id={channel_id}"
+    headers = {
+        "Authorization": f"Bearer {oauth_token}"
+    }
+    response = requests.get(channel_url, headers=headers)
+    channel_data = response.json()
+
+    # Extract the custom URL (channel handle) or fallback to channel title
+    username = "Unknown"
+    if 'items' in channel_data and len(channel_data['items']) > 0:
+        custom_url = channel_data['items'][0].get('snippet', {}).get('customUrl', '')
+        if custom_url:
+            username = custom_url  # Use the custom URL as the channel handle
+        else:
+            # Fallback to channelTitle if no custom URL is available
+            username = channel_data['items'][0].get('snippet', {}).get('title', '')
+
+    # Save the channel data to cache for later use
+    with open(channel_cache_path, "w", encoding="utf-8") as f:
+        json.dump(channel_data, f, ensure_ascii=False, indent=4)
+
+    return channel_data
+
+def build_xml(subscriptions, base_url, oauth_token):
+    xml_template = f"""<?xml version='1.0' encoding='UTF-8'?>
+<feed>
+{{channels}}
+</feed>
+"""
+
+    channel_template = """<entry>
+    <category scheme='http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat' term='channel'/>
+    <content type='application/atom+xml;type=feed' src='http://{base_url}/feeds/api/users/{channel_id}/videos'/>
+    <link rel='edit' href='http://{base_url}/edit'/>
+    <yt:username>{username}</yt:username>
+    <y9id>{channel_id}</y9id>
+    <yt:channelId>{channel_id}</yt:channelId>
+</entry>"""
+
+    channel_entries = []
+    for item in subscriptions:
+        snippet = item.get("snippet", {})
+        resource = snippet.get("resourceId", {})
+
+        if snippet and resource:
+            channel_id = resource.get("channelId", "")
+            
+            # Fetch channel details using oauth_token
+            if channel_id:
+                channel_data = get_channel_info(channel_id, oauth_token)
+
+                # Extract the username (channel handle) without '@' symbol
+                username = "Unknown"
+                if 'items' in channel_data and len(channel_data['items']) > 0:
+                    custom_url = channel_data['items'][0].get('snippet', {}).get('customUrl', '')
+                    if custom_url:
+                        username = custom_url.lstrip('@')  # Remove '@' symbol
+                    else:
+                        # Fallback to channelTitle if no custom URL is available
+                        username = channel_data['items'][0].get('snippet', {}).get('title', '')
+            
+            # Format the username without the @ symbol
+            entry = channel_template.format(
+                username=escape_xml(username),  # This is the channel handle (without @)
+                channel_id=channel_id,
+                base_url=base_url
+            )
+
+            channel_entries.append(entry)
+
+    return xml_template.format(channels="\n".join(channel_entries))
 
 @app.route("/feeds/api/users/default/subscriptions", methods=["GET"])
 def subscriptions_xml():
@@ -2027,11 +2145,14 @@ def subscriptions_xml():
             next_page_token = None
 
             while True:
-                url = f"https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=25&access_token={oauth_token}"
+                url = f"https://www.googleapis.com/youtube/v3/subscriptions?part=snippet&mine=true&maxResults=20"
+                headers = {
+                    "Authorization": f"Bearer {oauth_token}"
+                }
                 if next_page_token:
                     url += f"&pageToken={next_page_token}"
 
-                response = requests.get(url)
+                response = requests.get(url, headers=headers)
                 response.raise_for_status()
                 data = response.json()
 
@@ -2047,7 +2168,7 @@ def subscriptions_xml():
                 if not next_page_token:
                     break
 
-            xml_data = build_xml(subscriptions, base_url)
+            xml_data = build_xml(subscriptions, base_url, oauth_token)
 
             # Cache XML for fallback
             with open(SUBSCRIPTIONS_CACHE_PATH, "w", encoding="utf-8") as f:
@@ -2078,7 +2199,7 @@ def subscriptions_xml():
             return Response(cached_xml, mimetype="application/xml")
         else:
             return Response("<error>No cached data available and no oauth_token provided.</error>",
-                            mimetype="application/xml", status=400) 
+                            mimetype="application/xml", status=400)
 
 
 
