@@ -25,6 +25,9 @@ from flask import Flask, Response, request
 import requests
 import xml.sax.saxutils as saxutils
 import sys
+import ast
+import xml.etree.ElementTree as ET
+
 
 from flask import (
     Flask, request, Response, send_file, send_from_directory,
@@ -601,6 +604,117 @@ def serve_video():
 @app.route('/wiitv')
 def wiitv():
     return send_file('swf/leanbacklite_wii.swf', mimetype='application/x-shockwave-flash')
+
+@app.route('/complete/search', methods=['GET'])
+def get_suggestions():
+    # Extract the 'q' parameter from the request
+    query = request.args.get('q', '')
+    
+    if not query:
+        return jsonify({"error": "Query parameter 'q' is required"}), 400
+    
+    # URL to make the second request
+    google_url = f'http://clients1.google.com/complete/search?client=youtube&hl=en&ds=yt&q={query}&xml=t'
+    
+    # Make the request to Google
+    response = requests.get(google_url)
+    
+    # Check if the response is successful (status code 200)
+    if response.status_code != 200:
+        return jsonify({"error": "Failed to fetch suggestions from Google"}), 500
+    
+    # Print the raw content for debugging purposes
+    print("Raw response content:")
+    print(response.text)
+    
+    # Check if the response contains the expected JavaScript callback structure
+    content = response.text
+
+    # Regular expression to extract only the array of suggestions (inside the square brackets)
+    match = re.search(r'window\.google\.ac\.h\(\["[^"]*",\s*(\[\[.*?\]\])\]', content)
+    
+    if not match:
+        return jsonify({"error": "Failed to extract suggestions from the response"}), 500
+    
+    # Extract the second argument from the matched string (which is the suggestions array)
+    suggestions_data = match.group(1)  # This is the list of suggestions as a string
+    print("Extracted suggestions data:")
+    print(suggestions_data)  # Print the extracted part
+    
+    # Clean the data to remove any trailing or misplaced commas
+    cleaned_data = suggestions_data.strip()  # Strip whitespace
+    
+    # Debugging: Check if there are misplaced commas or issues around line 1, column 57
+    print("Before sanitizing:")
+    print(cleaned_data)  # Output the raw, extracted part before any cleaning
+    
+    # Fix common issues:
+    # 1. Remove any trailing commas before closing square brackets
+    cleaned_data = re.sub(r',\s*\]$', ']', cleaned_data)  # Remove trailing commas before closing brackets
+    # 2. Ensure no stray commas in between list elements
+    cleaned_data = re.sub(r',\s*(?=\])', '', cleaned_data)  # Remove comma before closing brackets
+    # 3. Remove any extra commas inside the lists
+    cleaned_data = re.sub(r',\s*(?=\[\[)', '', cleaned_data)  # Fix extra commas before nested lists
+    
+    # Handle unicode by ensuring all unicode escapes are properly decoded
+    cleaned_data = bytes(cleaned_data, 'utf-8').decode('unicode_escape')
+    
+    # Debugging: Check the sanitized version
+    print("Sanitized suggestions data:")
+    print(cleaned_data)  # Print the sanitized data
+    
+    try:
+        # Attempt to parse the cleaned data
+        suggestions_list = json.loads(cleaned_data)
+    except json.JSONDecodeError as e:
+        # If JSON parsing fails, skip parsing and generate XML directly from the raw response
+        print(f"JSONDecodeError: {str(e)}. Generating XML directly from raw response.")
+
+        # Initialize the <toplevel> element for XML
+        toplevel = ET.Element('toplevel')
+        
+        # Create a <CompleteSuggestion> element directly from the raw match
+        suggestion_element = ET.SubElement(toplevel, 'CompleteSuggestion')
+        
+        # Fix the regular expression to capture the raw suggestion values correctly
+        raw_suggestions = cleaned_data[1:-1]  # Removing outer square brackets
+        raw_suggestions_list = re.findall(r'\["(.*?)"', raw_suggestions)  # Extract text inside quotes
+
+        print("Raw suggestions list:")
+        print(raw_suggestions_list)  # Debugging to ensure the suggestions are extracted properly
+
+        # Add suggestions to XML
+        for suggestion in raw_suggestions_list:
+            ET.SubElement(suggestion_element, 'suggestion', {'data': suggestion})
+
+        # Convert the XML tree to a string
+        xml_str = ET.tostring(toplevel, encoding='utf-8').decode('utf-8')
+        
+        # Return the raw XML as response
+        return xml_str, 200, {'Content-Type': 'application/xml'}
+
+    # If JSON parsing succeeds, process normally
+    # Get the first suggestion (only the first list inside the array)
+    first_suggestion_group = suggestions_list[0] if suggestions_list else []
+
+    # Initialize the <toplevel> element for XML
+    toplevel = ET.Element('toplevel')
+    
+    # Create a <CompleteSuggestion> element for the first suggestion
+    if first_suggestion_group:
+        suggestion_element = ET.SubElement(toplevel, 'CompleteSuggestion')
+        # Add the first suggestion to the XML element
+        for suggestion in first_suggestion_group:
+            suggestion_data = suggestion[0]  # Get the suggestion text
+            ET.SubElement(suggestion_element, 'suggestion', {'data': suggestion_data})
+    
+    # Convert the XML tree to a string
+    xml_str = ET.tostring(toplevel, encoding='utf-8').decode('utf-8')
+    
+    # Return the formatted XML response
+    return xml_str, 200, {'Content-Type': 'application/xml'}
+
+
 
 @app.route('/s/tv/wii/config')
 def config():
