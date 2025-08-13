@@ -1,666 +1,1158 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<feed xmlns='http://www.w3.org/2005/Atom'
-xmlns:media='http://search.yahoo.com/mrss/'
-xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
-xmlns:gd='http://schemas.google.com/g/2005'
-xmlns:yt='http://192.168.1.27/schemas/2007'>
-    <id>http://192.168.1.27/feeds/api/standardfeeds/us/recently_featured</id>
-    <updated>2010-12-21T18:59:58.000-08:00</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
-    <title type='text'> </title>
-    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
-    <author>
-        <name>YouTube</name>
-        <uri>http://www.youtube.com/</uri>
-    </author>
-    <generator version='2.0' uri='http://192.168.1.27/'>YouTube data API</generator>
-    <openSearch:totalResults>25</openSearch:totalResults>
-    <openSearch:startIndex>1</openSearch:startIndex>
-    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/Sv4c4v520NQ</id>
-            <youTubeId id='Sv4c4v520NQ'>Sv4c4v520NQ</youTubeId>
-            <published>2025-06-08T22:00:00.000Z</published>
-            <updated>2025-06-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Viitube | A Youtube on Wii Revival (Version 2)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/Sv4c4v520NQ/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/Sv4c4v520NQ/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=Sv4c4v520NQ' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=Sv4c4v520NQ'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/Sv4c4v520NQ/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/Sv4c4v520NQ/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/Sv4c4v520NQ/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='782'/>
-                <yt:videoid id='Sv4c4v520NQ'>Sv4c4v520NQ</yt:videoid>
-                <youTubeId id='Sv4c4v520NQ'>Sv4c4v520NQ</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="3" viewCount="539"/>
-            <yt:rating numLikes="32" numDislikes="3"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/A5L9E5s4njo</id>
-            <youTubeId id='A5L9E5s4njo'>A5L9E5s4njo</youTubeId>
-            <published>2025-06-08T22:00:00.000Z</published>
-            <updated>2025-06-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>E4-Breakdown During Big brother (Season 7) (November 2006) (MOCK)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/A5L9E5s4njo/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/A5L9E5s4njo/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=A5L9E5s4njo' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=A5L9E5s4njo'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/A5L9E5s4njo/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/A5L9E5s4njo/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/A5L9E5s4njo/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='417'/>
-                <yt:videoid id='A5L9E5s4njo'>A5L9E5s4njo</yt:videoid>
-                <youTubeId id='A5L9E5s4njo'>A5L9E5s4njo</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="2" viewCount="348"/>
-            <yt:rating numLikes="20" numDislikes="2"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/gJ3PcDZtv5E</id>
-            <youTubeId id='gJ3PcDZtv5E'>gJ3PcDZtv5E</youTubeId>
-            <published>2025-02-08T23:00:00.000Z</published>
-            <updated>2025-02-08T23:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Wii No Ma v770 Revival  (Vii no ma) (beta test)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/gJ3PcDZtv5E/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/gJ3PcDZtv5E/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=gJ3PcDZtv5E' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=gJ3PcDZtv5E'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/gJ3PcDZtv5E/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/gJ3PcDZtv5E/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/gJ3PcDZtv5E/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='678'/>
-                <yt:videoid id='gJ3PcDZtv5E'>gJ3PcDZtv5E</yt:videoid>
-                <youTubeId id='gJ3PcDZtv5E'>gJ3PcDZtv5E</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="2" viewCount="307"/>
-            <yt:rating numLikes="18" numDislikes="2"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/xahWuRVdR80</id>
-            <youTubeId id='xahWuRVdR80'>xahWuRVdR80</youTubeId>
-            <published>2025-05-08T22:00:00.000Z</published>
-            <updated>2025-05-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Youtube On Wii Revival (ViiTube)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/xahWuRVdR80/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/xahWuRVdR80/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=xahWuRVdR80' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=xahWuRVdR80'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/xahWuRVdR80/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/xahWuRVdR80/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/xahWuRVdR80/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='258'/>
-                <yt:videoid id='xahWuRVdR80'>xahWuRVdR80</yt:videoid>
-                <youTubeId id='xahWuRVdR80'>xahWuRVdR80</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="1" viewCount="273"/>
-            <yt:rating numLikes="16" numDislikes="1"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/boswnYyPQCI</id>
-            <youTubeId id='boswnYyPQCI'>boswnYyPQCI</youTubeId>
-            <published>2025-03-08T23:00:00.000Z</published>
-            <updated>2025-03-08T23:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Wii No Ma v0/v512 overview (Vii No Ma) (Read description)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/boswnYyPQCI/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/boswnYyPQCI/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=boswnYyPQCI' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=boswnYyPQCI'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/boswnYyPQCI/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/boswnYyPQCI/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/boswnYyPQCI/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='266'/>
-                <yt:videoid id='boswnYyPQCI'>boswnYyPQCI</yt:videoid>
-                <youTubeId id='boswnYyPQCI'>boswnYyPQCI</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="1" viewCount="195"/>
-            <yt:rating numLikes="11" numDislikes="1"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/rYbhMaSZ3z8</id>
-            <youTubeId id='rYbhMaSZ3z8'>rYbhMaSZ3z8</youTubeId>
-            <published>2025-04-08T22:00:00.000Z</published>
-            <updated>2025-04-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Wii no ma v0/v512,v770,v1025 overview (Vii No Ma)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/rYbhMaSZ3z8/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/rYbhMaSZ3z8/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=rYbhMaSZ3z8' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=rYbhMaSZ3z8'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/rYbhMaSZ3z8/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/rYbhMaSZ3z8/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/rYbhMaSZ3z8/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='2391'/>
-                <yt:videoid id='rYbhMaSZ3z8'>rYbhMaSZ3z8</yt:videoid>
-                <youTubeId id='rYbhMaSZ3z8'>rYbhMaSZ3z8</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="1" viewCount="166"/>
-            <yt:rating numLikes="9" numDislikes="1"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/b5YvuQLw2Zs</id>
-            <youTubeId id='b5YvuQLw2Zs'>b5YvuQLw2Zs</youTubeId>
-            <published>2025-03-08T23:00:00.000Z</published>
-            <updated>2025-03-08T23:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Riri miaou-carmine (slowed+reverb)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/b5YvuQLw2Zs/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/b5YvuQLw2Zs/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=b5YvuQLw2Zs' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=b5YvuQLw2Zs'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/b5YvuQLw2Zs/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/b5YvuQLw2Zs/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/b5YvuQLw2Zs/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='85'/>
-                <yt:videoid id='b5YvuQLw2Zs'>b5YvuQLw2Zs</yt:videoid>
-                <youTubeId id='b5YvuQLw2Zs'>b5YvuQLw2Zs</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="143"/>
-            <yt:rating numLikes="8" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/tJonN7Sbbl4</id>
-            <youTubeId id='tJonN7Sbbl4'>tJonN7Sbbl4</youTubeId>
-            <published>2025-03-08T23:00:00.000Z</published>
-            <updated>2025-03-08T23:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Wii No Ma v770 Revival (Vii No Ma PreBeta2) (Beta)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/tJonN7Sbbl4/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/tJonN7Sbbl4/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=tJonN7Sbbl4' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=tJonN7Sbbl4'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/tJonN7Sbbl4/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/tJonN7Sbbl4/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/tJonN7Sbbl4/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='742'/>
-                <yt:videoid id='tJonN7Sbbl4'>tJonN7Sbbl4</yt:videoid>
-                <youTubeId id='tJonN7Sbbl4'>tJonN7Sbbl4</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="141"/>
-            <yt:rating numLikes="8" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/vHIzIKwG72Q</id>
-            <youTubeId id='vHIzIKwG72Q'>vHIzIKwG72Q</youTubeId>
-            <published>2025-03-08T23:00:00.000Z</published>
-            <updated>2025-03-08T23:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Vii No Ma:Patching (v3)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/vHIzIKwG72Q/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/vHIzIKwG72Q/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=vHIzIKwG72Q' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=vHIzIKwG72Q'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/vHIzIKwG72Q/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/vHIzIKwG72Q/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/vHIzIKwG72Q/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='816'/>
-                <yt:videoid id='vHIzIKwG72Q'>vHIzIKwG72Q</yt:videoid>
-                <youTubeId id='vHIzIKwG72Q'>vHIzIKwG72Q</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="125"/>
-            <yt:rating numLikes="7" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/_FYkdjSR00M</id>
-            <youTubeId id='_FYkdjSR00M'>_FYkdjSR00M</youTubeId>
-            <published>2025-04-08T22:00:00.000Z</published>
-            <updated>2025-04-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Channel 4 Breakdown during Celebrity Big Brother (January 2005)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/_FYkdjSR00M/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/_FYkdjSR00M/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=_FYkdjSR00M' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=_FYkdjSR00M'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/_FYkdjSR00M/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/_FYkdjSR00M/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/_FYkdjSR00M/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='18'/>
-                <yt:videoid id='_FYkdjSR00M'>_FYkdjSR00M</yt:videoid>
-                <youTubeId id='_FYkdjSR00M'>_FYkdjSR00M</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="124"/>
-            <yt:rating numLikes="7" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/YHppYGEkG3c</id>
-            <youTubeId id='YHppYGEkG3c'>YHppYGEkG3c</youTubeId>
-            <published>2025-06-08T22:00:00.000Z</published>
-            <updated>2025-06-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Viitube | Setup And Patching</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/YHppYGEkG3c/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/YHppYGEkG3c/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=YHppYGEkG3c' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=YHppYGEkG3c'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/YHppYGEkG3c/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/YHppYGEkG3c/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/YHppYGEkG3c/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='885'/>
-                <yt:videoid id='YHppYGEkG3c'>YHppYGEkG3c</yt:videoid>
-                <youTubeId id='YHppYGEkG3c'>YHppYGEkG3c</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="107"/>
-            <yt:rating numLikes="6" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/QgDfF8N7nN0</id>
-            <youTubeId id='QgDfF8N7nN0'>QgDfF8N7nN0</youTubeId>
-            <published>2025-06-08T22:00:00.000Z</published>
-            <updated>2025-06-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Viitube | Amelioration With login (ver 1.1.0)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/QgDfF8N7nN0/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/QgDfF8N7nN0/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=QgDfF8N7nN0' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=QgDfF8N7nN0'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/QgDfF8N7nN0/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/QgDfF8N7nN0/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/QgDfF8N7nN0/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='1611'/>
-                <yt:videoid id='QgDfF8N7nN0'>QgDfF8N7nN0</yt:videoid>
-                <youTubeId id='QgDfF8N7nN0'>QgDfF8N7nN0</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="81"/>
-            <yt:rating numLikes="4" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/703VNFuEW_g</id>
-            <youTubeId id='703VNFuEW_g'>703VNFuEW_g</youTubeId>
-            <published>2025-03-08T23:00:00.000Z</published>
-            <updated>2025-03-08T23:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Bad Apple On Wii Room Shopping</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/703VNFuEW_g/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/703VNFuEW_g/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=703VNFuEW_g' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=703VNFuEW_g'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/703VNFuEW_g/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/703VNFuEW_g/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/703VNFuEW_g/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='228'/>
-                <yt:videoid id='703VNFuEW_g'>703VNFuEW_g</yt:videoid>
-                <youTubeId id='703VNFuEW_g'>703VNFuEW_g</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="56"/>
-            <yt:rating numLikes="3" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/39WFBUou40A</id>
-            <youTubeId id='39WFBUou40A'>39WFBUou40A</youTubeId>
-            <published>2025-06-08T22:00:00.000Z</published>
-            <updated>2025-06-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Viitube | Login In Test (Version 4)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/39WFBUou40A/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/39WFBUou40A/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=39WFBUou40A' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=39WFBUou40A'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/39WFBUou40A/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/39WFBUou40A/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/39WFBUou40A/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='1234'/>
-                <yt:videoid id='39WFBUou40A'>39WFBUou40A</yt:videoid>
-                <youTubeId id='39WFBUou40A'>39WFBUou40A</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="52"/>
-            <yt:rating numLikes="3" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/B2UweK55x68</id>
-            <youTubeId id='B2UweK55x68'>B2UweK55x68</youTubeId>
-            <published>2025-06-08T22:00:00.000Z</published>
-            <updated>2025-06-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Channel 5 EAS Scenario:Moon enter in colision with earth (MOCK)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/B2UweK55x68/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/B2UweK55x68/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=B2UweK55x68' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=B2UweK55x68'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/B2UweK55x68/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/B2UweK55x68/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/B2UweK55x68/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='259'/>
-                <yt:videoid id='B2UweK55x68'>B2UweK55x68</yt:videoid>
-                <youTubeId id='B2UweK55x68'>B2UweK55x68</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="48"/>
-            <yt:rating numLikes="2" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/ENvBB1WSjeE</id>
-            <youTubeId id='ENvBB1WSjeE'>ENvBB1WSjeE</youTubeId>
-            <published>2025-06-08T22:00:00.000Z</published>
-            <updated>2025-06-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>QVC EAS Scenario-Asteroid Impact closedown (2023) (MOCK)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/ENvBB1WSjeE/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/ENvBB1WSjeE/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=ENvBB1WSjeE' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=ENvBB1WSjeE'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/ENvBB1WSjeE/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/ENvBB1WSjeE/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/ENvBB1WSjeE/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='151'/>
-                <yt:videoid id='ENvBB1WSjeE'>ENvBB1WSjeE</yt:videoid>
-                <youTubeId id='ENvBB1WSjeE'>ENvBB1WSjeE</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="36"/>
-            <yt:rating numLikes="2" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/a0SFWlZoBwU</id>
-            <youTubeId id='a0SFWlZoBwU'>a0SFWlZoBwU</youTubeId>
-            <published>2025-05-08T22:00:00.000Z</published>
-            <updated>2025-05-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>E4 got Screwed... (2009) (Fake)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/a0SFWlZoBwU/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/a0SFWlZoBwU/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=a0SFWlZoBwU' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=a0SFWlZoBwU'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/a0SFWlZoBwU/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/a0SFWlZoBwU/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/a0SFWlZoBwU/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='69'/>
-                <yt:videoid id='a0SFWlZoBwU'>a0SFWlZoBwU</yt:videoid>
-                <youTubeId id='a0SFWlZoBwU'>a0SFWlZoBwU</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="26"/>
-            <yt:rating numLikes="1" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/iomf58mM9Rw</id>
-            <youTubeId id='iomf58mM9Rw'>iomf58mM9Rw</youTubeId>
-            <published>2025-06-08T22:00:00.000Z</published>
-            <updated>2025-06-08T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Compare the market Advert (2008) (Upscaled)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/iomf58mM9Rw/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/iomf58mM9Rw/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=iomf58mM9Rw' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=iomf58mM9Rw'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/iomf58mM9Rw/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/iomf58mM9Rw/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/iomf58mM9Rw/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='30'/>
-                <yt:videoid id='iomf58mM9Rw'>iomf58mM9Rw</yt:videoid>
-                <youTubeId id='iomf58mM9Rw'>iomf58mM9Rw</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="14"/>
-            <yt:rating numLikes="0" numDislikes="0"/>
-        </entry>
-        <entry>
-            <id>http://192.168.1.27/feeds/api/videos/QwhfmkxWrz4</id>
-            <youTubeId id='QwhfmkxWrz4'>QwhfmkxWrz4</youTubeId>
-            <published>2025-07-03T22:00:00.000Z</published>
-            <updated>2025-07-03T22:00:00.000Z</updated>
-            <category scheme="http://192.168.1.27/schemas/2007/categories.cat" label="-" term="-">-</category>
-            <title type='text'>Genshin Impact - La vaguelette (Slowed + Reverb)</title>
-            <content type='text'></content>
-            <link rel="http://192.168.1.27/schemas/2007#video.related" href="http://192.168.1.27/feeds/api/videos/QwhfmkxWrz4/related"/>
-            <author>
-                <name>kinich-j3x</name>
-                <uri>http://192.168.1.27/feeds/api/users/kinich-j3x</uri>
-            </author>
-            <gd:comments>
-                <gd:feedLink href='http://192.168.1.27/feeds/api/videos/QwhfmkxWrz4/comments' countHint='530'/>
-            </gd:comments>
-            <media:group>
-                <media:category label='-' scheme='http://192.168.1.27/schemas/2007/categories.cat'>-</media:category>
-                <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=QwhfmkxWrz4' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-                <media:description type='plain'></media:description>
-                <media:keywords>-</media:keywords>
-                <media:player url='http://www.youtube.com/watch?v=QwhfmkxWrz4'/>
-                <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/QwhfmkxWrz4/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/QwhfmkxWrz4/0.jpg' height='240' width='320' time='00:00:00'/>
-                <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/QwhfmkxWrz4/0.jpg' height='240' width='320' time='00:00:00'/>
-                <yt:duration seconds='173'/>
-                <yt:videoid id='QwhfmkxWrz4'>QwhfmkxWrz4</yt:videoid>
-                <youTubeId id='QwhfmkxWrz4'>QwhfmkxWrz4</youTubeId>
-                <media:credit role='uploader' name='kinich-j3x'>kinich-j3x</media:credit>
-            </media:group>
-            <gd:rating average='5' max='5' min='1' numRaters='0' rel='http://schemas.google.com/g/2005#overall'/>
-            <yt:statistics favoriteCount="0" viewCount="13"/>
-            <yt:rating numLikes="0" numDislikes="0"/>
-        </entry>
+<feed
+	xmlns='http://www.w3.org/2005/Atom'
+	xmlns:gd='http://schemas.google.com/g/2005'
+	xmlns:yt='http://192.168.1.27//schemas/2007'
+	xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/'
+	xmlns:media='http://search.yahoo.com/mrss/' gd:etag='W/&quot;CEIMR384cSp7I2A9XRdUE0Q.&quot;'>
+	<id>tag:youtube.com,2008:user:19cachicha:uploads</id>
+	<updated>2014-12-01T00:09:46.139Z</updated>
+	<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27//schemas/2007#video'/>
+	<title>Search results</title>
+	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
+	<link rel='alternate' type='text/html' href='http://www.youtube.com/channel/UC9yMWgQf2_xMhbdKPo7Ljrw/videos'/>
+	<link rel='hub' href='http://pubsubhubbub.appspot.com'/>
+	<author>
+		<name>Youtube</name>
+		<uri>http://192.168.1.27//feeds/api/users/Youtube</uri>
+		<yt:userId>null</yt:userId>
+	</author>
+	<generator version='2.1' uri='http://192.168.1.27/'>YouTube data API</generator>
+	<openSearch:totalResults>9955</openSearch:totalResults>
+	<openSearch:startIndex>1</openSearch:startIndex>
+	<openSearch:itemsPerPage>20</openSearch:itemsPerPage>
+    <entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:TwIvUbOhcKE</id>
+		<published>2025-08-07T14:11:53</published>
+		<updated>2025-08-07T14:11:53</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>How NOT to Make an Electric Guitar (The Hazards of Electricity)</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/TwIvUbOhcKE?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=TwIvUbOhcKE&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/TwIvUbOhcKE/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=TwIvUbOhcKE'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/TwIvUbOhcKE?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/TwIvUbOhcKE/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/TwIvUbOhcKE?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=TwIvUbOhcKE' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=TwIvUbOhcKE' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=TwIvUbOhcKE' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Don&apos;t make your electric guitar this way! Just learn to be safe with electricity...
+For more design details, please see: http://www.electroboom.com/?p=336
+
+It would be pretty awesome if you support ElectroBOOM at Patreon:  
+http://patreon.com/electroboom
+
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+Follow me on Twitter: https://twitter.com/ElectroBOOMGuy
+
+Especial thanks to:
+Billie Joe Armstrong for his outburst at the iHeart Radio Music Festival 2012
+and
+&quot;VeryMisleading&quot; for the picture &quot;Light at the End of the Tunnel&quot;
+and
+Lord Darth Vader for his appearance!
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=TwIvUbOhcKE&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/TwIvUbOhcKE/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/TwIvUbOhcKE/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/TwIvUbOhcKE/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/TwIvUbOhcKE/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/TwIvUbOhcKE/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/TwIvUbOhcKE/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/TwIvUbOhcKE/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>How NOT to Make an Electric Guitar (The Hazards of Electricity)</media:title>
+			<yt:duration seconds='195'/>
+	        <yt:uploaded>2025-08-07T14:11:53</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>TwIvUbOhcKE</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='22219071'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:lT3vGaOLWqE</id>
+		<published>2025-08-07T14:11:54</published>
+		<updated>2025-08-07T14:11:54</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Making a Jacob&apos;s Ladder to Celebrate a Million Subs!</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/lT3vGaOLWqE?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=lT3vGaOLWqE&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/lT3vGaOLWqE/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=lT3vGaOLWqE'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/lT3vGaOLWqE?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/lT3vGaOLWqE/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/lT3vGaOLWqE?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=lT3vGaOLWqE' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=lT3vGaOLWqE' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=lT3vGaOLWqE' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Thank you everyone for raising my channel to where it is. And DO NOT try making a Jacob’s Ladder at home! I still want to have you around. 
+
+Read about it at: http://www.electroboom.com/?p=976
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+
+It would be pretty awesome if you support ElectroBOOM at Patreon:  
+http://patreon.com/electroboom
+
+If you need a 3D printer, Lulzbot is a great and well reviewed brand which I have at home: http://lulzbot.com
+Also PLA is my favourite material!
+
+And special thanks to my sponsors and patrons:  
+http://www.electroboom.com/?page_id=727
+
+And thanks to SingKingKaraoke for their awesome Karaoke music:
+https://www.youtube.com/singkingkaraoke
+
+Below are my Super Patrons with support to the extreme!
+
+Aki K. at http://www.pc-doctor.com/
+James Y. at http://vsee.com/
+Christopher R.
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=lT3vGaOLWqE&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/lT3vGaOLWqE/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/lT3vGaOLWqE/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/lT3vGaOLWqE/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/lT3vGaOLWqE/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/lT3vGaOLWqE/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/lT3vGaOLWqE/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/lT3vGaOLWqE/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Making a Jacob&apos;s Ladder to Celebrate a Million Subs!</media:title>
+			<yt:duration seconds='628'/>
+	        <yt:uploaded>2025-08-07T14:11:54</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>lT3vGaOLWqE</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='19264732'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:MrnCDKB1hE0</id>
+		<published>2025-08-07T14:11:54</published>
+		<updated>2025-08-07T14:11:54</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Making a Heated Seat</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/MrnCDKB1hE0?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=MrnCDKB1hE0&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/MrnCDKB1hE0/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=MrnCDKB1hE0'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/MrnCDKB1hE0?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/MrnCDKB1hE0/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/MrnCDKB1hE0?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=MrnCDKB1hE0' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=MrnCDKB1hE0' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=MrnCDKB1hE0' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Heated Seat?? well you might want to buy one instead! But maybe we can learn something from it.
+The keysight giveaway is concluded, thank you everyone! See the comment for winners.
+
+It would be pretty awesome if you support ElectroBOOM at Patreon:  
+http://patreon.com/electroboom
+
+Checkout my Amazon picks (my affiliate link): https://www.amazon.com/shop/Electroboom
+
+Enter your school for tools: https://goo.gl/forms/VAgRre8rLVvA1cEi2
+
+My other articles: https://www.electroboom.com/
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+
+Thanks to http://CircuitSpecialists.com and http://keysight.com for proving my essential lab tools and giveaways.
+
+Below are my Super Patrons with support to the extreme!
+
+Nicholas Moller at https://www.usbmemorydirect.com
+The Guitar Rig Guru at https://www.altium.com/
+Mark W. Bennett
+
+My sponsors and top patrons: http://www.electroboom.com/?page_id=727
+
+By: Mehdi Sadaghdar
+
+--------------------------------------------------------------------------
+#HeatedSeat #ElectroBOOM</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=MrnCDKB1hE0&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/MrnCDKB1hE0/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/MrnCDKB1hE0/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/MrnCDKB1hE0/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/MrnCDKB1hE0/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/MrnCDKB1hE0/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/MrnCDKB1hE0/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/MrnCDKB1hE0/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Making a Heated Seat</media:title>
+			<yt:duration seconds='729'/>
+	        <yt:uploaded>2025-08-07T14:11:54</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>MrnCDKB1hE0</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='15254221'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:DOMs7mYm_zs</id>
+		<published>2025-08-07T14:11:54</published>
+		<updated>2025-08-07T14:11:54</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>7 MILLION VOLT TASER (stun... thingy)!!!</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/DOMs7mYm_zs?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=DOMs7mYm_zs&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/DOMs7mYm_zs/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=DOMs7mYm_zs'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/DOMs7mYm_zs?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/DOMs7mYm_zs/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/DOMs7mYm_zs?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=DOMs7mYm_zs' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=DOMs7mYm_zs' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=DOMs7mYm_zs' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>While the police taser creates 50kV, how can there be stun or taser products at 7 million volts or more out there? WHAT’S GOING ON?! 
+
+It would be pretty awesome if you support ElectroBOOM at Patreon:  
+http://patreon.com/electroboom
+
+
+Read other articles at: http://www.electroboom.com
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+
+Thanks to:
+http://CircuitSpecialists.com for proving my essential lab tools
+My sponsors and patrons, http://www.electroboom.com/?page_id=727
+
+Below are my Super Patrons with support to the extreme!
+
+Aki K. at http://www.pc-doctor.com/
+Enzo Breda Lee
+
+The Yellow Jacket Review videos:
+JerryRigEverything: https://youtu.be/XaJSYxit1qI 
+Unbox Therapy: https://youtu.be/bfArLcysAIc 
+
+Touching 200kV, Jefferson Lab video: https://youtu.be/ubZuSZYVBng 
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=DOMs7mYm_zs&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/DOMs7mYm_zs/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/DOMs7mYm_zs/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/DOMs7mYm_zs/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/DOMs7mYm_zs/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/DOMs7mYm_zs/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/DOMs7mYm_zs/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/DOMs7mYm_zs/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>7 MILLION VOLT TASER (stun... thingy)!!!</media:title>
+			<yt:duration seconds='615'/>
+	        <yt:uploaded>2025-08-07T14:11:54</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>DOMs7mYm_zs</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='12395864'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:mdZo_keUoEs</id>
+		<published>2025-08-07T14:11:54</published>
+		<updated>2025-08-07T14:11:54</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Just Try and Make Your Own Coil-Gun (Accelerator)</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/mdZo_keUoEs?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=mdZo_keUoEs&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/mdZo_keUoEs/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=mdZo_keUoEs'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/mdZo_keUoEs?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/mdZo_keUoEs/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/mdZo_keUoEs?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=mdZo_keUoEs' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=mdZo_keUoEs' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=mdZo_keUoEs' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Learn how to make a Coil Accelerator, just don&apos;t hurt yourself or anyone else for that matter! If you like the detailed design, please read more at: http://www.electroboom.com/?p=101
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+Follow on Twitter: https://twitter.com/ElectroBOOMGuy
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=mdZo_keUoEs&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/mdZo_keUoEs/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/mdZo_keUoEs/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/mdZo_keUoEs/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/mdZo_keUoEs/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/mdZo_keUoEs/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/mdZo_keUoEs/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/mdZo_keUoEs/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Just Try and Make Your Own Coil-Gun (Accelerator)</media:title>
+			<yt:duration seconds='220'/>
+	        <yt:uploaded>2025-08-07T14:11:54</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>mdZo_keUoEs</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='10371166'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:dje7uhyW23o</id>
+		<published>2025-08-07T14:11:54</published>
+		<updated>2025-08-07T14:11:54</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Making 500,000 VOLT ARC with Marx Generator</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/dje7uhyW23o?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=dje7uhyW23o&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/dje7uhyW23o/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=dje7uhyW23o'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/dje7uhyW23o?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/dje7uhyW23o/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/dje7uhyW23o?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=dje7uhyW23o' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=dje7uhyW23o' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=dje7uhyW23o' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>You can make a Lightening Bolt with a Marx Generator! I’m ZEUS!!
+Go to https://brilliant.org/electroboom to get 20% off of your annual membership and start learning!!
+
+Support ElectroBOOM: http://patreon.com/electroboom
+
+Checkout my Amazon picks (my affiliate link): https://www.amazon.com/shop/Electroboom
+
+Post your submissions to: http://reddit.com/r/electroboom 
+
+My Facebook: http://www.facebook.com/ElectroBOOM
+My Twitter: http://twitter.com/electroboomguy
+My other articles: https://www.electroboom.com/
+
+Thanks to http://CircuitSpecialists.com and http://keysight.com for proving my essential lab tools and giveaways.
+
+Below are my Super Patrons with support to the extreme!
+
+Nicholas Moller at https://www.usbmemorydirect.com
+Sam Lutfi
+EIM Technology: https://www.eimtechnology.com/
+Maestri Investment Group Ltd.: https://investmaestri.com/
+
+Enter your school for tools: https://goo.gl/forms/VAgRre8rLVvA1cEi2
+
+My sponsors and top patrons: http://www.electroboom.com/?page_id=727
+
+By: Mehdi Sadaghdar
+--------------------------------------------------------------------------</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=dje7uhyW23o&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/dje7uhyW23o/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/dje7uhyW23o/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/dje7uhyW23o/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/dje7uhyW23o/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/dje7uhyW23o/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/dje7uhyW23o/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/dje7uhyW23o/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Making 500,000 VOLT ARC with Marx Generator</media:title>
+			<yt:duration seconds='761'/>
+	        <yt:uploaded>2025-08-07T14:11:54</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>dje7uhyW23o</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='9231838'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:5YBwDNfOaxU</id>
+		<published>2025-08-07T14:11:54</published>
+		<updated>2025-08-07T14:11:54</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Graphite and Its Awesome Properties</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/5YBwDNfOaxU?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=5YBwDNfOaxU&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/5YBwDNfOaxU/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=5YBwDNfOaxU'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/5YBwDNfOaxU?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/5YBwDNfOaxU/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/5YBwDNfOaxU?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=5YBwDNfOaxU' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=5YBwDNfOaxU' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=5YBwDNfOaxU' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Graphite is one of the many interesting forms of carbon. And carbon I love! It morphs into coal, diamond, graphite, graphene, fullerenes, nanotubes, buckyballs and more, all with their own set of fantastic properties. Except for CO2, that causes global warming. But graphite is awesome!
+
+Read my article at: http://www.electroboom.com/?p=835
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM 
+
+It would be pretty cool if you Support ElectroBOOM at Patreon: http://patreon.com/electroboom 
+
+Thanks to SEEK Thermal for providing the cameras to my patrons. 
+If you like to purchase their product at www.thermal.com, make sure to use promo code “electroboom20” to get 20% discount till the end of August 2016.
+
+Visit Keysight channel for valuable information on oscilloscopes: 
+https://www.youtube.com/user/KeysightOscilloscope
+Make sure to visit http://circuitspecialists.com for lab equipment like mine.
+
+My videos are also available to watch at:
+
+http://www.liveleak.com/c/Mehdi-S
+http://vessel.com/electroboom 
+
+And special thanks to my sponsors and patrons:
+http://www.electroboom.com/?page_id=727 
+
+Below are my Super Patrons with support to the extreme!
+
+Aki K. at PC Doctor Inc.
+
+Watch Next:
+Thermal Imaging: https://youtu.be/1DiqL8iFD8g
+Jumpstart with Supercaps: https://youtu.be/tKki89sq0XY
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=5YBwDNfOaxU&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/5YBwDNfOaxU/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/5YBwDNfOaxU/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/5YBwDNfOaxU/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/5YBwDNfOaxU/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/5YBwDNfOaxU/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/5YBwDNfOaxU/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/5YBwDNfOaxU/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Graphite and Its Awesome Properties</media:title>
+			<yt:duration seconds='298'/>
+	        <yt:uploaded>2025-08-07T14:11:54</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>5YBwDNfOaxU</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='8345323'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:hp97GjuULX8</id>
+		<published>2025-08-07T14:11:55</published>
+		<updated>2025-08-07T14:11:55</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>The Pain of Electricity (AC versus DC)</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/hp97GjuULX8?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=hp97GjuULX8&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/hp97GjuULX8/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=hp97GjuULX8'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/hp97GjuULX8?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/hp97GjuULX8/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/hp97GjuULX8?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=hp97GjuULX8' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=hp97GjuULX8' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=hp97GjuULX8' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Have you always wondered if you shocked yourself with electricity, which type of electricity would hurt more: AC (Alternating Current) or DC (Direct Current)? Wait no more!
+For more details, please see http://www.electroboom.com/?p=151
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+Follow me on Twitter: https://twitter.com/ElectroBOOMGuy
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=hp97GjuULX8&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/hp97GjuULX8/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/hp97GjuULX8/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/hp97GjuULX8/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/hp97GjuULX8/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/hp97GjuULX8/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/hp97GjuULX8/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/hp97GjuULX8/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>The Pain of Electricity (AC versus DC)</media:title>
+			<yt:duration seconds='249'/>
+	        <yt:uploaded>2025-08-07T14:11:55</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>hp97GjuULX8</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='7989728'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:LMT1sn1bKRY</id>
+		<published>2025-08-07T14:11:55</published>
+		<updated>2025-08-07T14:11:55</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Making &quot;MILLIONS&quot; of AMPS of Current</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/LMT1sn1bKRY?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=LMT1sn1bKRY&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/LMT1sn1bKRY/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=LMT1sn1bKRY'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/LMT1sn1bKRY?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/LMT1sn1bKRY/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/LMT1sn1bKRY?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=LMT1sn1bKRY' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=LMT1sn1bKRY' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=LMT1sn1bKRY' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>The first 1,000 people to use the link will get a 1 month free trial of Skillshare: https://skl.sh/electroboom10221 
+
+You can make a ton of current modifying a transformer, but with little voltage, it means little!
+
+Get your ElectroBOOM Bundle at:
+                                 https://www.circuitspecialists.com/electroboom-101-kit.html
+Thanks for your support at:
+                                 http://patreon.com/electroboom
+Post your submissions to: 
+                                 http://reddit.com/r/electroboom 
+My Facebook:        http://www.facebook.com/ElectroBOOM
+My Twitter:             http://twitter.com/electroboomguy
+My other articles:  https://www.electroboom.com/
+
+Thanks to http://CircuitSpecialists.com and http://keysight.com for proving my essential lab tools and giveaways.
+
+Checkout my Amazon picks (my affiliate link):
+                                 https://www.amazon.com/shop/Electroboom
+
+Below are my Super Patrons with support to the extreme!
+
+- Nicholas Moller at  https://www.usbmemorydirect.com
+- Sam Lutfi
+
+My sponsors and top patrons:
+                                 http://www.electroboom.com/?page_id=727
+Enter your school for tools: 
+                                 https://goo.gl/forms/VAgRre8rLVvA1cEi2
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=LMT1sn1bKRY&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/LMT1sn1bKRY/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/LMT1sn1bKRY/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/LMT1sn1bKRY/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/LMT1sn1bKRY/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/LMT1sn1bKRY/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/LMT1sn1bKRY/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/LMT1sn1bKRY/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Making &quot;MILLIONS&quot; of AMPS of Current</media:title>
+			<yt:duration seconds='851'/>
+	        <yt:uploaded>2025-08-07T14:11:55</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>LMT1sn1bKRY</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='7911350'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:CkGVMWK10qU</id>
+		<published>2025-08-07T14:11:55</published>
+		<updated>2025-08-07T14:11:55</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>How to Make a Taser (Stun Gun)</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/CkGVMWK10qU?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=CkGVMWK10qU&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/CkGVMWK10qU/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=CkGVMWK10qU'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/CkGVMWK10qU?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/CkGVMWK10qU/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/CkGVMWK10qU?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=CkGVMWK10qU' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=CkGVMWK10qU' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=CkGVMWK10qU' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Are you a spark enthusiast like me?! Then learn to make a taser here.
+For more details, please see http://www.electroboom.com/?p=484
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+Follow me on Twitter: https://twitter.com/ElectroBOOMGuy
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=CkGVMWK10qU&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/CkGVMWK10qU/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/CkGVMWK10qU/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/CkGVMWK10qU/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/CkGVMWK10qU/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/CkGVMWK10qU/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/CkGVMWK10qU/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/CkGVMWK10qU/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>How to Make a Taser (Stun Gun)</media:title>
+			<yt:duration seconds='291'/>
+	        <yt:uploaded>2025-08-07T14:11:55</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>CkGVMWK10qU</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='7458129'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:WM25pUsrODk</id>
+		<published>2025-08-07T14:11:55</published>
+		<updated>2025-08-07T14:11:55</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Arcs change shape in my vacuum! RIP Tesla Coil :(</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/WM25pUsrODk?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=WM25pUsrODk&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/WM25pUsrODk/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=WM25pUsrODk'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/WM25pUsrODk?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/WM25pUsrODk/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/WM25pUsrODk?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=WM25pUsrODk' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=WM25pUsrODk' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=WM25pUsrODk' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>I finally managed to get my vacuum chamber working, and run the Tesla coil in it! Awesome effect on arcs, but RIP Tesla coil!
+
+Read other articles at: http://www.electroboom.com/
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+
+It would be pretty awesome if you support ElectroBOOM at Patreon:  
+http://patreon.com/electroboom
+
+Make sure you sign up to get a free Keysight scope at: http://scopemonth.com
+Visit Circuit Specialists for great low cost tools I use, or for the MooshiMeter:  
+http://circuitspecialists.com
+
+And special thanks to my sponsors and patrons:  
+http://www.electroboom.com/?page_id=727
+
+Below are my Super Patrons with support to the extreme!
+
+Aki K. at http://www.pc-doctor.com/
+James Y. at http://vsee.com/
+Christopher R.
+Electronoob
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=WM25pUsrODk&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/WM25pUsrODk/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/WM25pUsrODk/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/WM25pUsrODk/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/WM25pUsrODk/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/WM25pUsrODk/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/WM25pUsrODk/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/WM25pUsrODk/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Arcs change shape in my vacuum! RIP Tesla Coil :(</media:title>
+			<yt:duration seconds='604'/>
+	        <yt:uploaded>2025-08-07T14:11:55</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>WM25pUsrODk</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='6919664'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:06w3-l1AzFk</id>
+		<published>2025-08-07T14:11:55</published>
+		<updated>2025-08-07T14:11:55</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>How Safe Is the SHOWER HEAD OF DOOM?!</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/06w3-l1AzFk?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=06w3-l1AzFk&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/06w3-l1AzFk/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=06w3-l1AzFk'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/06w3-l1AzFk?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/06w3-l1AzFk/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/06w3-l1AzFk?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=06w3-l1AzFk' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=06w3-l1AzFk' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=06w3-l1AzFk' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>If having live wire in shower isn’t bad enough, these water heaters make you do it! How bad is it?
+Also use promo code “ElectroBOOM” at http://CircuitSpecialists.com for 10% off. And for my multi-talented scope, follow this link: 
+https://www.circuitspecialists.com/hantek2d72_70mhz_oscilloscope.html
+
+The sign up for the Scope/meter/gen draw is closed now. See comments.
+
+It would be pretty awesome if you support ElectroBOOM at Patreon:  
+http://patreon.com/electroboom
+
+Checkout my Amazon picks (my affiliate link): https://www.amazon.com/shop/Electroboom
+
+Follow me on Facebook: http://www.facebook.com/ElectroBOOM
+And Twitter: http://twitter.com/electroboomguy
+My other articles: https://www.electroboom.com/
+
+Enter your school for tools: https://goo.gl/forms/VAgRre8rLVvA1cEi2
+
+Thanks to http://CircuitSpecialists.com and http://keysight.com for proving my essential lab tools and giveaways.
+
+Below are my Super Patrons with support to the extreme!
+
+Nicholas Moller at https://www.usbmemorydirect.com
+The Guitar Rig Guru at https://www.altium.com/
+Mark W. Bennett
+Moreno Gianola
+Andy Rod
+Sergio
+
+My sponsors and top patrons: http://www.electroboom.com/?page_id=727
+
+Related Videos:
+Why Charging Phones Take Victims: https://youtu.be/SHGo-52wCDc 
+
+By: Mehdi Sadaghdar
+--------------------------------------------------------------------------
+#ShowerHead #WaterHeater</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=06w3-l1AzFk&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/06w3-l1AzFk/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/06w3-l1AzFk/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/06w3-l1AzFk/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/06w3-l1AzFk/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/06w3-l1AzFk/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/06w3-l1AzFk/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/06w3-l1AzFk/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>How Safe Is the SHOWER HEAD OF DOOM?!</media:title>
+			<yt:duration seconds='654'/>
+	        <yt:uploaded>2025-08-07T14:11:55</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>06w3-l1AzFk</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='6897422'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:u8s9hpjN25Y</id>
+		<published>2025-08-07T14:11:55</published>
+		<updated>2025-08-07T14:11:55</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>The Touchscreen that Changed the World!</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/u8s9hpjN25Y?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=u8s9hpjN25Y&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/u8s9hpjN25Y/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=u8s9hpjN25Y'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/u8s9hpjN25Y?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/u8s9hpjN25Y/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/u8s9hpjN25Y?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=u8s9hpjN25Y' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=u8s9hpjN25Y' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=u8s9hpjN25Y' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Try everything Brilliant has to offer for free visiting https://brilliant.org/electroboom. You’ll also get 20% off an annual premium subscription.
+Touchscreens are awesome parts of electronics! The new(ish) best way to interact with devices and yet, such simple components. 
+
+For Exclusive Content, join:
+Patreon: http://patreon.com/electroboom
+YouTube membership: https://www.youtube.com/channel/UCJ0-OtVpF0wOKEqT2Z1HEtA/join
+
+Post your submissions to: http://reddit.com/r/electroboom 
+
+Instagram: http://instagram.com/mehdi_sadaghdar 
+TikTok: https://www.tiktok.com/@electroboomguy
+Twitter:  http://twitter.com/electroboomguy
+Facebook:  http://www.facebook.com/ElectroBOOM
+My articles:  https://www.electroboom.com/
+
+Below are my Super HUGE Patrons!
+
+Raphaël (River) Champeimont
+Zoddy
+Michael Lloyd
+ 
+My sponsors and top patrons: http://www.electroboom.com/?page_id=727
+
+By: Mehdi Sadaghdar
+
+0:00 Introduction
+3:18 Resistive Touchscreen
+5:28 Infrared Touchscreen
+6:43 Capacitive Touchscreen</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=u8s9hpjN25Y&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/u8s9hpjN25Y/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/u8s9hpjN25Y/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/u8s9hpjN25Y/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/u8s9hpjN25Y/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/u8s9hpjN25Y/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/u8s9hpjN25Y/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/u8s9hpjN25Y/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>The Touchscreen that Changed the World!</media:title>
+			<yt:duration seconds='1060'/>
+	        <yt:uploaded>2025-08-07T14:11:55</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>u8s9hpjN25Y</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='655083'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:rg1xXCzLdQ0</id>
+		<published>2025-08-07T14:11:56</published>
+		<updated>2025-08-07T14:11:56</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Canada is Beating US in Electrical Upkeep!</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/rg1xXCzLdQ0?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=rg1xXCzLdQ0&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/rg1xXCzLdQ0/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=rg1xXCzLdQ0'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/rg1xXCzLdQ0?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/rg1xXCzLdQ0/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/rg1xXCzLdQ0?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=rg1xXCzLdQ0' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=rg1xXCzLdQ0' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=rg1xXCzLdQ0' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>A local travel is still travel! Let’s see how the electrical code has changed over time in Canada and if everything is in tiptop shape!
+Also, it would be great to meet you soon at Open Sauce: http://opensauce.live! There is still time left, and tons of creators and makers and inventors are coming!
+
+For Exclusive Content, join:
+Patreon: http://patreon.com/electroboom
+YouTube membership: https://www.youtube.com/channel/UCJ0-OtVpF0wOKEqT2Z1HEtA/join
+
+Post your submissions to: http://reddit.com/r/electroboom 
+
+
+Instagram: http://instagram.com/mehdi_sadaghdar 
+TikTok: https://www.tiktok.com/@electroboomguy
+Twitter:  http://twitter.com/electroboomguy
+Facebook:  http://www.facebook.com/ElectroBOOM
+My articles:  https://www.electroboom.com/
+
+Below are my Super HUGE Patrons!
+
+River Champeimont
+Zoddy
+Michael Lloyd
+ 
+My sponsors and top patrons: http://www.electroboom.com/?page_id=727
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=rg1xXCzLdQ0&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/rg1xXCzLdQ0/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/rg1xXCzLdQ0/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/rg1xXCzLdQ0/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/rg1xXCzLdQ0/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/rg1xXCzLdQ0/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/rg1xXCzLdQ0/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/rg1xXCzLdQ0/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Canada is Beating US in Electrical Upkeep!</media:title>
+			<yt:duration seconds='1483'/>
+	        <yt:uploaded>2025-08-07T14:11:56</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>rg1xXCzLdQ0</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='368911'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry><entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
+		<id>tag:youtube.com,2008:video:uz6xrE8WZHc</id>
+		<published>2025-08-07T14:11:56</published>
+		<updated>2025-08-07T14:11:56</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://192.168.1.27/schemas/2007#video'/>
+		<category scheme='http://192.168.1.27/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<title>Fighting Electrical Fire by AFCI</title>
+		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/uz6xrE8WZHc?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=uz6xrE8WZHc&amp;feature=youtube_gdata'/>
+		<link rel='http://192.168.1.27/schemas/2007#video.related' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/videos/uz6xrE8WZHc/related?v=2'/>
+		<link rel='http://192.168.1.27/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v=uz6xrE8WZHc'/>
+		<link rel='http://192.168.1.27/schemas/2007#uploader' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA?v=2'/>
+		<link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA/uploads/uz6xrE8WZHc?v=2'/>
+		<author>
+			<name>ElectroBOOM</name>
+			<uri>http://192.168.1.27/feeds/api/users/UCJ0-OtVpF0wOKEqT2Z1HEtA</uri>
+			<yt:userId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:userId>
+		</author>
+		<yt:accessControl action='comment' permission='allowed'/>
+		<yt:accessControl action='commentVote' permission='allowed'/>
+		<yt:accessControl action='videoRespond' permission='moderated'/>
+		<yt:accessControl action='rate' permission='allowed'/>
+		<yt:accessControl action='embed' permission='allowed'/>
+		<yt:accessControl action='list' permission='allowed'/>
+		<yt:accessControl action='autoPlay' permission='allowed'/>
+		<yt:accessControl action='syndicate' permission='allowed'/>
+		<gd:comments>
+			<gd:feedLink rel='http://192.168.1.27/schemas/2007#comments' href='http://192.168.1.27/feeds/api/videos/uz6xrE8WZHc/comments?v=2' countHint='24'/>
+		</gd:comments>
+		<media:group>
+			<media:category label='News &amp; Politics' scheme='http://192.168.1.27/schemas/2007/categories.cat'>News</media:category>
+			<media:content url='http://www.youtube.com/v/uz6xrE8WZHc?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
+            <media:content url='http://192.168.1.27/channel_fh264_getvideo?v=uz6xrE8WZHc' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='http://192.168.1.27/get_480?video_id=uz6xrE8WZHc' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='http://192.168.1.27/exp_hd?video_id=uz6xrE8WZHc' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='ElectroBOOM' yt:type='partner'>UCJ0-OtVpF0wOKEqT2Z1HEtA</media:credit>
+			<media:description type='plain'>Try everything Brilliant has to offer for free visiting https://brilliant.org/electroboom. You’ll also get 20% off an annual premium subscription.
+And then install AFCI to save yourself from loose-contact electrical fire!
+
+For Exclusive Content, join:
+Patreon: http://patreon.com/electroboom
+YouTube membership: https://www.youtube.com/channel/UCJ0-OtVpF0wOKEqT2Z1HEtA/join
+
+Post your submissions to: http://reddit.com/r/electroboom 
+
+
+Instagram: http://instagram.com/mehdi_sadaghdar 
+TikTok: https://www.tiktok.com/@electroboomguy
+Twitter:  http://twitter.com/electroboomguy
+Facebook:  http://www.facebook.com/ElectroBOOM
+My articles:  https://www.electroboom.com/
+
+Below are my Super HUGE Patrons!
+
+Sam Lutfi
+River Champeimont
+Zoddy
+Michael Lloyd
+ 
+My sponsors and top patrons: http://www.electroboom.com/?page_id=727
+
+By: Mehdi Sadaghdar</media:description>
+			<media:keywords/>
+			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+			<media:player url='http://www.youtube.com/watch?v=uz6xrE8WZHc&amp;feature=youtube_gdata_player'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/uz6xrE8WZHc/default.jpg' height='90' width='120' time='00:20:53' yt:name='default'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/uz6xrE8WZHc/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/uz6xrE8WZHc/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/uz6xrE8WZHc/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/uz6xrE8WZHc/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/uz6xrE8WZHc/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/uz6xrE8WZHc/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+			<media:title type='plain'>Fighting Electrical Fire by AFCI</media:title>
+			<yt:duration seconds='953'/>
+	        <yt:uploaded>2025-08-07T14:11:56</yt:uploaded>
+			<yt:uploaderId>EEUCJ0-OtVpF0wOKEqT2Z1HEtA</yt:uploaderId>
+			<yt:videoid>uz6xrE8WZHc</yt:videoid>
+		</media:group>
+		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='648682'/>
+		<yt:rating numDislikes='0' numLikes='0'/>
+	</entry>
 </feed>
