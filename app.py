@@ -556,6 +556,16 @@ class GetVideoInfo:
             return {"error": str(e)}
 
 
+# Catch any route under /feeds/api/users/default/*
+@app.route('/feeds/api/users/default', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def catch_default1():
+    # If this endpoint is hit, return 404 error
+    abort(404)
+@app.route('/feeds/api/users/default/<path:path>', methods=['GET', 'POST', 'PUT', 'DELETE'])
+def catch_default(path):
+    # If this endpoint is hit, return 404 error
+    abort(404)
+
 # 🎥 Download video and fetch info
 def download_video(video_id):
     video_url = f"https://www.youtube.com/watch?v={video_id}"
@@ -782,7 +792,7 @@ xmltemplate = """    <entry>
 
 CACHE_PATH = os.path.join("assets", "cache", "users", "river.xml")
 
-@app.route('/feeds/api/users/default/river', methods=['GET'])
+@app.route('/feeds/tv/users/default/river', methods=['GET'])
 def river():
     oauth_token = request.args.get('oauth_token')
 
@@ -1339,7 +1349,7 @@ def fetch_youtube_user_data(access_token):
         return None, "No channel data found"
     return data["items"][0], None
 
-@app.route("/feeds/api/users/default")
+@app.route("/feeds/tv/users/default")
 def user_feed():
     access_token = request.args.get("oauth_token")
 
@@ -1530,7 +1540,7 @@ xmlns:yt='{base_url}/schemas/2007'>
     final_xml = '\n'.join(xml_template)
     return f'{final_xml}'
 
-@app.route('/feeds/api/users/default/playlists', methods=['GET'])
+@app.route('/feeds/tv/users/default/playlists', methods=['GET'])
 def get_playlists():
     oauth_token = request.args.get('oauth_token')
 
@@ -2260,7 +2270,7 @@ def build_xml(subscriptions, base_url, oauth_token):
 
     return xml_template.format(channels="\n".join(channel_entries))
 
-@app.route("/feeds/api/users/default/subscriptions", methods=["GET"])
+@app.route("/feeds/tv/users/default/subscriptions", methods=["GET"])
 def subscriptions_xml():
     oauth_token = request.args.get("oauth_token")
     base_url = request.host
@@ -2745,7 +2755,7 @@ def fetch_liked_videos_xml(oauth_token, base_url):
 
     return xml_output
 
-@app.route("/feeds/api/users/default/favorites")
+@app.route("/feeds/tv/users/default/favorites")
 def favorites():
     oauth_token = request.args.get("oauth_token")
     base_url = request.host_url.strip("/")  # e.g., http://127.0.0.1:5000
@@ -2777,7 +2787,7 @@ def get_channel_id_from_api(oauth_token):
         return data["items"][0]["id"] if "items" in data else None
     return None
 
-@app.route('/feeds/api/users/default/uploads')
+@app.route('/feeds/tv/users/default/uploads')
 def extract_channel_id_and_forward():
     oauth_token = request.args.get("oauth_token")
 
@@ -2960,7 +2970,7 @@ def fetch_watch_later_video_details(video_ids, oauth_token):
     return response.json() if response.status_code == 200 else None
 
 
-@app.route('/feeds/api/users/default/watch_later', methods=['GET'])
+@app.route('/feeds/tv/users/default/watch_later', methods=['GET'])
 def get_watch_later_xml():
     """API endpoint returning ordered Watch Later list with full metadata."""
     oauth_token = request.args.get('oauth_token')
@@ -3773,7 +3783,7 @@ def fetch_video_details_history(video_ids, oauth_token):
     response = requests.get(url, headers=headers)
     return response.json() if response.status_code == 200 else None
 
-@app.route('/feeds/api/users/default/watch_history', methods=['GET'])
+@app.route('/feeds/tv/users/default/watch_history', methods=['GET'])
 def get_watch_history_xml():
     """API endpoint returning ordered watch history with full metadata."""
     oauth_token = request.args.get('oauth_token')
