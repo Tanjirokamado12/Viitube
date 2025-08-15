@@ -738,11 +738,20 @@ def river1():
 def apiloader():
     return send_from_directory('swf', 'apiloader.swf')
  
+@app.route('/apiplayerv3')
+def apiloaderv3():
+    return send_from_directory('swf', 'apiloaderv3.swf') 
+
 @app.route('/yt/swfbin/apiplayer-vfl3wD2Ji.swf')
 @app.route('/videoplayback')
 def videoplayback():
     return send_from_directory('swf', 'apiplayer.swf')
   
+@app.route('/yt/swfbin/apiplayer-vfl3wD2Jiv3.swf')
+@app.route('/videoplaybackv3')
+def videoplaybackv3():
+    return send_from_directory('swf', 'apiplayerv3.swf')
+
 @app.route('/leanbacklite')
 @app.route('/tv')
 def tv():
@@ -2063,6 +2072,140 @@ def get_video_orientation(file_path):
     height = data['streams'][0]['height']
     return "vertical" if height > width else "standard"
 
+# Ensure 'assets' folder exists
+if not os.path.exists("assets"):
+    os.makedirs("assets")
+
+# Ensure the assets folder exists
+ASSETS_FOLDER = 'assets'
+os.makedirs(ASSETS_FOLDER, exist_ok=True)
+
+def flv_get_video_orientation(file_path):
+    """Checks if a video is vertical (height > width)"""
+    probe_cmd = [
+        'ffprobe', '-v', 'error', '-select_streams', 'v:0',
+        '-show_entries', 'stream=width,height', '-of', 'json', file_path
+    ]
+    result = subprocess.run(probe_cmd, capture_output=True, text=True)
+    data = json.loads(result.stdout)
+
+    width = data['streams'][0]['width']
+    height = data['streams'][0]['height']
+    return "vertical" if height > width else "standard"
+
+@app.route('/get_flv', methods=['GET'])
+def flv_get_video():
+    video_id = request.args.get('video_id')
+    if not video_id:
+        return "Missing video_id parameter", 400
+
+    file_path = os.path.join(ASSETS_FOLDER, f"{video_id}.mp4")
+    processed_file = os.path.join(ASSETS_FOLDER, f"{video_id}.flv")
+
+    if os.path.exists(processed_file):
+        return send_file(processed_file, as_attachment=True)
+
+    try:
+        yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
+        stream = yt.streams.get_highest_resolution()
+        stream.download(output_path=ASSETS_FOLDER, filename=f"{video_id}.mp4")
+    except Exception as e:
+        return f"Error downloading video: {str(e)}", 500
+
+    if not os.path.exists(file_path):
+        return "Download failed, file not found", 500
+
+    # Detect orientation
+    orientation = flv_get_video_orientation(file_path)
+
+    # Apply correct FFmpeg processing
+    if orientation == "vertical":  # Convert vertical videos properly
+        ffmpeg_cmd = [
+            'ffmpeg', '-i', file_path,
+            '-vf', 'scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2',
+            '-c:v', 'flv', '-b:v', '300k', '-cpu-used', '8',
+            '-pix_fmt', 'yuv420p', '-c:a', 'libmp3lame', '-b:a', '128k',
+            '-r', '30', '-g', '30', processed_file
+        ]
+    else:  # Keep standard videos unchanged
+        ffmpeg_cmd = [
+            'ffmpeg', '-i', file_path, '-c:v', 'flv', '-b:v', '300k',
+            '-cpu-used', '8', '-pix_fmt', 'yuv420p', '-c:a', 'libmp3lame', '-b:a', '128k',
+            '-r', '30', '-g', '30', processed_file
+        ]
+
+    subprocess.run(ffmpeg_cmd)
+
+    return send_file(processed_file, as_attachment=True) if os.path.exists(processed_file) else "Processing failed", 500
+
+
+@app.route('/get_flv', methods=['GET'])
+def get_flv_video():
+    video_id = request.args.get('video_id')
+    if not video_id:
+        return "Missing video_id parameter", 400
+
+    file_path = os.path.join(ASSETS_FOLDER, f"{video_id}.mp4")
+    processed_file = os.path.join(ASSETS_FOLDER, f"{video_id}.flv")
+
+    if os.path.exists(processed_file):
+        return send_file(processed_file, as_attachment=True)
+
+    try:
+        yt = YouTube(f"https://www.youtube.com/watch?v={video_id}")
+        stream = yt.streams.get_highest_resolution()
+        stream.download(output_path=ASSETS_FOLDER, filename=f"{video_id}.mp4")
+    except Exception as e:
+        return f"Error downloading video: {str(e)}", 500
+
+    if not os.path.exists(file_path):
+        return "Download failed, file not found", 500
+
+    # Detect orientation
+    orientation = get_video_orientation(file_path)
+
+    # Apply correct FFmpeg processing
+    if orientation == "vertical":  # Convert vertical videos properly
+        ffmpeg_cmd = [
+            'ffmpeg', '-i', file_path,
+            '-vf', 'scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2',
+            '-c:v', 'flv', '-b:v', '300k', '-cpu-used', '8',
+            '-pix_fmt', 'yuv420p', '-c:a', 'libmp3lame', '-b:a', '128k',
+            '-r', '30', '-g', '30', processed_file
+        ]
+    else:  # Keep standard videos unchanged
+        ffmpeg_cmd = [
+            'ffmpeg', '-i', file_path, '-c:v', 'flv', '-b:v', '300k',
+            '-cpu-used', '8', '-pix_fmt', 'yuv420p', '-c:a', 'libmp3lame', '-b:a', '128k',
+            '-r', '30', '-g', '30', processed_file
+        ]
+
+    subprocess.run(ffmpeg_cmd)
+
+    return send_file(processed_file, as_attachment=True) if os.path.exists(processed_file) else "Processing failed", 500
+
+
+# Ensure 'assets' folder exists
+if not os.path.exists("assets"):
+    os.makedirs("assets")
+
+# Ensure the assets folder exists
+ASSETS_FOLDER = 'assets'
+os.makedirs(ASSETS_FOLDER, exist_ok=True)
+
+def get_video_orientation(file_path):
+    """Checks if a video is vertical (height > width)"""
+    probe_cmd = [
+        'ffprobe', '-v', 'error', '-select_streams', 'v:0',
+        '-show_entries', 'stream=width,height', '-of', 'json', file_path
+    ]
+    result = subprocess.run(probe_cmd, capture_output=True, text=True)
+    data = json.loads(result.stdout)
+
+    width = data['streams'][0]['width']
+    height = data['streams'][0]['height']
+    return "vertical" if height > width else "standard"
+
 @app.route('/get_webm', methods=['GET'])
 def get_video():
     video_id = request.args.get('video_id')
@@ -2125,12 +2268,14 @@ def build_xml(subscriptions, base_url, oauth_token):
 """
 
     channel_template = """<entry>
+<yt:username>{username}</yt:username>
+<yt:channelId>{channel_id}</yt:channelId>
+<yt:countHint>1</yt:countHint>
     <category scheme='http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat' term='channel'/>
     <content type='application/atom+xml;type=feed' src='http://{base_url}/feeds/api/users/{channel_id}/videos'/>
     <link rel='edit' href='http://{base_url}/edit'/>
-    <yt:username>{username}</yt:username>
     <y9id>{channel_id}</y9id>
-    <yt:channelId>{channel_id}</yt:channelId>
+    <media:thumbnail url='{xml_escape(urljoin(base_url + "/", f"feeds/api/users/{channel_id}/icon"))}'/>
 </entry>"""
 
     channel_entries = []
@@ -2775,66 +2920,182 @@ def favorites():
         else:
             return Response("<videos></videos>", mimetype="application/xml")
 
-CACHE_PATH = os.path.join(os.getcwd(), "assets", "cache", "users", "usersuploads.xml")
+def escape_xml(text):
+    return html.escape(str(text or ""), quote=True)
 
+def iso8601_duration_to_seconds(duration):
+    try:
+        return int(isodate.parse_duration(duration).total_seconds())
+    except:
+        return 0
 
+def get_uploads_playlist_id(token):
+    headers = {'Authorization': f'Bearer {token}'}
+    url = 'https://www.googleapis.com/youtube/v3/channels'
+    params = {'part': 'contentDetails,snippet', 'mine': 'true'}
+    r = requests.get(url, headers=headers, params=params)
+    r.raise_for_status()
+    data = r.json()
+    item = data['items'][0]
+    return item['contentDetails']['relatedPlaylists']['uploads'], item['snippet']['title'], item['snippet']['customUrl'], item['id']
 
-def get_channel_id_from_api(oauth_token):
-    headers = {"Authorization": f"Bearer {oauth_token}"}
-    response = requests.get("https://www.googleapis.com/youtube/v3/channels?part=id&mine=true", headers=headers)
-    if response.status_code == 200:
-        data = response.json()
-        return data["items"][0]["id"] if "items" in data else None
-    return None
+def get_all_video_ids(playlist_id, token):
+    headers = {'Authorization': f'Bearer {token}'}
+    url = 'https://www.googleapis.com/youtube/v3/playlistItems'
+    params = {'part': 'snippet,status', 'playlistId': playlist_id, 'maxResults': 50}
+    video_ids = []
 
-@app.route('/feeds/tv/users/default/uploads')
-def extract_channel_id_and_forward():
-    oauth_token = request.args.get("oauth_token")
-
-    # ✅ If no token, try to serve the cached file
-    if not oauth_token:
-        if os.path.exists(CACHE_PATH):
-            return send_file(CACHE_PATH, mimetype="application/xml")
+    while True:
+        r = requests.get(url, headers=headers, params=params)
+        r.raise_for_status()
+        data = r.json()
+        for item in data.get('items', []):
+            if item['status']['privacyStatus'] == 'public':
+                video_ids.append(item['snippet']['resourceId']['videoId'])
+        if 'nextPageToken' in data:
+            params['pageToken'] = data['nextPageToken']
         else:
-            return Response("<error>Cached file not found</error>", status=404, mimetype="application/xml")
+            break
+    return video_ids
 
-    # ✅ Decode token to get channel_id, or fallback to API
+def chunks(lst, n):
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+
+def get_video_details(video_ids, token):
+    headers = {'Authorization': f'Bearer {token}'}
+    url = 'https://www.googleapis.com/youtube/v3/videos'
+    all_data = []
+
+    for chunk_ids in chunks(video_ids, 50):
+        params = {'part': 'snippet,contentDetails,statistics', 'id': ','.join(chunk_ids)}
+        r = requests.get(url, headers=headers, params=params)
+        r.raise_for_status()
+        data = r.json()
+        for item in data.get('items', []):
+            snippet = item['snippet']
+            content = item['contentDetails']
+            stats = item.get('statistics', {})
+            all_data.append({
+                'videoId': item['id'],
+                'publishedAt': snippet.get('publishedAt'),
+                'title': snippet.get('title'),
+                'description': snippet.get('description'),
+                'channelId': snippet.get('channelId'),
+                'channelTitle': snippet.get('channelTitle'),
+                'duration': content.get('duration'),
+                'viewCount': int(stats.get('viewCount', 0)),
+                'likeCount': int(stats.get('likeCount', 0))
+            })
+    return all_data
+
+@app.route('/feeds/tv//users/default/uploads')
+def user_uploads():
+    token = request.args.get('oauth_token')
+    if not token:
+        return jsonify({'error': 'Missing oauth_token'}), 400
+
+    base_url = f"{request.scheme}://{request.host}"
+
     try:
-        payload = jwt.decode(oauth_token, options={"verify_signature": False})
-        channel_id = payload.get("channel_id")
-    except Exception:
-        channel_id = None
+        playlist_id, channel_title, custom_url, channel_id = get_uploads_playlist_id(token)
+        video_ids = get_all_video_ids(playlist_id, token)
+        enriched = get_video_details(video_ids, token)
 
-    if not channel_id:
-        channel_id = get_channel_id_from_api(oauth_token)
-        if not channel_id:
-            return Response("<error>Failed to retrieve channel ID</error>", status=400, mimetype="application/xml")
+        rss_items = ""
+        for v in enriched:
+            video_id = v['videoId']
+            duration_sec = iso8601_duration_to_seconds(v['duration'])
+            published = escape_xml(v.get("publishedAt", datetime.now(timezone.utc).isoformat()))
+            video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-    # ✅ Build internal URL
-    query_params = request.args.to_dict()
-    query_params["oauth_token"] = oauth_token  # Ensure it's present
-    query_string = urlencode(query_params)
-    internal_path = f"/feeds/viitube/users/{channel_id}/uploads"
-    internal_url = urljoin(request.host_url, f"{internal_path}?{query_string}")
+            rss_items += f"""<entry gd:etag='W/"etag"'>
+  <id>tag:youtube.com,2008:video:{escape_xml(video_id)}</id>
+  <published>{published}</published>
+  <updated>{published}</updated>
+  <category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
+  <category scheme='{base_url}/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+  <title>{escape_xml(v.get("title"))}</title>
+  <content type='application/x-shockwave-flash' src='http://www.youtube.com/v/{escape_xml(video_id)}?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
+  <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={escape_xml(video_id)}&amp;feature=youtube_gdata'/>
+  <link rel='{base_url}/schemas/2007#video.related' type='application/atom+xml' href='{base_url}/feeds/api/videos/{escape_xml(video_id)}/related?v=2'/>
+  <link rel='{base_url}/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v={escape_xml(video_id)}'/>
+  <link rel='{base_url}/schemas/2007#uploader' type='application/atom+xml' href='{base_url}/feeds/api/users/{escape_xml(channel_id)}?v=2'/>
+  <link rel='self' type='application/atom+xml' href='{base_url}/feeds/api/users/{escape_xml(channel_id)}/uploads/{escape_xml(video_id)}?v=2'/>
+  <author>
+    <name>{escape_xml(channel_title)}</name>
+    <uri>{base_url}/feeds/api/users/{escape_xml(channel_id)}</uri>
+    <yt:userId>EE{escape_xml(channel_id)}</yt:userId>
+  </author>
+  <yt:accessControl action='comment' permission='allowed'/>
+  <yt:accessControl action='commentVote' permission='allowed'/>
+  <yt:accessControl action='videoRespond' permission='moderated'/>
+  <yt:accessControl action='rate' permission='allowed'/>
+  <yt:accessControl action='embed' permission='allowed'/>
+  <yt:accessControl action='list' permission='allowed'/>
+  <yt:accessControl action='autoPlay' permission='allowed'/>
+  <yt:accessControl action='syndicate' permission='allowed'/>
+  <gd:comments>
+    <gd:feedLink rel='{base_url}/schemas/2007#comments' href='{base_url}/feeds/api/videos/{escape_xml(video_id)}/comments?v=2' countHint='24'/>
+  </gd:comments>
+  <media:group>
+    <media:category label='News &amp; Politics' scheme='{base_url}/schemas/2007/categories.cat'>News</media:category>
+    <media:content url='http://www.youtube.com/v/{escape_xml(video_id)}?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='{duration_sec}' yt:format='5'/>
+    <media:credit role='uploader' scheme='urn:youtube' yt:display='{escape_xml(channel_title)}' yt:type='partner'>{escape_xml(channel_id)}</media:credit>
+    <media:description type='plain'>{escape_xml(v.get("description"))}</media:description>
+    <media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
+    <media:player url='http://www.youtube.com/watch?v={escape_xml(video_id)}&amp;feature=youtube_gdata_player'/>
+    <media:thumbnail url='http://i.ytimg.com/vi/{escape_xml(video_id)}/default.jpg' height='90' width='120' yt:name='default'/>
+    <media:thumbnail url='http://i.ytimg.com/vi/{escape_xml(video_id)}/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+    <media:thumbnail url='http://i.ytimg.com/vi/{escape_xml(video_id)}/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+    <media:title type='plain'>{escape_xml(v.get("title"))}</media:title>
+    <yt:duration seconds='{duration_sec}'/>
+    <yt:uploaded>{published}</yt:uploaded>
+    <yt:uploaderId>EE{escape_xml(channel_id)}</yt:uploaderId>
+    <yt:videoid>{escape_xml(video_id)}</yt:videoid>
+  </media:group>
+  <yt:statistics favoriteCount='0' viewCount='{v.get("viewCount", 0)}'/>
+  <yt:rating numDislikes='0' numLikes='{v.get("likeCount", 0)}'/>
+</entry>\n"""
 
-    try:
-        # ✅ Make internal request
-        resp = requests.get(internal_url)
-        content = resp.content
-        status_code = resp.status_code
-        content_type = resp.headers.get("Content-Type", "application/xml")
+        updated = datetime.now(timezone.utc).isoformat()
+        channel_feed_id = f"tag:youtube.com,2008:user:{channel_id}:uploads"
+        channel_link = f"http://www.youtube.com/channel/{channel_id}/videos"
 
-        # ✅ Save to cache file
-        os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
-        with open(CACHE_PATH, "wb") as f:
-            f.write(content)
+        rss_feed = f"""<?xml version='1.0' encoding='UTF-8'?>
+<feed
+  xmlns='http://www.w3.org/2005/Atom'
+  xmlns:gd='http://schemas.google.com/g/2005'
+  xmlns:yt='{base_url}/schemas/2007'
+  xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/'
+  xmlns:media='http://search.yahoo.com/mrss/' gd:etag='W/"CEIMR384cSp7I2A9XRdUE0Q."'>
+  <id>{channel_feed_id}</id>
+  <updated>{updated}</updated>
+  <category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
+  <title>User Uploads</title>
+  <logo>http://www.gstatic.com/youtube/img/logo.png</logo>
+  <link rel='alternate' type='text/html' href='{channel_link}'/>
+  <link rel='hub' href='http://pubsubhubbub.appspot.com'/>
+  <author>
+    <name>{escape_xml(channel_title)}</name>
+    <uri>{base_url}/feeds/api/users/{escape_xml(channel_id)}</uri>
+    <yt:userId>EE{escape_xml(channel_id)}</yt:userId>
+  </author>
+  <generator version='2.1' uri='{base_url}'>YouTube data API</generator>
+  <openSearch:totalResults>{len(enriched)}</openSearch:totalResults>
+  <openSearch:startIndex>1</openSearch:startIndex>
+  <openSearch:itemsPerPage>{len(enriched)}</openSearch:itemsPerPage>
+  {rss_items}
+</feed>"""
 
-        return Response(content, status=status_code, content_type=content_type)
+        return Response(rss_feed, mimetype='application/atom+xml')
 
-    except requests.RequestException:
-        return Response("<error>Internal fetch failed</error>", status=500, mimetype="application/xml")
+    except requests.HTTPError as e:
+        return jsonify({'error': 'YouTube API error', 'details': str(e)}), 500
+    except Exception as e:
+        return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
-    
+
 WATCH_LATER_CACHE_PATH = "./assets/cache/watch_later.json"
 CACHE_EXPIRATION = 5 * 3600  # 5 hours (in seconds)
 YOUTUBEI_URL = "https://www.youtube.com/youtubei/v1/browse"
@@ -4907,7 +5168,7 @@ def related_get_related_videos(video_id):
     except Exception as e:
         print(f"Error: {e}")
         return "<error>Error fetching related videos</error>", 500, {'Content-Type': 'application/xml'}
-    
+ 
     
 # === Run ===
 if __name__ == '__main__':
