@@ -1,7 +1,6 @@
 annotated-types==0.7.0
 anyio==4.9.0
 beautifulsoup4==4.13.4
-blackboxprotobuf==1.0.1
 blinker==1.9.0
 cachetools==5.5.2
 certifi==2025.4.26
@@ -31,9 +30,6 @@ mediate==0.1.8
 numpy==2.2.6
 oauthlib==3.2.2
 pandas==2.2.3
-proto-plus==1.26.1
-protobuf==3.10.0
-protobuf-decoder==0.4.0
 psutil==7.0.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
