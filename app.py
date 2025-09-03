@@ -27,7 +27,7 @@ import xml.sax.saxutils as saxutils
 import sys
 import ast
 import xml.etree.ElementTree as ET
-
+import pytz
 
 from flask import (
     Flask, request, Response, send_file, send_from_directory,
@@ -205,6 +205,9 @@ def viitube_playlist_extract_playlist_items(raw):
             pos += 1
     return items_all
 
+from datetime import datetime
+import pytz
+
 def viitube_playlist_fetch_video_details(video_id):
     video_cache_path = VIDEO_VIITUBE_PLAYLIST_CACHE_DIR / f"{video_id}.json"
     VIDEO_VIITUBE_PLAYLIST_CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -217,7 +220,6 @@ def viitube_playlist_fetch_video_details(video_id):
                     resp = json.load(f)  # Try loading the JSON data
                 except json.JSONDecodeError as e:
                     resp = None
-                    # Handle further, such as re-fetching the data
         else:
             # Fetch data from API
             payload = {"context": {"client": {"clientName": "WEB", "clientVersion": "2.20210721.00.00"}}, "videoId": video_id}
@@ -240,6 +242,20 @@ def viitube_playlist_fetch_video_details(video_id):
         video_details = resp.get("videoDetails", {})
         microformat = resp.get("microformat", {}).get("playerMicroformatRenderer", {})
 
+        # Format the published date to "YYYY-MM-DDTHH:MM:SS.000Z" in UTC
+        published_at = microformat.get("publishDate", "")
+        if published_at:
+            try:
+                # Parse the original timestamp with timezone information
+                publish_datetime = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%S%z")
+                # Convert the datetime to UTC
+                publish_datetime_utc = publish_datetime.astimezone(pytz.UTC)
+                # Format it to "YYYY-MM-DDTHH:MM:SS"
+                # Ensure no milliseconds and add the proper UTC format
+                published_at = publish_datetime_utc.strftime("%Y-%m-%dT%H:%M:%S")
+            except ValueError:
+                pass  # If parsing fails, keep the original format
+
         channel_handle = ""
         if "ownerProfileUrl" in microformat:
             channel_handle = microformat["ownerProfileUrl"].split("/")[-1]
@@ -250,7 +266,7 @@ def viitube_playlist_fetch_video_details(video_id):
         return {
             "videoId": video_id,
             "title": video_details.get("title") or microformat.get("title", {}).get("simpleText", ""),
-            "publishedAt": microformat.get("publishDate", ""),
+            "publishedAt": published_at,
             "channelId": video_details.get("channelId") or microformat.get("externalChannelId", ""),
             "channelHandle": channel_handle,
             "channelTitle": video_details.get("author") or microformat.get("ownerChannelName", ""),
@@ -4238,6 +4254,7 @@ def mobile_serve_video():
         return "Internal server error", 500
     
 
+# Constants (replace with your actual values)
 VIITUBE_MOBILE_PLAYLIST_URL = "https://www.youtube.com/youtubei/v1/browse"
 SEARCH_VIITUBE_MOBILE_PLAYLIST_URL = "https://www.youtube.com/youtubei/v1/search"
 MOBILE_PLAYLIST_API_KEY = "YOUR_MOBILE_PLAYLIST_API_KEY_HERE"  # Replace with your YouTube API key
@@ -4374,12 +4391,18 @@ def playlist_extract_playlist_info(tile):
 
     # Thumbnails
     thumbs = []
+    first_video_id = None
     try:
         thumbnails = tile['header']['tileHeaderRenderer']['thumbnail']['thumbnails']
         thumbs = [t['url'] for t in thumbnails]
+        
+        # Extract the video ID of the first video from the thumbnail URL
+        if thumbs:
+            first_video_id = playlist_extract_video_id_from_thumb(thumbs[0])
     except (KeyError, TypeError):
         pass
     info['thumbnails'] = thumbs
+    info['first_video_id'] = first_video_id  # Add the first video ID here
 
     # Number of videos (extract number only)
     num_videos = None
@@ -4417,6 +4440,13 @@ def playlist_extract_playlist_info(tile):
 
     return info
 
+def playlist_extract_video_id_from_thumb(url):
+    # Thumbnail URL pattern: https://i.ytimg.com/vi/<video_id>/hqdefault.jpg
+    match = re.search(r"/vi/([^/]+)/", url)
+    if match:
+        return match.group(1)
+    return ""
+
 def converting_playlists_to_xml(playlists, base_url=""):
     def esc(text):
         if not text:
@@ -4427,19 +4457,13 @@ def converting_playlists_to_xml(playlists, base_url=""):
                     .replace('"', "&quot;")
                     .replace("'", "&apos;"))
 
-    def playlist_extract_video_id_from_thumb(url):
-        # Thumbnail URL pattern: https://i.ytimg.com/vi/<video_id>/hqdefault.jpg
-        match = re.search(r"/vi/([^/]+)/", url)
-        if match:
-            return match.group(1)
-        return ""
-
     playlist_entries = []
     for pl in playlists:
         title = esc(pl.get("title", "") or "")
         playlist_id = esc(pl.get("playlist_id", "") or "")
         num_videos = esc(pl.get("num_videos", "") or "")
         author = esc(pl.get("author", "") or "")
+        first_video_id = esc(pl.get("first_video_id", "") or "")  # Extract first video ID
 
         # Extract video IDs from thumbnail URLs
         thumbnails_xml = "\n".join(
@@ -4447,9 +4471,10 @@ def converting_playlists_to_xml(playlists, base_url=""):
         )
 
         playlist_xml = f"""    <entry>
-	    <id>{esc(base_url)}/feeds/api/users/{author}/playlists/{playlist_id}</id>
-        <playlistId>{playlist_id}</playlistId>
-        <yt:playlistId>{playlist_id}</yt:playlistId>
+            <id>{esc(base_url)}/feeds/api/users/{author}/playlists/{playlist_id}</id>
+            <playlistId>{playlist_id}</playlistId>
+            <yt:playlistId>{playlist_id}</yt:playlistId>
+            <firstVideoId>{first_video_id}</firstVideoId>
 		<published>2008-08-25T10:05:58.000-07:00</published>
 		<updated>2008-08-27T22:37:59.000-07:00</updated>
 		<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#playlistLink'/>
@@ -4462,8 +4487,13 @@ def converting_playlists_to_xml(playlists, base_url=""):
 			<name>{author}</name>
 			<uri>{esc(base_url)}/feeds/api/users/{author}</uri>
 		</author>
+        <media:group>
+           <media:thumbnail url='https://i.ytimg.com/vi/{first_video_id}/default.jpg' height='90' width='120' yt:name='default'/>
+           <media:thumbnail url='https://i.ytimg.com/vi/{first_video_id}/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+           <media:thumbnail url='https://i.ytimg.com/vi/{first_video_id}/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+       </media:group>
 		<gd:feedLink rel='http://gdata.youtube.com/schemas/2007#playlist' href='{esc(base_url)}/feeds/api/playlists/{playlist_id}' countHint='15'/>
-		<yt:description>None</yt:description>
+		<yt:description>None</yt:description> 
         <yt:countHint>{num_videos}</yt:countHint>
 		<summary></summary>
 	</entry>"""
@@ -5373,7 +5403,7 @@ def playlist_route(playlist_id):
                 return abort(500, f"Failed to rebuild XML from cache: {e}")
         else:
             return abort(400, "Missing oauth_token and no cached data available")
-            
+
 # === Run ===
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
