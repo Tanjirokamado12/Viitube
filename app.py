@@ -1409,439 +1409,6 @@ def user_feed():
 
     except Exception as e:
         return Response(f"Error generating XML: {str(e)}", status=500)
-   
-PLAYLIST_CACHE_FILE  = 'assets/cache/users/playlistinfo.json'
-
-def fetch_playlists_from_api(oauth_token):
-    url = 'https://www.googleapis.com/youtube/v3/playlists'
-    params = {
-        'part': 'snippet,contentDetails',
-        'mine': 'true',
-        'maxResults': 25
-    }
-    headers = {
-        'Authorization': f'Bearer {oauth_token}'
-    }
-
-    response = requests.get(url, headers=headers, params=params)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        return None
-
-def fetch_first_video_info(oauth_token, playlist_id):
-    """Get the first video's ID and thumbnail URL in the playlist."""
-    url = 'https://www.googleapis.com/youtube/v3/playlistItems'
-    params = {
-        'part': 'snippet',
-        'playlistId': playlist_id,
-        'maxResults': 25
-    }
-    headers = {
-        'Authorization': f'Bearer {oauth_token}'
-    }
-
-    response = requests.get(url, headers=headers, params=params)
-    if response.status_code == 200:
-        data = response.json()
-        items = data.get('items', [])
-        if not items:
-            return "", ""  # no videos in playlist
-        first_video_id = items[0]['snippet']['resourceId']['videoId']
-        thumbnails = items[0]['snippet'].get('thumbnails', {})
-        thumbnail_url = ""
-        for quality in ['maxres', 'standard', 'high', 'medium', 'default']:
-            if quality in thumbnails:
-                thumbnail_url = thumbnails[quality]['url']
-                break
-        return first_video_id, thumbnail_url
-    else:
-        return "", ""
-
-def build_xml_template(data, base_url, oauth_token=None):
-    if not data:
-        return '"""$xmltemplates\n<error>Unable to retrieve data</error>\n"""'
-
-    xml_template = [f'''<?xml version='1.0' encoding='UTF-8'?>
-<feed xmlns='http://www.w3.org/2005/Atom'
-xmlns:media='http://search.yahoo.com/mrss/'
-xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
-xmlns:gd='http://schemas.google.com/g/2005'
-xmlns:yt='{base_url}/schemas/2007'>
-    <id>{base_url}/feeds/mobile/api/standardfeeds/us/recently_featured</id>
-    <updated>2010-12-21T18:59:58.000-08:00</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
-    <title type='text'> </title>
-    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
-    <author>
-        <name>YouTube</name>
-        <uri>http://www.youtube.com/</uri>
-    </author>
-    <generator version='2.0' uri='{base_url}/'>YouTube data API</generator>
-    <openSearch:totalResults>25</openSearch:totalResults>
-    <openSearch:startIndex>1</openSearch:startIndex>
-    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
-''']
-
-
-    for item in data.get('items', []):
-        playlist_id = item.get("id", "")
-        title = item["snippet"].get("title", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        description = item["snippet"].get("description", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        published_at = item["snippet"].get("publishedAt", "")
-        item_count = item["contentDetails"].get("itemCount", 0)
-        author = item["snippet"].get("channelTitle", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        channel_id = item["snippet"].get("channelId", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-
-        first_video_id = ""
-        thumbnail_url = ""
-        if oauth_token:
-            first_video_id, thumbnail_url = fetch_first_video_info(oauth_token, playlist_id)
-
-        xml_template.append(f"""<entry>
-	    <id>{base_url}/feeds/mobile/api/playlists/{playlist_id}</id>
-        <playlistId>{playlist_id}</playlistId>
-        <yt:playlistId>{playlist_id}</yt:playlistId>
-		<published>2008-08-25T10:05:58.000-07:00</published>
-		<updated>2008-08-27T22:37:59.000-07:00</updated>
-		<category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#playlistLink'/>
-		<title type='text'>{title}</title>
-		<content type='text' src='{base_url}/feeds/mobile/api/playlists/{playlist_id}'>None</content>
-		<link rel='related' type='application/atom+xml' href='{base_url}/feeds/mobile/api/users/{author}'/>
-		<link rel='alternate' type='text/html' href='{base_url}/view_play_list?p={playlist_id}'/>
-		<link rel='self' type='application/atom+xml' href='{base_url}/feeds/mobile/api/playlists/{playlist_id}'/>
-		<author>
-			<name>{author}</name>
-			<uri>{base_url}/feeds/mobile/api/users/{author}</uri>
-		</author>
-		<gd:feedLink rel='{base_url}/schemas/2007#playlist' href='{base_url}/feeds/mobile/api/playlists/{playlist_id}' countHint='{item_count}'/>
-		<yt:description>{description}</yt:description>
-		<media:group>
-			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
-			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
-		</media:group>
-        <yt:countHint>{item_count}</yt:countHint>
-		<summary>{description}</summary>
-	</entry>""")
-
-    xml_template.append('</feed>')
-    final_xml = '\n'.join(xml_template)
-    return f'{final_xml}'
-
-@app.route('/feeds/tv/users/default/playlists', methods=['GET'])
-def get_playlists():
-    oauth_token = request.args.get('oauth_token')
-
-    if oauth_token:
-        data = fetch_playlists_from_api(oauth_token)
-        if data:
-            os.makedirs(os.path.dirname(PLAYLIST_CACHE_FILE ), exist_ok=True)
-            with open(PLAYLIST_CACHE_FILE , 'w', encoding='utf-8') as f:
-                json.dump(data, f, ensure_ascii=False, indent=2)
-        else:
-            return Response("Error fetching data from YouTube API.", status=400)
-    else:
-        if os.path.exists(PLAYLIST_CACHE_FILE ):
-            with open(PLAYLIST_CACHE_FILE , 'r', encoding='utf-8') as f:
-                data = json.load(f)
-        else:
-            return Response("No cached data found and no token provided.", status=404)
-
-    base_url = request.url_root.rstrip('/')
-    xml_output = build_xml_template(data, base_url, oauth_token)
-    return Response(xml_output, mimetype='text/plain')
-    
-
-# ========== UTILS ==========
-
-def ensure_dir(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
-
-def save_json(data, filepath):
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
-
-def load_text_file(filepath):
-    with open(filepath, 'r', encoding='utf-8') as f:
-        return f.read()
-
-def file_exists(path):
-    return os.path.isfile(path)
-
-# ========== YOUTUBE DATA ==========
-
-def get_dislike_count(video_id):
-    url = f"https://returnyoutubedislikeapi.com/votes?videoId={video_id}"
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            path = f"./assets/cache/dislike"
-            ensure_dir(path)
-            save_json(data, f"{path}/{video_id}.json")
-            return data.get('dislikes', 0)
-        return 0
-    except:
-        return 0
-
-def build_playlist_xml(videos_info, base_url):
-    xml = ["""<?xml version='1.0' encoding='UTF-8'?>
-<feed
-	xmlns='http://www.w3.org/2005/Atom'
-	xmlns:app='http://www.w3.org/2007/app'
-	xmlns:media='http://search.yahoo.com/mrss/'
-	xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/'
-	xmlns:gd='http://schemas.google.com/g/2005'
-	xmlns:yt='{e(base_url)}/schemas/2007' gd:etag='W/&quot;DUECRn47eCp7I2A9WhJVEkU.&quot;'>
-	<id>tag:youtube.com,2008:playlist:5A4E6E3F17B78FA1</id>
-	<updated>2012-08-30T00:47:47.000Z</updated>
-	<category scheme='http://schemas.google.com/g/2005#kind' term='{e(base_url)}/schemas/2007#playlist'/>
-	<title>Website</title>
-	<subtitle>New Vybe Videos</subtitle>
-	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
-	<link rel='alternate' type='text/html' href='http://www.youtube.com/playlist?list=PL5A4E6E3F17B78FA1'/>
-	<link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/5A4E6E3F17B78FA1?v=2'/>
-	<link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/5A4E6E3F17B78FA1/batch?v=2'/>
-	<link rel='self' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/5A4E6E3F17B78FA1?start-index=1&amp;max-results=25&amp;v=2'/>
-	<link rel='service' type='application/atomsvc+xml' href='{e(base_url)}/feeds/api/playlists/5A4E6E3F17B78FA1?alt=atom-service&amp;v=2'/>
-	<author>
-		<name>NEWVYBE</name>
-		<uri>{e(base_url)}/feeds/api/users/NEWVYBE</uri>
-		<yt:userId>2rGyD633KCNs0jn3ifYH5g</yt:userId>
-	</author>
-	<generator version='2.1' uri='{e(base_url)}'>YouTube data API</generator>
-	<openSearch:totalResults>6</openSearch:totalResults>
-	<openSearch:startIndex>1</openSearch:startIndex>
-	<openSearch:itemsPerPage>25</openSearch:itemsPerPage>
-	<media:group>
-		<media:content url='http://www.youtube.com/p/PL5A4E6E3F17B78FA1' type='application/x-shockwave-flash' yt:format='5'/>
-		<media:description type='plain'>New Vybe Videos</media:description>
-		<media:thumbnail url='http://i.ytimg.com/vi/0grd767X4Jg/default.jpg' height='90' width='120' yt:name='default'/>
-		<media:thumbnail url='http://i.ytimg.com/vi/0grd767X4Jg/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
-		<media:thumbnail url='http://i.ytimg.com/vi/0grd767X4Jg/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
-		<media:title type='plain'>Website</media:title>
-	</media:group>
-	<yt:playlistId>PL5A4E6E3F17B78FA1</yt:playlistId>"""]
-    for video in videos_info:
-        def e(t): return clean_xml_text(t)
-        xml.append(f"""    <entry>
-        <id>{e(video.get('video_id'))}</id>
-        <updated>2010-06-30T22:34:43.880Z</updated>
-        <title>{e(video.get('title'))}</title>
-        <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={e(video.get('video_id'))}&amp;feature=youtube_gdata'/>
-        <link rel='{e(base_url)}/schemas/2007#video.responses' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/responses?v=2'/>
-        <link rel='{e(base_url)}/schemas/2007#video.related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/related?v=2'/>
-        <link rel='related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}?v=2'/>
-        <link rel='self' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/0A7ED544A0D9877D/00A37F607671690E?v=2'/>
-		<author>
-			<name>{e(video.get('author_user_id'))}</name>
-			<uri>{e(base_url)}/feeds/api/users/{e(video.get('author_user_id'))}</uri>
-			<yt:userId>ee{e(video.get('author_user_id'))}</yt:userId>
-		</author>
-        <yt:accessControl action='comment' permission='allowed'/>
-        <yt:accessControl action='commentVote' permission='allowed'/>
-        <yt:accessControl action='videoRespond' permission='moderated'/>
-        <yt:accessControl action='rate' permission='allowed'/>
-        <yt:accessControl action='embed' permission='allowed'/>
-        <yt:accessControl action='syndicate' permission='allowed'/>
-        <yt:accessControl action='list' permission='allowed'/>
-        <gd:comments>
-            <gd:feedLink href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/comments?v=2' countHint='1'/>
-        </gd:comments>
-        <media:group>
-            <media:content url='{e(base_url)}/get_video?video_id={e(video.get('video_id'))}/mp4' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
-            <media:credit role='uploader' scheme='urn:youtube' yt:display='{e(video.get('author_name'))}'>{e(video.get('author_user_id'))}</media:credit>
-            <media:description type='plain'>{e(video.get('description'))}</media:description>
-            <media:keywords>-</media:keywords>
-            <media:player url='http://www.youtube.com/watch?v={e(video.get('video_id'))}&amp;feature=youtube_gdata'/>
-            <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{e(video.get('video_id'))}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
-            <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{e(video.get('video_id'))}/0.jpg' height='240' width='320' time='00:00:00'/>
-            <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{e(video.get('video_id'))}/0.jpg' height='240' width='320' time='00:00:00'/>
-            <media:title type='plain'>{e(video.get('title'))}</media:title>
-            <yt:duration seconds='{e(video.get('duration_seconds'))}'/>
-            <yt:uploaded>{e(video.get('published_at'))}</yt:uploaded>
-			<yt:uploaderId>EE{e(video.get('author_user_id'))}</yt:uploaderId>
-			<yt:videoid>{e(video.get('video_id'))}</yt:videoid>
-        </media:group>
-		<gd:rating average='4.2' max='5' min='1' numRaters='5' rel='http://schemas.google.com/g/2005#overall'/>
-		<yt:statistics favoriteCount='0' viewCount='{e(video.get('view_count'))}'/>
-		<yt:rating numDislikes='{e(video.get('dislike_count'))}' numLikes='{e(video.get('like_count'))}'/>
-		<yt:position>{e(video.get('position'))}</yt:position>
-    </entry>""")
-    xml.append('</feed>')
-    return '\n'.join(xml)
-
-def get_playlist_videos_details(access_token, playlist_id):
-    creds = Credentials(token=access_token)
-    youtube = build('youtube', 'v3', credentials=creds)
-
-    playlist_path = f"./assets/cache/users/playlists"
-    videos_path = f"{playlist_path}/videos"
-    ensure_dir(playlist_path)
-    ensure_dir(videos_path)
-
-    all_playlist_items = []
-    videos_info = []
-    next_page_token = None
-
-    while True:
-        playlist_response = youtube.playlistItems().list(
-            part='snippet,contentDetails',
-            playlistId=playlist_id,
-            maxResults=25,
-            pageToken=next_page_token
-        ).execute()
-
-        all_playlist_items.extend(playlist_response.get('items', []))
-        video_ids = [i['contentDetails']['videoId'] for i in playlist_response['items']]
-        positions = [i['snippet']['position'] for i in playlist_response['items']]
-
-        video_response = youtube.videos().list(
-            part='snippet,contentDetails,statistics',
-            id=','.join(video_ids)
-        ).execute()
-
-        channel_ids = list({v['snippet']['channelId'] for v in video_response.get('items', [])})
-        channel_response = youtube.channels().list(
-            part='snippet',
-            id=','.join(channel_ids)
-        ).execute()
-
-        channel_map = {
-            ch['id']: ch['snippet'].get('customUrl') or ch['snippet'].get('title')
-            for ch in channel_response.get('items', [])
-        }
-
-        for i, video in enumerate(video_response.get('items', [])):
-            snippet = video['snippet']
-            stats = video.get('statistics', {})
-            content = video.get('contentDetails', {})
-
-            duration = int(isodate.parse_duration(content['duration']).total_seconds())
-            dislikes = get_dislike_count(video['id'])
-
-            video_info = {
-                'playlist_id': playlist_id,
-                'video_id': video['id'],
-                'published_at': snippet['publishedAt'],
-                'title': snippet['title'],
-                'author_name': snippet['channelTitle'],
-                'author_handle': channel_map.get(snippet['channelId'], ''),
-                'author_user_id': snippet['channelId'],
-                'description': snippet.get('description', ''),
-                'duration_seconds': duration,
-                'view_count': int(stats.get('viewCount', 0)),
-                'like_count': int(stats.get('likeCount', 0)),
-                'dislike_count': dislikes,
-                'position': positions[i]
-            }
-
-            save_json(video, f"{videos_path}/{video['id']}.json")
-            videos_info.append(video_info)
-
-        next_page_token = playlist_response.get('nextPageToken')
-        if not next_page_token:
-            break
-
-    save_json(all_playlist_items, f"{playlist_path}/{playlist_id}.json")
-    return videos_info
-
-# ========== FLASK ROUTE ==========
-
-@app.route("/feeds/mobile/api/playlists/<playlist_id>")
-def playlist_route(playlist_id):
-    oauth_token = request.args.get('oauth_token')
-    base_url = request.host_url.rstrip('/') + '/'
-    
-    xml_file_path = f"./assets/cache/users/playlists/{playlist_id}.xml"
-    json_file_path = f"./assets/cache/users/playlists/{playlist_id}.json"
-
-    if oauth_token:
-        # 🔄 Fetch fresh data from API using token
-        try:
-            videos_info = get_playlist_videos_details(oauth_token, playlist_id)
-            xml_content = build_playlist_xml(videos_info, base_url)
-
-            with open(xml_file_path, 'w', encoding='utf-8') as f:
-                f.write(xml_content)
-
-            return Response(xml_content, mimetype='application/xml')
-        except Exception as e:
-            return abort(500, f"Failed to fetch and cache playlist: {e}")
-    else:
-        # 🔁 No token provided — serve from cache if possible
-        if file_exists(xml_file_path):
-            # ✅ Use existing XML file
-            return Response(load_text_file(xml_file_path), mimetype='application/xml')
-        elif file_exists(json_file_path):
-            try:
-                # 🔁 Rebuild XML from cached JSON
-                with open(json_file_path, 'r', encoding='utf-8') as jf:
-                    cached_items = json.load(jf)
-
-                videos_info = []
-                for item in cached_items:
-                    snippet = item.get('snippet', {})
-                    content = item.get('contentDetails', {})
-                    video_id = content.get('videoId')
-                    position = snippet.get('position', 0)
-
-                    video_json_path = f"./assets/cache/users/playlists/videos/{video_id}.json"
-                    if not file_exists(video_json_path):
-                        continue
-
-                    with open(video_json_path, 'r', encoding='utf-8') as vf:
-                        video = json.load(vf)
-
-                    stats = video.get('statistics', {})
-                    snippet_v = video.get('snippet', {})
-                    content_v = video.get('contentDetails', {})
-
-                    try:
-                        duration = int(isodate.parse_duration(content_v['duration']).total_seconds())
-                    except:
-                        duration = 0
-
-                    dislike_path = f"./assets/cache/dislike/{video_id}.json"
-                    dislike_count = 0
-                    if file_exists(dislike_path):
-                        with open(dislike_path, 'r', encoding='utf-8') as df:
-                            dislike_data = json.load(df)
-                            dislike_count = dislike_data.get('dislikes', 0)
-
-                    videos_info.append({
-                        'playlist_id': playlist_id,
-                        'video_id': video_id,
-                        'published_at': snippet_v.get('publishedAt'),
-                        'title': snippet_v.get('title'),
-                        'author_name': snippet_v.get('channelTitle'),
-                        'author_handle': '',  # No handle from cache
-                        'author_user_id': snippet_v.get('channelId'),
-                        'description': snippet_v.get('description', ''),
-                        'duration_seconds': duration,
-                        'view_count': int(stats.get('viewCount', 0)),
-                        'like_count': int(stats.get('likeCount', 0)),
-                        'dislike_count': dislike_count,
-                        'position': position
-                    })
-
-                xml_content = build_playlist_xml(videos_info, base_url)
-
-                with open(xml_file_path, 'w', encoding='utf-8') as f:
-                    f.write(xml_content)
-
-                return Response(xml_content, mimetype='application/xml')
-
-            except Exception as e:
-                return abort(500, f"Failed to rebuild XML from cache: {e}")
-        else:
-            return abort(400, "Missing oauth_token and no cached data available")
 
 @app.route("/feeds/api/videos/<video_id>")
 def get_video_xml(video_id):
@@ -5362,6 +4929,451 @@ def channels_endpoint():
     xml_output = channels_to_xml_template(results, query, base_url)
     return Response(xml_output, mimetype="application/xml")
     
+PLAYLIST_CACHE_FILE  = 'assets/cache/users/playlistinfo.json'
+
+def fetch_playlists_from_api(oauth_token):
+    url = 'https://www.googleapis.com/youtube/v3/playlists'
+    params = {
+        'part': 'snippet,contentDetails',
+        'mine': 'true',
+        'maxResults': 25
+    }
+    headers = {
+        'Authorization': f'Bearer {oauth_token}'
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return None
+
+def fetch_first_video_info(oauth_token, playlist_id):
+    """Get the first video's ID and thumbnail URL in the playlist."""
+    url = 'https://www.googleapis.com/youtube/v3/playlistItems'
+    params = {
+        'part': 'snippet',
+        'playlistId': playlist_id,
+        'maxResults': 25
+    }
+    headers = {
+        'Authorization': f'Bearer {oauth_token}'
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code == 200:
+        data = response.json()
+        items = data.get('items', [])
+        if not items:
+            return "", ""  # no videos in playlist
+        first_video_id = items[0]['snippet']['resourceId']['videoId']
+        thumbnails = items[0]['snippet'].get('thumbnails', {})
+        thumbnail_url = ""
+        for quality in ['maxres', 'standard', 'high', 'medium', 'default']:
+            if quality in thumbnails:
+                thumbnail_url = thumbnails[quality]['url']
+                break
+        return first_video_id, thumbnail_url
+    else:
+        return "", ""
+
+def build_xml_template(data, base_url, oauth_token=None):
+    if not data:
+        return '"""$xmltemplates\n<error>Unable to retrieve data</error>\n"""'
+
+    xml_template = [f'''<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom'
+xmlns:media='http://search.yahoo.com/mrss/'
+xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
+xmlns:gd='http://schemas.google.com/g/2005'
+xmlns:yt='{base_url}/schemas/2007'>
+    <id>{base_url}/feeds/mobile/api/standardfeeds/us/recently_featured</id>
+    <updated>2010-12-21T18:59:58.000-08:00</updated>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
+    <title type='text'> </title>
+    <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
+    <author>
+        <name>YouTube</name>
+        <uri>http://www.youtube.com/</uri>
+    </author>
+    <generator version='2.0' uri='{base_url}/'>YouTube data API</generator>
+    <openSearch:totalResults>25</openSearch:totalResults>
+    <openSearch:startIndex>1</openSearch:startIndex>
+    <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
+''']
+
+
+    for item in data.get('items', []):
+        playlist_id = item.get("id", "")
+        title = item["snippet"].get("title", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        description = item["snippet"].get("description", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        published_at = item["snippet"].get("publishedAt", "")
+        item_count = item["contentDetails"].get("itemCount", 0)
+        author = item["snippet"].get("channelTitle", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        channel_id = item["snippet"].get("channelId", "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+        first_video_id = ""
+        thumbnail_url = ""
+        if oauth_token:
+            first_video_id, thumbnail_url = fetch_first_video_info(oauth_token, playlist_id)
+
+        xml_template.append(f"""<entry>
+	    <id>{base_url}/feeds/mobile/api/playlists/{playlist_id}</id>
+        <playlistId>{playlist_id}</playlistId>
+        <yt:playlistId>{playlist_id}</yt:playlistId>
+		<published>2008-08-25T10:05:58.000-07:00</published>
+		<updated>2008-08-27T22:37:59.000-07:00</updated>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#playlistLink'/>
+		<title type='text'>{title}</title>
+		<content type='text' src='{base_url}/feeds/mobile/api/playlists/{playlist_id}'>None</content>
+		<link rel='related' type='application/atom+xml' href='{base_url}/feeds/mobile/api/users/{author}'/>
+		<link rel='alternate' type='text/html' href='{base_url}/view_play_list?p={playlist_id}'/>
+		<link rel='self' type='application/atom+xml' href='{base_url}/feeds/mobile/api/playlists/{playlist_id}'/>
+		<author>
+			<name>{author}</name>
+			<uri>{base_url}/feeds/mobile/api/users/{author}</uri>
+		</author>
+		<gd:feedLink rel='{base_url}/schemas/2007#playlist' href='{base_url}/feeds/mobile/api/playlists/{playlist_id}' countHint='{item_count}'/>
+		<yt:description>{description}</yt:description>
+		<media:group>
+			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/sddefault.jpg' height='480' width='640' yt:name='sddefault'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/1.jpg' height='90' width='120' time='00:10:26.500' yt:name='start'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/2.jpg' height='90' width='120' time='00:20:53' yt:name='middle'/>
+			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
+		</media:group>
+        <yt:countHint>{item_count}</yt:countHint>
+		<summary>{description}</summary>
+	</entry>""")
+
+    xml_template.append('</feed>')
+    final_xml = '\n'.join(xml_template)
+    return f'{final_xml}'
+
+@app.route('/feeds/tv/users/default/playlists', methods=['GET'])
+def get_playlists():
+    oauth_token = request.args.get('oauth_token')
+
+    if oauth_token:
+        data = fetch_playlists_from_api(oauth_token)
+        if data:
+            os.makedirs(os.path.dirname(PLAYLIST_CACHE_FILE ), exist_ok=True)
+            with open(PLAYLIST_CACHE_FILE , 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        else:
+            return Response("Error fetching data from YouTube API.", status=400)
+    else:
+        if os.path.exists(PLAYLIST_CACHE_FILE ):
+            with open(PLAYLIST_CACHE_FILE , 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        else:
+            return Response("No cached data found and no token provided.", status=404)
+
+    base_url = request.url_root.rstrip('/')
+    xml_output = build_xml_template(data, base_url, oauth_token)
+    return Response(xml_output, mimetype='text/plain')
+    
+
+def playlist_clean_xml_text(text):
+    if not text:
+        return ''
+    if not isinstance(text, str):
+        text = str(text)
+
+    # Remove control characters not allowed in XML 1.0
+    text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text)
+
+    # Escape standard XML-sensitive characters
+    text = xml_escape(text, {'"': "&quot;", "'": "&apos;"})
+
+    return text
+
+def playlist_ensure_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+def playlist_save_json(data, filepath):
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+def playlist_load_text_file(filepath):
+    with open(filepath, 'r', encoding='utf-8') as f:
+        return f.read()
+
+def playlist_file_exists(path):
+    return os.path.isfile(path)
+
+# ========== YOUTUBE DATA ==========
+
+def playlist_get_dislike_count(video_id):
+    url = f"https://returnyoutubedislikeapi.com/votes?videoId={video_id}"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            path = f"./assets/cache/dislike"
+            playlist_ensure_dir(path)
+            playlist_save_json(data, f"{path}/{video_id}.json")
+            return data.get('dislikes', 0)
+        return 0
+    except:
+        return 0
+
+def playlist_build_playlist_xml(videos_info, base_url):
+    xml = ["""<?xml version='1.0' encoding='UTF-8'?>
+<feed
+	xmlns='http://www.w3.org/2005/Atom'
+	xmlns:app='http://www.w3.org/2007/app'
+	xmlns:media='http://search.yahoo.com/mrss/'
+	xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/'
+	xmlns:gd='http://schemas.google.com/g/2005'
+	xmlns:yt='{e(base_url)}/schemas/2007' gd:etag='W/&quot;DUECRn47eCp7I2A9WhJVEkU.&quot;'>
+	<id>tag:youtube.com,2008:playlist:5A4E6E3F17B78FA1</id>
+	<updated>2012-08-30T00:47:47.000Z</updated>
+	<category scheme='http://schemas.google.com/g/2005#kind' term='{e(base_url)}/schemas/2007#playlist'/>
+	<title>Website</title>
+	<subtitle>New Vybe Videos</subtitle>
+	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
+	<link rel='alternate' type='text/html' href='http://www.youtube.com/playlist?list=PL5A4E6E3F17B78FA1'/>
+	<link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/5A4E6E3F17B78FA1?v=2'/>
+	<link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/5A4E6E3F17B78FA1/batch?v=2'/>
+	<link rel='self' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/5A4E6E3F17B78FA1?start-index=1&amp;max-results=25&amp;v=2'/>
+	<link rel='service' type='application/atomsvc+xml' href='{e(base_url)}/feeds/api/playlists/5A4E6E3F17B78FA1?alt=atom-service&amp;v=2'/>
+	<author>
+		<name>NEWVYBE</name>
+		<uri>{e(base_url)}/feeds/api/users/NEWVYBE</uri>
+		<yt:userId>2rGyD633KCNs0jn3ifYH5g</yt:userId>
+	</author>
+	<generator version='2.1' uri='{e(base_url)}'>YouTube data API</generator>
+	<openSearch:totalResults>6</openSearch:totalResults>
+	<openSearch:startIndex>1</openSearch:startIndex>
+	<openSearch:itemsPerPage>25</openSearch:itemsPerPage>
+	<media:group>
+		<media:content url='http://www.youtube.com/p/PL5A4E6E3F17B78FA1' type='application/x-shockwave-flash' yt:format='5'/>
+		<media:description type='plain'>New Vybe Videos</media:description>
+		<media:thumbnail url='http://i.ytimg.com/vi/0grd767X4Jg/default.jpg' height='90' width='120' yt:name='default'/>
+		<media:thumbnail url='http://i.ytimg.com/vi/0grd767X4Jg/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
+		<media:thumbnail url='http://i.ytimg.com/vi/0grd767X4Jg/hqdefault.jpg' height='360' width='480' yt:name='hqdefault'/>
+		<media:title type='plain'>Website</media:title>
+	</media:group>
+	<yt:playlistId>PL5A4E6E3F17B78FA1</yt:playlistId>"""]
+    for video in videos_info:
+        def e(t): return playlist_clean_xml_text(t)
+        xml.append(f"""    <entry>
+        <id>{e(video.get('video_id'))}</id>
+        <updated>2010-06-30T22:34:43.880Z</updated>
+        <title>{e(video.get('title'))}</title>
+        <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={e(video.get('video_id'))}&amp;feature=youtube_gdata'/>
+        <link rel='{e(base_url)}/schemas/2007#video.responses' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/responses?v=2'/>
+        <link rel='{e(base_url)}/schemas/2007#video.related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/related?v=2'/>
+        <link rel='related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}?v=2'/>
+        <link rel='self' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/0A7ED544A0D9877D/00A37F607671690E?v=2'/>
+		<author>
+			<name>{e(video.get('author_user_id'))}</name>
+			<uri>{e(base_url)}/feeds/api/users/{e(video.get('author_user_id'))}</uri>
+			<yt:userId>ee{e(video.get('author_user_id'))}</yt:userId>
+		</author>
+        <yt:accessControl action='comment' permission='allowed'/>
+        <yt:accessControl action='commentVote' permission='allowed'/>
+        <yt:accessControl action='videoRespond' permission='moderated'/>
+        <yt:accessControl action='rate' permission='allowed'/>
+        <yt:accessControl action='embed' permission='allowed'/>
+        <yt:accessControl action='syndicate' permission='allowed'/>
+        <yt:accessControl action='list' permission='allowed'/>
+        <gd:comments>
+            <gd:feedLink href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/comments?v=2' countHint='1'/>
+        </gd:comments>
+        <media:group>
+            <media:content url='{e(base_url)}/get_video?video_id={e(video.get('video_id'))}/mp4' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
+            <media:credit role='uploader' scheme='urn:youtube' yt:display='{e(video.get('author_name'))}'>{e(video.get('author_user_id'))}</media:credit>
+            <media:description type='plain'>{e(video.get('description'))}</media:description>
+            <media:keywords>-</media:keywords>
+            <media:player url='http://www.youtube.com/watch?v={e(video.get('video_id'))}&amp;feature=youtube_gdata'/>
+            <media:thumbnail yt:name='hqdefault' url='http://i.ytimg.com/vi/{e(video.get('video_id'))}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
+            <media:thumbnail yt:name='poster' url='http://i.ytimg.com/vi/{e(video.get('video_id'))}/0.jpg' height='240' width='320' time='00:00:00'/>
+            <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{e(video.get('video_id'))}/0.jpg' height='240' width='320' time='00:00:00'/>
+            <media:title type='plain'>{e(video.get('title'))}</media:title>
+            <yt:duration seconds='{e(video.get('duration_seconds'))}'/>
+            <yt:uploaded>{e(video.get('published_at'))}</yt:uploaded>
+			<yt:uploaderId>EE{e(video.get('author_user_id'))}</yt:uploaderId>
+			<yt:videoid>{e(video.get('video_id'))}</yt:videoid>
+        </media:group>
+		<gd:rating average='4.2' max='5' min='1' numRaters='5' rel='http://schemas.google.com/g/2005#overall'/>
+		<yt:statistics favoriteCount='0' viewCount='{e(video.get('view_count'))}'/>
+		<yt:rating numDislikes='{e(video.get('dislike_count'))}' numLikes='{e(video.get('like_count'))}'/>
+		<yt:position>{e(video.get('position'))}</yt:position>
+    </entry>""")
+    xml.append('</feed>')
+    return '\n'.join(xml)
+
+def playlist_get_playlist_videos_details(access_token, playlist_id):
+    creds = Credentials(token=access_token)
+    youtube = build('youtube', 'v3', credentials=creds)
+
+    playlist_path = f"./assets/cache/users/playlists"
+    videos_path = f"{playlist_path}/videos"
+    playlist_ensure_dir(playlist_path)
+    playlist_ensure_dir(videos_path)
+
+    all_playlist_items = []
+    videos_info = []
+    next_page_token = None
+
+    while True:
+        playlist_response = youtube.playlistItems().list(
+            part='snippet,contentDetails',
+            playlistId=playlist_id,
+            maxResults=25,
+            pageToken=next_page_token
+        ).execute()
+
+        all_playlist_items.extend(playlist_response.get('items', []))
+        video_ids = [i['contentDetails']['videoId'] for i in playlist_response['items']]
+        positions = [i['snippet']['position'] for i in playlist_response['items']]
+
+        video_response = youtube.videos().list(
+            part='snippet,contentDetails,statistics',
+            id=','.join(video_ids)
+        ).execute()
+
+        channel_ids = list({v['snippet']['channelId'] for v in video_response.get('items', [])})
+        channel_response = youtube.channels().list(
+            part='snippet',
+            id=','.join(channel_ids)
+        ).execute()
+
+        channel_map = {
+            ch['id']: ch['snippet'].get('customUrl') or ch['snippet'].get('title')
+            for ch in channel_response.get('items', [])
+        }
+
+        for i, video in enumerate(video_response.get('items', [])):
+            snippet = video['snippet']
+            stats = video.get('statistics', {})
+            content = video.get('contentDetails', {})
+
+            duration = int(isodate.parse_duration(content['duration']).total_seconds())
+            dislikes = playlist_get_dislike_count(video['id'])
+
+            video_info = {
+                'playlist_id': playlist_id,
+                'video_id': video['id'],
+                'published_at': snippet['publishedAt'],
+                'title': snippet['title'],
+                'author_name': snippet['channelTitle'],
+                'author_handle': channel_map.get(snippet['channelId'], ''),
+                'author_user_id': snippet['channelId'],
+                'description': snippet.get('description', ''),
+                'duration_seconds': duration,
+                'view_count': int(stats.get('viewCount', 0)),
+                'like_count': int(stats.get('likeCount', 0)),
+                'dislike_count': dislikes,
+                'position': positions[i]
+            }
+
+            playlist_save_json(video, f"{videos_path}/{video['id']}.json")
+            videos_info.append(video_info)
+
+        next_page_token = playlist_response.get('nextPageToken')
+        if not next_page_token:
+            break
+
+    playlist_save_json(all_playlist_items, f"{playlist_path}/{playlist_id}.json")
+    return videos_info
+
+# ========== FLASK ROUTE ==========
+
+@app.route("/feeds/mobile/api/playlists/<playlist_id>")
+def playlist_route(playlist_id):
+    oauth_token = request.args.get('oauth_token')
+    base_url = request.host_url.rstrip('/') + '/'
+    
+    xml_file_path = f"./assets/cache/users/playlists/{playlist_id}.xml"
+    json_file_path = f"./assets/cache/users/playlists/{playlist_id}.json"
+
+    if oauth_token:
+        # 🔄 Fetch fresh data from API using token
+        try:
+            videos_info = playlist_get_playlist_videos_details(oauth_token, playlist_id)
+            xml_content = playlist_build_playlist_xml(videos_info, base_url)
+
+            with open(xml_file_path, 'w', encoding='utf-8') as f:
+                f.write(xml_content)
+
+            return Response(xml_content, mimetype='application/xml')
+        except Exception as e:
+            return abort(500, f"Failed to fetch and cache playlist: {e}")
+    else:
+        # 🔁 No token provided — serve from cache if possible
+        if playlist_file_exists(xml_file_path):
+            # ✅ Use existing XML file
+            return Response(playlist_load_text_file(xml_file_path), mimetype='application/xml')
+        elif playlist_file_exists(json_file_path):
+            try:
+                # 🔁 Rebuild XML from cached JSON
+                with open(json_file_path, 'r', encoding='utf-8') as jf:
+                    cached_items = json.load(jf)
+
+                videos_info = []
+                for item in cached_items:
+                    snippet = item.get('snippet', {})
+                    content = item.get('contentDetails', {})
+                    video_id = content.get('videoId')
+                    position = snippet.get('position', 0)
+
+                    video_json_path = f"./assets/cache/users/playlists/videos/{video_id}.json"
+                    if not playlist_file_exists(video_json_path):
+                        continue
+
+                    with open(video_json_path, 'r', encoding='utf-8') as vf:
+                        video = json.load(vf)
+
+                    stats = video.get('statistics', {})
+                    snippet_v = video.get('snippet', {})
+                    content_v = video.get('contentDetails', {})
+
+                    try:
+                        duration = int(isodate.parse_duration(content_v['duration']).total_seconds())
+                    except:
+                        duration = 0
+
+                    dislike_path = f"./assets/cache/dislike/{video_id}.json"
+                    dislike_count = 0
+                    if playlist_file_exists(dislike_path):
+                        with open(dislike_path, 'r', encoding='utf-8') as df:
+                            dislike_data = json.load(df)
+                            dislike_count = dislike_data.get('dislikes', 0)
+
+                    videos_info.append({
+                        'playlist_id': playlist_id,
+                        'video_id': video_id,
+                        'published_at': snippet_v.get('publishedAt'),
+                        'title': snippet_v.get('title'),
+                        'author_name': snippet_v.get('channelTitle'),
+                        'author_handle': '',  # No handle from cache
+                        'author_user_id': snippet_v.get('channelId'),
+                        'description': snippet_v.get('description', ''),
+                        'duration_seconds': duration,
+                        'view_count': int(stats.get('viewCount', 0)),
+                        'like_count': int(stats.get('likeCount', 0)),
+                        'dislike_count': dislike_count,
+                        'position': position
+                    })
+
+                xml_content = playlist_build_playlist_xml(videos_info, base_url)
+
+                with open(xml_file_path, 'w', encoding='utf-8') as f:
+                    f.write(xml_content)
+
+                return Response(xml_content, mimetype='application/xml')
+
+            except Exception as e:
+                return abort(500, f"Failed to rebuild XML from cache: {e}")
+        else:
+            return abort(400, "Missing oauth_token and no cached data available")
+            
 # === Run ===
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
