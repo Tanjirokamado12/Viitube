@@ -6,6 +6,7 @@ import random
 import string
 import threading
 import subprocess
+from dateutil import parser as dateparser  # Requires `python-dateutil`
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import unquote, urlparse, urlencode, urljoin
@@ -914,7 +915,7 @@ def get_channel_pfp_url(channel_id):
         channel_url = f'https://www.youtube.com/channel/{channel_id}'
         channel = Channel(channel_url)
 
-        # pytube.Channel doesn’t provide pfp directly, so fetch HTML manually
+        # pytubefix.Channel doesn’t provide pfp directly, so fetch HTML manually
         response = requests.get(channel_url)
         if response.status_code != 200:
             return None
@@ -1834,31 +1835,39 @@ def build_xml(subscriptions, base_url, oauth_token):
 </feed>
 """
 
-    channel_template = """<entry gd:etag='W/&quot;AkQAQn47eCp7I2A9XRRXE0Q.&quot;'>
-		<id>tag:youtube.com,2008:channel:{channel_id}</id>
-		<updated>2015-02-20T02:12:23.000Z</updated>
-		<category scheme='http://schemas.google.com/g/2005#kind' term='http://{base_url}/schemas/2007#channel'/>
-		<category scheme='http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat' term='channel'/>
-		<content type='application/atom+xml;type=feed' src='http://{base_url}/feeds/api/users/{channel_id}/videos'/>
-		<title>{username}</title>
-		<summary>{username}</summary>
-		<link rel='http://gdata.youtube.com/schemas/2007#featured-video' type='application/atom+xml' href='http://{base_url}/feeds/api/videos/-MDe7XhRbK8?v=2'/>
-		<link rel='alternate' type='text/html' href='http://www.youtube.com/channel/{channel_id}'/>
-		<link rel='self' type='application/atom+xml' href='http://{base_url}/feeds/api/channels/{channel_id}?v=2'/>
-		<link rel='edit' href='http://{base_url}/edit'/>
-		<author>
-			<name>{username}</name>
-			<uri>http://{base_url}/feeds/api/users/{channel_id}</uri>
-			<yt:userId>{channel_id}</yt:userId>
-		</author>
-		<yt:countHint>1</yt:countHint>
+    channel_template = """   <entry>
+       <id>tag:youtube.com,2008:standardchannel:{channel_id}</id>
+       <updated>2015-05-27T05:27:17.076Z</updated>
+       <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#channelstandard'/>
+       <title>{username}</title>
+       <summary></summary>
+       <link rel='self' type='application/atom+xml' href='http://{base_url}/feeds/api/users{channel_id}?v=2'/>
+       <author>
+           <name>{username}</name>
+           <uri>http://{base_url}/feeds/api/users/{channel_id}</uri>
+           <yt:userId>{channel_id}</yt:userId>
+       </author>
+       <yt:channelId>{channel_id}</yt:channelId>
+       <yt:channelStatistics commentCount='0' subscriberCount='0' totalUploadViewCount='0' videoCount='0' viewCount='0'/>
+       <media:group>
+           <media:thumbnail url='http://{base_url}/feeds/api/users/{channel_id}//icon' yt:name='default'/>
+           <media:thumbnail url='http://{base_url}/feeds/api/users/{channel_id}//icon' yt:name='hqdefault'/>
+           <media:title>{username}</media:title>
+       </media:group>
+	   <y9id>{channel_id}</y9id>
+	   <yt:countHint>1</yt:countHint>
 		<yt:username>{username}</yt:username>
 		<yt:channelId>{channel_id}</yt:channelId>
 		<yt:channelStatistics subscriberCount='0' viewCount='0'/>
 		<y9id>{channel_id}</y9id>
 		<gd:feedLink rel='http://gdata.youtube.com/schemas/2007#channel.content' href='http://{base_url}/feeds/api/users/{channel_id}/uploads?v=2' countHint='7073'/>
 		<media:thumbnail url='http://{base_url}/feeds/api/users/{channel_id}//icon'/>
-	</entry>"""
+		<category scheme='http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat' term='channel'/>
+		<content type='application/atom+xml;type=feed' src='http://{base_url}/feeds/api/users/{channel_id}/videos'/>
+		<title>{username}</title>
+		<summary>{username}</summary>
+		<link rel='edit' href='http://{base_url}/edit'/>
+   </entry>"""
 
     channel_entries = []
     for item in subscriptions:
@@ -1973,31 +1982,39 @@ def build_xml(subscriptions, base_url, oauth_token):
 </feed>
 """
 
-    channel_template = """<entry gd:etag='W/&quot;AkQAQn47eCp7I2A9XRRXE0Q.&quot;'>
-		<id>tag:youtube.com,2008:channel:{channel_id}</id>
-		<updated>2015-02-20T02:12:23.000Z</updated>
-		<category scheme='http://schemas.google.com/g/2005#kind' term='http://{base_url}/schemas/2007#channel'/>
-		<category scheme='http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat' term='channel'/>
-		<content type='application/atom+xml;type=feed' src='http://{base_url}/feeds/api/users/{channel_id}/videos'/>
-		<title>{username}</title>
-		<summary>{username}</summary>
-		<link rel='http://gdata.youtube.com/schemas/2007#featured-video' type='application/atom+xml' href='http://{base_url}/feeds/api/videos/-MDe7XhRbK8?v=2'/>
-		<link rel='alternate' type='text/html' href='http://www.youtube.com/channel/{channel_id}'/>
-		<link rel='self' type='application/atom+xml' href='http://{base_url}/feeds/api/channels/{channel_id}?v=2'/>
-		<link rel='edit' href='http://{base_url}/edit'/>
-		<author>
-			<name>{username}</name>
-			<uri>http://{base_url}/feeds/api/users/{channel_id}</uri>
-			<yt:userId>{channel_id}</yt:userId>
-		</author>
-		<yt:countHint>1</yt:countHint>
+    channel_template = """  <entry>
+       <id>tag:youtube.com,2008:standardchannel:{channel_id}</id>
+       <updated>2015-05-27T05:27:17.076Z</updated>
+       <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#channelstandard'/>
+       <title>{username}</title>
+       <summary></summary>
+       <link rel='self' type='application/atom+xml' href='http://{base_url}/feeds/api/users{channel_id}?v=2'/>
+       <author>
+           <name>{username}</name>
+           <uri>http://{base_url}/feeds/api/users/{channel_id}</uri>
+           <yt:userId>{channel_id}</yt:userId>
+       </author>
+       <yt:channelId>{channel_id}</yt:channelId>
+       <yt:channelStatistics commentCount='0' subscriberCount='0' totalUploadViewCount='0' videoCount='0' viewCount='0'/>
+       <media:group>
+           <media:thumbnail url='http://{base_url}/feeds/api/users/{channel_id}//icon' yt:name='default'/>
+           <media:thumbnail url='http://{base_url}/feeds/api/users/{channel_id}//icon' yt:name='hqdefault'/>
+           <media:title>{username}</media:title>
+       </media:group>
+	   <y9id>{channel_id}</y9id>
+	   <yt:countHint>1</yt:countHint>
 		<yt:username>{username}</yt:username>
 		<yt:channelId>{channel_id}</yt:channelId>
 		<yt:channelStatistics subscriberCount='0' viewCount='0'/>
 		<y9id>{channel_id}</y9id>
 		<gd:feedLink rel='http://gdata.youtube.com/schemas/2007#channel.content' href='http://{base_url}/feeds/api/users/{channel_id}/uploads?v=2' countHint='7073'/>
 		<media:thumbnail url='http://{base_url}/feeds/api/users/{channel_id}//icon'/>
-	</entry>"""
+		<category scheme='http://gdata.youtube.com/schemas/2007/subscriptiontypes.cat' term='channel'/>
+		<content type='application/atom+xml;type=feed' src='http://{base_url}/feeds/api/users/{channel_id}/videos'/>
+		<title>{username}</title>
+		<summary>{username}</summary>
+		<link rel='edit' href='http://{base_url}/edit'/>
+   </entry>"""
 
     channel_entries = []
     for item in subscriptions:
@@ -3097,7 +3114,7 @@ def build_xml_response(videos, baseurl):
 		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/{video_id}?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
 		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={video_id}&amp;feature=youtube_gdata'/>
         <link rel='http://gdata.youtube.com/schemas/2007#video.related' type='application/atom+xml' href='{baseurl_escaped}/feeds/api/videos/{video_id}/related'/>
-        <link rel='http://gdata.youtube.com/schemas/2007#video.captionTracks' type='application/xml' href='{baseurl_escaped}/timedtext/{video_id}/related'/>
+        <link rel='http://gdata.youtube.com/schemas/2007#video.captionTracks' type='application/xml' href='{baseurl_escaped}/timedtext/{video_id}/subtitles'/>
         <link rel="http://gdata.youtube.com/schemas/2007#video.related" href="{baseurl_escaped}/feeds/api/videos/{video_id}/related"/>
 		<link rel='{baseurl_escaped}/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v={video_id}'/>
 		<link rel='{baseurl_escaped}/schemas/2007#uploader' type='applicatio0tom+xml' href='{baseurl_escaped}/feeds/api/users/{channel_id}?v=2'/>
@@ -4078,6 +4095,10 @@ def live(region):
 def most_viewed(region):
     return send_file('Mobile/most_viewed.xml')
 
+@app.route('/feeds/api/channelstandardfeeds/most_subscribed')
+def most_subscribed():
+    return send_file('Mobile/most_subscribed.xml')
+
 @app.route('/feeds/api/standardfeeds/<region>/most_popular_Education')
 @app.route('/feeds/api/standardfeeds/<region>/most_viewed_Education')
 def most_viewed_Education(region):
@@ -4686,27 +4707,41 @@ def related_fetch_video_details(video_id):
             return None
 
 # Convert video details to XML format, with error handling for missing keys
+
 def related_convert_to_xml(video_id, video_details, base_url):
     try:
         video_data = video_details.get('videoDetails', {})
         microformat_data = video_details.get('microformat', {}).get('playerMicroformatRenderer', {})
 
-        # Escape special characters using xml.sax.saxutils.escape
+        # Escape text fields
         title = escape(video_data.get('title', 'N/A'))
         description = escape(video_data.get('shortDescription', 'N/A'))
         author = escape(video_data.get('author', 'N/A'))
         view_count = escape(str(video_data.get('viewCount', 'N/A')))
         length_seconds = escape(str(video_data.get('lengthSeconds', 'N/A')))
-        publish_date = escape(microformat_data.get('publishDate', 'Not available'))
         channel_id = escape(microformat_data.get('externalChannelId', 'N/A'))
         like_count = escape(str(microformat_data.get('likeCount', 'N/A')))
         dislike_count = escape(str(microformat_data.get('dislikeCount', 'N/A')))
 
+        # Handle publish date and updated date
+        raw_publish_date = microformat_data.get('publishDate', None)
+        if raw_publish_date:
+            try:
+                dt = dateparser.isoparse(raw_publish_date).astimezone(timezone.utc)
+            except Exception:
+                dt = datetime.strptime(raw_publish_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+        else:
+            dt = datetime.now(timezone.utc)
+
+        publish_date = dt.isoformat(timespec='seconds')  # e.g., 2025-09-01T00:00:00+00:00
+        updated_date = dt.strftime('%Y-%m-%dT%H:%M:%S.000Z')  # e.g., 2025-09-01T00:00:00.000Z
+
+
         # Return formatted XML
         xml_response = f"""  <entry>
   <id>{escape(base_url)}feeds/api/videos/{escape(video_id)}</id>
-  <published>{publish_date}</published>
-  <updated>{publish_date}</updated>
+  <published>{updated_date}</published>
+  <updated>{updated_date}</updated>
   <category scheme="http://gdata.youtube.com/schemas/2007/categories" label="Music" term="Music">Music</category>
   <title type='text'>{title}</title>
   <content type='text'>{description}</content>
@@ -4714,7 +4749,7 @@ def related_convert_to_xml(video_id, video_details, base_url):
   <link rel='alternate' type='text/html' href='https://www.youtube.com/watch?v={escape(video_id)}&amp;feature=youtube_gdata'/>
   <link rel='http://gdata.youtube.com/schemas/2007#video.responses' type='application/atom+xml' href='{escape(base_url)}feeds/api/videos/{escape(video_id)}/responses'/>
   <link rel='http://gdata.youtube.com/schemas/2007#video.related' type='application/atom+xml' href='{escape(base_url)}feeds/api/videos/{escape(video_id)}/related'/>
-  <link rel='http://gdata.youtube.com/schemas/2007#video.captionTracks' type='application/xml' href='{escape(base_url)}timedtext{escape(video_id)}/related'/>
+  <link rel='http://gdata.youtube.com/schemas/2007#video.captionTracks' type='application/xml' href='{escape(base_url)}timedtext{escape(video_id)}/subtitles'/>
   <link rel='http://gdata.youtube.com/schemas/2007#mobile' type='text/html' href='https://www.youtube.com/watch?v={escape(video_id)}'/>
   <link rel='self' type='application/atom+xml' href='{escape(base_url)}feeds/api/videos/{escape(video_id)}'/>
       <author>
