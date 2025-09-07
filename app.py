@@ -213,6 +213,11 @@ def viitube_playlist_extract_playlist_items(raw):
 from datetime import datetime
 import pytz
 
+def escape_xml_chars(text):
+    if isinstance(text, str):
+        return html.escape(text, quote=True)
+    return 
+
 def viitube_playlist_fetch_video_details(video_id):
     video_cache_path = VIDEO_VIITUBE_PLAYLIST_CACHE_DIR / f"{video_id}.json"
     VIDEO_VIITUBE_PLAYLIST_CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -269,16 +274,16 @@ def viitube_playlist_fetch_video_details(video_id):
         duration_seconds = int(video_details.get("lengthSeconds") or 0)
 
         return {
-            "videoId": video_id,
-            "title": video_details.get("title") or microformat.get("title", {}).get("simpleText", ""),
-            "publishedAt": published_at,
-            "channelId": video_details.get("channelId") or microformat.get("externalChannelId", ""),
-            "channelHandle": channel_handle,
-            "channelTitle": video_details.get("author") or microformat.get("ownerChannelName", ""),
+            "videoId": escape_xml_chars(video_id),
+            "title": escape_xml_chars(video_details.get("title") or microformat.get("title", {}).get("simpleText", "")),
+            "publishedAt": escape_xml_chars(published_at),
+            "channelId": escape_xml_chars(video_details.get("channelId") or microformat.get("externalChannelId", "")),
+            "channelHandle": escape_xml_chars(channel_handle),
+            "channelTitle": escape_xml_chars(video_details.get("author") or microformat.get("ownerChannelName", "")),
             "viewCount": int(video_details.get("viewCount", 0)),
             "likeCount": int(microformat.get("likeCount", 0)) if microformat.get("likeCount") else 0,
-            "dislikeCount": 0,  # If you want to handle dislikes, you may need to check if this exists in `microformat`
-            "description": microformat.get("description", {}).get("simpleText") or video_details.get("shortDescription", ""),
+            "dislikeCount": 0,
+            "description": escape_xml_chars(microformat.get("description", {}).get("simpleText") or video_details.get("shortDescription", "")),
             "durationSeconds": duration_seconds,
         }
 
@@ -343,7 +348,6 @@ def viitube_playlist_generate_video_entry(video, base_url):
 		<yt:statistics favoriteCount='0' viewCount='{video['viewCount']}'/>
 		<yt:rating numDislikes='{video['dislikeCount']}' numLikes='{video['likeCount']}'/>
 		<yt:position>{video['position']}</yt:position>
-        
 	</entry>"""
 
 def viitube_playlist_generate_xml_feed(videos, base_url, playlist_id, playlist_title):
