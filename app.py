@@ -39,6 +39,10 @@ from pytube import Channel
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from datetime import datetime, timezone
+from flask import Flask, Response
+from youtube_comment_downloader import YoutubeCommentDownloader
+from datetime import datetime, timedelta
+import re, os, json
 
 def clean_xml_text(text):
     if not text:
@@ -5438,6 +5442,121 @@ def playlist_route(playlist_id):
                 return abort(500, f"Failed to rebuild XML from cache: {e}")
         else:
             return abort(400, "Missing oauth_token and no cached data available")
+
+COMMENTS_CACHE_DIR = "assets/cache/comments"
+os.makedirs(COMMENTS_CACHE_DIR, exist_ok=True)
+
+def parse_relative_time(time_str):
+    now = datetime.utcnow()
+    time_str = time_str.lower()
+
+    patterns = [
+        # English
+        (r'(\d+)\s+minute', lambda v: timedelta(minutes=v)),
+        (r'(\d+)\s+hour', lambda v: timedelta(hours=v)),
+        (r'(\d+)\s+day', lambda v: timedelta(days=v)),
+        (r'(\d+)\s+week', lambda v: timedelta(weeks=v)),
+        (r'(\d+)\s+month', lambda v: timedelta(days=30 * v)),
+        (r'(\d+)\s+year', lambda v: timedelta(days=365 * v)),
+
+        # French
+        (r'il y a (\d+)\s+minute', lambda v: timedelta(minutes=v)),
+        (r'il y a (\d+)\s+heure', lambda v: timedelta(hours=v)),
+        (r'il y a (\d+)\s+jour', lambda v: timedelta(days=v)),
+        (r'il y a (\d+)\s+semaine', lambda v: timedelta(weeks=v)),
+        (r'il y a (\d+)\s+mois', lambda v: timedelta(days=30 * v)),
+        (r'il y a (\d+)\s+an', lambda v: timedelta(days=365 * v)),
+
+        # German
+        (r'vor (\d+)\s+minute', lambda v: timedelta(minutes=v)),
+        (r'vor (\d+)\s+stunde', lambda v: timedelta(hours=v)),
+        (r'vor (\d+)\s+tag', lambda v: timedelta(days=v)),
+        (r'vor (\d+)\s+woche', lambda v: timedelta(weeks=v)),
+        (r'vor (\d+)\s+monat', lambda v: timedelta(days=30 * v)),
+        (r'vor (\d+)\s+jahr', lambda v: timedelta(days=365 * v)),
+
+        # Spanish
+        (r'hace (\d+)\s+minuto', lambda v: timedelta(minutes=v)),
+        (r'hace (\d+)\s+hora', lambda v: timedelta(hours=v)),
+        (r'hace (\d+)\s+d[ií]a', lambda v: timedelta(days=v)),
+        (r'hace (\d+)\s+semana', lambda v: timedelta(weeks=v)),
+        (r'hace (\d+)\s+mes', lambda v: timedelta(days=30 * v)),
+        (r'hace (\d+)\s+a[nñ]o', lambda v: timedelta(days=365 * v)),
+    ]
+
+    for pattern, converter in patterns:
+        match = re.search(pattern, time_str)
+        if match:
+            value = int(match.group(1))
+            delta = converter(value)
+            timestamp = now - delta
+            return timestamp.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+    return now.strftime('%Y-%m-%dT%H:%M:%S.000Z')
+
+def escape_xml(text):
+    return (text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace('"', "&quot;")
+                .replace("'", "&apos;"))
+
+def fetch_comments(videoid, limit=20):
+    downloader = YoutubeCommentDownloader()
+    comments = downloader.get_comments_from_url(f"https://www.youtube.com/watch?v={videoid}", sort_by=1)
+
+    formatted_comments = []
+    for comment in comments:
+        formatted = {
+            "date": parse_relative_time(comment['time']),
+            "content": comment['text'],
+            "channel": comment['author']
+        }
+        formatted_comments.append(formatted)
+        if len(formatted_comments) >= limit:
+            break
+
+    return formatted_comments
+
+def build_xml(comments, videoid):
+    xml_parts = []
+    xml_parts.append('<?xml version="1.0" encoding="UTF-8"?>')
+    xml_parts.append('<feed xmlns="http://www.w3.org/2005/Atom">')
+
+    for i, c in enumerate(comments):
+        xml_parts.append('  <entry>')
+        xml_parts.append(f'    <id>tag:youtube.com,2025:comment:c</id>')
+        xml_parts.append(f'    <published>{c["date"]}</published>')
+        xml_parts.append(f'    <updated>{c["date"]}</updated>')
+        xml_parts.append(f"    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#comment'/>")
+        xml_parts.append(f'    <title>...</title>')
+        xml_parts.append(f'    <content>{escape_xml(c["content"])}</content>')
+        xml_parts.append(f"    <link rel='related' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/jNQXAC9IVRw?v=2'/>")
+        xml_parts.append(f"    <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=jNQXAC9IVRw'/>")
+        xml_parts.append(f"    <link rel='self' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/jNQXAC9IVRw/comments/c?v=2'/>")
+        xml_parts.append('    <author>')
+        xml_parts.append(f'      <name>{escape_xml(c["channel"])}</name>')
+        xml_parts.append(f'      <uri>http://gdata.youtube.com/feeds/api/users/{escape_xml(c["channel"])}</uri>')
+        xml_parts.append('    </author>')
+        xml_parts.append('  </entry>')
+        
+    xml_parts.append('</feed>')
+    return '\n'.join(xml_parts)
+
+@app.route('/feeds/api/videos/<videoid>/comments')
+def serve_comments(videoid):
+    cache_path = os.path.join(COMMENTS_CACHE_DIR, f"{videoid}.json")
+
+    if os.path.exists(cache_path):
+        with open(cache_path, "r", encoding="utf-8") as f:
+            comments = json.load(f)
+    else:
+        comments = fetch_comments(videoid)
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(comments, f, ensure_ascii=False, indent=2)
+
+    xmlresponse = build_xml(comments, videoid)
+    return Response(xmlresponse, mimetype='application/atom+xml')
 
 # === Run ===
 if __name__ == '__main__':
