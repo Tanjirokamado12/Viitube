@@ -112,7 +112,7 @@ def replace_in_smali_files(smali_dir, local_ip):
         ("\"gdata.youtube.com\"", f"\"{local_ip}\""),
         ("\"dev.gdata.youtube.com\"", f"\"{local_ip}\""),
         ("\"stage.gdata.youtube.com\"", f"\"{local_ip}\""),
-        ("https://www.googleapis.com/", f"http://{local_ip}/")  # New replacement rule
+        ("https://www.googleapis.com", f"http://{local_ip}/")  # New replacement rule
     ]
 
     # Walk through the smali directory and replace in all files
@@ -225,3 +225,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
