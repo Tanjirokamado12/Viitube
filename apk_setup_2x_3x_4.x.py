@@ -105,8 +105,6 @@ def get_or_cache_local_ip():
 def replace_in_smali_files(smali_dir, local_ip):
     # Define the replacements as a list of tuples (old, new)
     replacements = [
-        ("http://gdata.youtube.com/", f"http://{local_ip}/"),
-        ("https://gdata.youtube.com/", f"http://{local_ip}/"),
         ("https://www.google.com/", f"http://{local_ip}/"),
         ("AES/ECB/PKCS5Padding", "AES/ECB/ZeroBytePadding"),
         ("\"gdata.youtube.com\"", f"\"{local_ip}\""),
@@ -224,3 +222,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
