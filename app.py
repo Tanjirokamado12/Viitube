@@ -296,14 +296,14 @@ def viitube_playlist_generate_video_entry(video, base_url):
     <id>tag:youtube.com,2008:playlist:5A4E6E3F17B78FA1:PLFoD08MpX6_oJJo4YULX39bJJFtqy_8cM</id>
     <published>{escape(video['publishedAt'])}.880Z</published>
     <updated>{escape(video['publishedAt'])}.880Z</updated>
-    <category scheme="http://schemas.google.com/g/2005#kind" term="{base_url}/schemas/2007#video"/>
-    <category scheme="{base_url}/schemas/2007/categories.cat" term="Entertainment" label="Entertainment"/>
+    <category scheme="http://schemas.google.com/g/2005#kind" term="http://gdata.youtube.com/schemas/2007#video"/>
+    <category scheme="http://gdata.youtube.com/schemas/2007/categories.cat" term="Entertainment" label="Entertainment"/>
     <title>{escape(video['title'])}</title>
     <content type="application/x-shockwave-flash" src="http://www.youtube.com/v/{video['videoId']}?version=3&amp;f=playlists/&amp;app=youtube_gdata"/>
     <link rel="alternate" type="text/html" href="http://www.youtube.com/watch?v={video['videoId']}&amp;feature=youtube_gdata"/>
-    <link rel="{base_url}/schemas/2007#video.related" type="application/atom+xml" href="{base_url}/feeds/api/videos/{video['videoId']}/related?v=2"/>
-    <link rel="{base_url}/schemas/2007#mobile" type="text/html" href="http://m.youtube.com/details?v={video['videoId']}"/>
-    <link rel="{base_url}/schemas/2007#uploader" type="application/atom+xml" href="{base_url}/feeds/api/users/{video['channelId']}?v=2"/>
+    <link rel="http://gdata.youtube.com/schemas/2007#video.related" type="application/atom+xml" href="{base_url}/feeds/api/videos/{video['videoId']}/related?v=2"/>
+    <link rel="http://gdata.youtube.com/schemas/2007#mobile" type="text/html" href="http://m.youtube.com/details?v={video['videoId']}"/>
+    <link rel="http://gdata.youtube.com/schemas/2007#uploader" type="application/atom+xml" href="{base_url}/feeds/api/users/{video['channelId']}?v=2"/>
     <link rel="related" type="application/atom+xml" href="{base_url}/feeds/api/videos/{video['videoId']}?v=2"/>
     <link rel="self" type="application/atom+xml" href="{base_url}/feeds/api/playlists//5A4E6E3F17B78FA1/PLFoD08MpX6_oJJo4YULX39bJJFtqy_8cM?v=2"/>
     <author>
@@ -320,11 +320,11 @@ def viitube_playlist_generate_video_entry(video, base_url):
     <yt:accessControl action="autoPlay" permission="allowed"/>
     <yt:accessControl action="syndicate" permission="allowed"/>
     <gd:comments>
-        <gd:feedLink rel="{base_url}/schemas/2007#comments" href="{base_url}/feeds/api/videos/{video['videoId']}/comments?v=2" countHint="8"/>
+        <gd:feedLink rel="http://gdata.youtube.com/schemas/2007#comments" href="{base_url}/feeds/api/videos/{video['videoId']}/comments?v=2" countHint="8"/>
     </gd:comments>
     <yt:hd/>
 		<media:group>
-			<media:category label='Entertainment' scheme='{base_url}/schemas/2007/categories.cat'>Entertainment</media:category>
+			<media:category label='Entertainment' scheme='http://gdata.youtube.com/schemas/2007/categories.cat'>Entertainment</media:category>
             <media:content url='{base_url}/channel_fh264_getvideo?v={video['videoId']}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
 			<media:credit role='uploader' scheme='urn:youtube' yt:display='{video['channelTitle']}'>{video['channelHandle']}</media:credit>
 			<media:description type='plain'>{escape(video['description'])}</media:description>
@@ -373,16 +373,16 @@ def viitube_playlist_generate_xml_feed(videos, base_url, playlist_id, playlist_t
     <subtitle>{playlist_title}</subtitle>
     <logo>http://www.gstatic.com/youtube/img/logo.png</logo>
     <link rel='alternate' type='text/html' href='http://www.youtube.com/playlist?list={playlist_id}'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='applicatio0tom+xml' href='http://gdata.youtube.com/feeds/api/playlists//{playlist_id}?v=2'/>
-    <link rel='http://schemas.google.com/g/2005#batch' type='applicatio0tom+xml' href='http://gdata.youtube.com/feeds/api/playlists//{playlist_id}/batch?v=2'/>
-    <link rel='self' type='applicatio0tom+xml' href='http://gdata.youtube.com/feeds/api/playlists//{playlist_id}?start-index=1&amp;max-results=25&amp;v=2'/>
-    <link rel='service' type='applicatio0tomsvc+xml' href='http://gdata.youtube.com/feeds/api/playlists//{playlist_id}?alt=atom-service&amp;v=2'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/playlists//{playlist_id}?v=2'/>
+    <link rel='http://schemas.google.com/g/2005#batch' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/playlists//{playlist_id}/batch?v=2'/>
+    <link rel='self' type='applicatio0tom+xml' href='http://192.168.1.27/feeds/api/playlists//{playlist_id}?start-index=1&amp;max-results=25&amp;v=2'/>
+    <link rel='service' type='applicatio0tomsvc+xml' href='http://192.168.1.27/feeds/api/playlists//{playlist_id}?alt=atom-service&amp;v=2'/>
     <author>
         <name>{channel_id}</name>
-        <uri>http://gdata.youtube.com/feeds/api/users/{channel_id}</uri>
+        <uri>http://192.168.1.27/feeds/api/users/{channel_id}</uri>
         <yt:userId>{channel_id}</yt:userId>
     </author>
-    <generator version='2.1' uri='http://gdata.youtube.com'>YouTube data API</generator>
+    <generator version='2.1' uri='http://192.168.1.27'>YouTube data API</generator>
     <openSearch:totalResults>{len(videos)}</openSearch:totalResults>
     <openSearch:startIndex>1</openSearch:startIndex>
     <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
@@ -452,7 +452,7 @@ def generate_device_id():
     charset = "qwertyuiopasdfghjklzxcvbnm1234567890"
     return ''.join(random.choices(charset, k=7))
 
-@app.route('/youtube/accounts/registerDevice', methods=['POST'])
+@app.route('/youtube/accounts/registerDevice', methods=['POST', 'GET'])
 @app.route('/proxy/ytbt', methods=['POST'])
 def register_device():
     device_id = generate_device_id()
@@ -473,7 +473,7 @@ PLACEHOLDER = b'thevideoiid'  # must be 11 bytes for exact replacement
 @app.route('/youtubei/v1/player', methods=['GET', 'POST'])
 @app.route('/youtube/v3/players', methods=['GET', 'POST'])
 def youtube_player():
-    video_id = request.args.get('id', '').strip() 
+    video_id = request.args.get('id') or request.args.get('videoId')
 
     if not video_id:
         return jsonify({"error": "Missing 'id' parameter"}), 400
@@ -1257,6 +1257,7 @@ def mobile_user_info(handle):
     <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.uploads' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('channel_id', '0'))}/uploads?v=2' countHint='321'/>
     <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.newsubscriptionvideos' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('channel_id', '0'))}/newsubscriptionvideos?v=2'/>
     <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.watchwhileactivity' href='{mobile_xml_escape(base_url)}/feeds/api/users/{mobile_xml_escape(info.get('channel_id', '0'))}/newsubscriptionvideos?v=2'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#user.recentactivity' href='{mobile_xml_escape(base_url)}/feeds/api/events?author={mobile_xml_escape(info.get('channel_id', '0'))}'/>
     <yt:googlePlusUserId>105395577935858592015</yt:googlePlusUserId>
     <yt:location>NL</yt:location>
     <yt:statistics lastWebAccess='1970-01-01T00:00:00.000Z' subscriberCount='{mobile_xml_escape(info.get('subscribers', '0'))}' videoWatchCount='0' viewCount='0' totalUploadViews='{mobile_xml_escape(info.get('total_uploads', '0'))}'/>
@@ -1478,25 +1479,28 @@ def get_video_xml(video_id):
     # Attempt to extract both date and upload time if possible
     upload_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("uploadDate", "")
     publish_time_str = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
+    # Attempt to extract both date and upload time if possible
+    upload_date = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("uploadDate", "")
+    publish_time_str = data.get("microformat", {}).get("playerMicroformatRenderer", {}).get("publishDate", "")
     title_esc = escape(title)
     description_esc = escape(description)
     author_esc = escape(author)
     view_count_esc = escape(view_count)
     duration_esc = escape(duration)
 
-
     # Combine with a default time if no time is given
     if publish_time_str:
         # Fallback: assume noon UTC if time not provided
         try:
-            published_dt = datetime.strptime(publish_time_str, "%Y-%m-%d").replace(hour=12, minute=0, second=0, tzinfo=timezone.utc)
+            published_dt = datetime.strptime(publish_time_str, "%Y-%m-%d").replace(hour=12, minute=0, second=0)
         except ValueError:
-            published_dt = datetime.now(timezone.utc)
+            published_dt = datetime.now()
     else:
-        published_dt = datetime.now(timezone.utc)
+        published_dt = datetime.now()
 
     # Format as RFC3339 (ISO 8601)
-    published_time = published_dt.isoformat().replace("+00:00", "Z")
+    published_time = published_dt.isoformat().replace("+00:00", "0")
+
 
 # Use escaped variables inside the XML string:
     xmlcontent = f"""<?xml version='1.0' encoding='UTF-8'?>
@@ -1965,7 +1969,7 @@ def get_channel_info(channel_id, oauth_token):
 
     return channel_data
 
-def build_xml(subscriptions, base_url, oauth_token):
+def subscriptions_build_xml(subscriptions, base_url, oauth_token):
     xml_template = f"""<?xml version='1.0' encoding='UTF-8'?>
 <feed xmlns='http://www.w3.org/2005/Atom' xmlns:gd='http://schemas.google.com/g/2005' xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/' xmlns:yt='http://gdata.youtube.com/schemas/2007' xmlns:media='http://search.yahoo.com/mrss/' gd:etag='W/&quot;Ak4DQnw_fip7I2A9XRRXFEU.&quot;'>
 	<id>tag:youtube.com,2008:channels</id>
@@ -1973,16 +1977,16 @@ def build_xml(subscriptions, base_url, oauth_token):
 	<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#channel'/>
 	<title>Channels matching: crossfit</title>
 	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
-	<link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/channels?v=2'/>
-	<link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/channels/batch?v=2'/>
-	<link rel='self' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/channels?q=crossfit&amp;start-index=1&amp;max-results=3&amp;v=2'/>
-	<link rel='service' type='application/atomsvc+xml' href='http://gdata.youtube.com/feeds/api/channels?alt=atom-service&amp;v=2'/>
-	<link rel='next' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/channels?q=crossfit&amp;start-index=4&amp;max-results=3&amp;v=2'/>
+	<link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?v=2'/>
+	<link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels/batch?v=2'/>
+	<link rel='self' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?q=crossfit&amp;start-index=1&amp;max-results=3&amp;v=2'/>
+	<link rel='service' type='application/atomsvc+xml' href='http://192.168.1.27/feeds/api/channels?alt=atom-service&amp;v=2'/>
+	<link rel='next' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?q=crossfit&amp;start-index=4&amp;max-results=3&amp;v=2'/>
 	<author>
 		<name>YouTube</name>
 		<uri>http://www.youtube.com/</uri>
 	</author>
-	<generator version='2.1' uri='http://gdata.youtube.com'>YouTube data API</generator>
+	<generator version='2.1' uri='http://192.168.1.27'>YouTube data API</generator>
 	<openSearch:totalResults>77161</openSearch:totalResults>
 	<openSearch:startIndex>1</openSearch:startIndex>
 	<openSearch:itemsPerPage>3</openSearch:itemsPerPage>
@@ -2092,7 +2096,7 @@ def subscriptions_xml():
                 if not next_page_token:
                     break
 
-            xml_data = build_xml(subscriptions, base_url, oauth_token)
+            xml_data = subscriptions_build_xml(subscriptions, base_url, oauth_token)
 
             # Cache XML for fallback
             with open(SUBSCRIPTIONS_CACHE_PATH, "w", encoding="utf-8") as f:
@@ -2284,7 +2288,7 @@ def create_xml_feed(videos, channel_id, channel_name, base_url):
         "xmlns:gd": "http://schemas.google.com/g/2005"
     })
 
-    ET.SubElement(feed, "id").text = "http://gdata.youtube.com/feeds/api/channel/uploads"
+    ET.SubElement(feed, "id").text = "http://192.168.1.27/feeds/api/channel/uploads"
     ET.SubElement(feed, "updated").text = videos[0]["published"] if videos else ""
     ET.SubElement(feed, "title").text = channel_name
 
@@ -2498,7 +2502,7 @@ def fetch_liked_videos_xml(oauth_token, base_url):
                 <yt:videoid id='{item['id']}'>{item['id']}</yt:videoid>
 				<yt:uploaderId>EE{sn.get('channelId')}</yt:uploaderId>
                 <youTubeId id='{item['id']}'>{item['id']}</youTubeId>
-				<media:credit role='uploader' scheme='urn:youtube' yt:display="{escaped_author_name}" yt:type='partner'>{sn.get('channelId')}</media:credit>
+				<media:credit role='uploader' scheme='urn:youtube' yt:display="{escaped_author_name}" >{sn.get('channelId')}</media:credit>
             </media:group>
 		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
 		<yt:statistics favoriteCount='0' viewCount='{view_count}'/>
@@ -2508,18 +2512,18 @@ def fetch_liked_videos_xml(oauth_token, base_url):
     # Wrap in XML root
     xml_output = f"""<?xml version='1.0' encoding='UTF-8'?>
 <feed>
-    <id>http://gdata.youtube.com/feeds/api/videos</id>
+    <id>http://192.168.1.27/feeds/api/videos</id>
     <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
     <title type='text'>YouTube Videos</title>
     <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
     <link rel='alternate' type='text/html' href='http://www.youtube.com'/>
-    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos'/>
-    <link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/batch'/>
+    <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://192.168.1.27/feeds/api/videos'/>
+    <link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://192.168.1.27/feeds/api/videos/batch'/>
     <author>
       <name>YouTube/yt2009</name>
       <uri>http://www.youtube.com/</uri>
     </author>
-    <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+    <generator version='2.0' uri='http://192.168.1.27/'>YouTube data API</generator>
     <openSearch:totalResults>20</openSearch:totalResults>
     <openSearch:startIndex>20</openSearch:startIndex>
     <openSearch:itemsPerPage>20</openSearch:itemsPerPage>
@@ -2647,14 +2651,14 @@ def user_uploads():
   <id>tag:youtube.com,2008:video:{escape_xml(video_id)}</id>
   <published>{published}</published>
   <updated>{published}</updated>
-  <category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
+  <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
   <category scheme='{base_url}/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
   <title>{escape_xml(v.get("title"))}</title>
   <content type='application/x-shockwave-flash' src='http://www.youtube.com/v/{escape_xml(video_id)}?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
   <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={escape_xml(video_id)}&amp;feature=youtube_gdata'/>
-  <link rel='{base_url}/schemas/2007#video.related' type='application/atom+xml' href='{base_url}/feeds/api/videos/{escape_xml(video_id)}/related?v=2'/>
-  <link rel='{base_url}/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v={escape_xml(video_id)}'/>
-  <link rel='{base_url}/schemas/2007#uploader' type='application/atom+xml' href='{base_url}/feeds/api/users/{escape_xml(channel_id)}?v=2'/>
+  <link rel='http://gdata.youtube.com/schemas/2007#video.related' type='application/atom+xml' href='{base_url}/feeds/api/videos/{escape_xml(video_id)}/related?v=2'/>
+  <link rel='http://gdata.youtube.com/schemas/2007#mobile' type='text/html' href='http://m.youtube.com/details?v={escape_xml(video_id)}'/>
+  <link rel='http://gdata.youtube.com/schemas/2007#uploader' type='application/atom+xml' href='{base_url}/feeds/api/users/{escape_xml(channel_id)}?v=2'/>
   <link rel='self' type='application/atom+xml' href='{base_url}/feeds/api/users/{escape_xml(channel_id)}/uploads/{escape_xml(video_id)}?v=2'/>
   <author>
     <name>{escape_xml(channel_title)}</name>
@@ -2670,12 +2674,12 @@ def user_uploads():
   <yt:accessControl action='autoPlay' permission='allowed'/>
   <yt:accessControl action='syndicate' permission='allowed'/>
   <gd:comments>
-    <gd:feedLink rel='{base_url}/schemas/2007#comments' href='{base_url}/feeds/api/videos/{escape_xml(video_id)}/comments?v=2' countHint='24'/>
+    <gd:feedLink rel='http://gdata.youtube.com/schemas/2007#comments' href='{base_url}/feeds/api/videos/{escape_xml(video_id)}/comments?v=2' countHint='24'/>
   </gd:comments>
   <media:group>
     <media:category label='News &amp; Politics' scheme='{base_url}/schemas/2007/categories.cat'>News</media:category>
     <media:content url='http://www.youtube.com/v/{escape_xml(video_id)}?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='{duration_sec}' yt:format='5'/>
-    <media:credit role='uploader' scheme='urn:youtube' yt:display='{escape_xml(channel_title)}' yt:type='partner'>{escape_xml(channel_id)}</media:credit>
+    <media:credit role='uploader' scheme='urn:youtube' yt:display='{escape_xml(channel_title)}' >{escape_xml(channel_id)}</media:credit>
     <media:description type='plain'>{escape_xml(v.get("description"))}</media:description>
     <media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
     <media:player url='http://www.youtube.com/watch?v={escape_xml(video_id)}&amp;feature=youtube_gdata_player'/>
@@ -2705,7 +2709,7 @@ def user_uploads():
   xmlns:media='http://search.yahoo.com/mrss/' gd:etag='W/"CEIMR384cSp7I2A9XRdUE0Q."'>
   <id>{channel_feed_id}</id>
   <updated>{updated}</updated>
-  <category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
+  <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
   <title>User Uploads</title>
   <logo>http://www.gstatic.com/youtube/img/logo.png</logo>
   <link rel='alternate' type='text/html' href='{channel_link}'/>
@@ -3116,8 +3120,8 @@ def build_xml_response(videos, baseurl):
 		<id>tag:youtube.com,2008:video:{video_id}</id>
         {publish_date_tag}
         {updated_date_tag}
-		<category scheme='http://schemas.google.com/g/2005#kind' term='{baseurl_escaped}/schemas/2007#video'/>
-		<category scheme='{baseurl_escaped}/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
+		<category scheme='http://gdata.youtube.com/schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
 		<title>{title}</title>
 		<content type='application/x-shockwave-flash' src='http://www.youtube.com/v/{video_id}?version=3&amp;f=user_uploads&amp;app=youtube_gdata'/>
 		<link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={video_id}&amp;feature=youtube_gdata'/>
@@ -3141,13 +3145,13 @@ def build_xml_response(videos, baseurl):
 		<yt:accessControl action='autoPlay' permission='allowed'/>
 		<yt:accessControl action='syndicate' permission='allowed'/>
 		<gd:comments>
-			<gd:feedLink rel='{baseurl_escaped}/schemas/2007#comments' href='{baseurl_escaped}/feeds/api/videos/{video_id}/comments?v=2' countHint='24'/>
+			<gd:feedLink rel='http://gdata.youtube.com/schemas/2007#comments' href='{baseurl_escaped}/feeds/api/videos/{video_id}/comments?v=2' countHint='24'/>
 		</gd:comments>
 		<media:group>
 			<media:category label='News &amp; Politics' scheme='{baseurl_escaped}/schemas/2007/categories.cat'>News</media:category>
 			<media:content url='http://www.youtube.com/v/{video_id}?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
             <media:content url='{baseurl_escaped}/channel_fh264_getvideo?v={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='{baseurl_escaped}/get_480?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='{baseurl_escaped}/exp_hd?video_id={video_id}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
-			<media:credit role='uploader' scheme='urn:youtube' yt:display='{channel_name}' yt:type='partner'>{channel_id}</media:credit>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='{channel_name}' >{channel_id}</media:credit>
 			<media:description type='plain'>{description}</media:description>
 			<media:keywords/>
 			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
@@ -3182,7 +3186,7 @@ def build_xml_response(videos, baseurl):
 	xmlns:media='http://search.yahoo.com/mrss/' gd:etag='W/&quot;CEIMR384cSp7I2A9XRdUE0Q.&quot;'>
 	<id>tag:youtube.com,2008:user:19cachicha:uploads</id>
 	<updated>2014-12-01T00:09:46.139Z</updated>
-	<category scheme='http://schemas.google.com/g/2005#kind' term='{baseurl_escaped}/schemas/2007#video'/>
+	<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
 	<title>Search results</title>
 	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
 	<link rel='alternate' type='text/html' href='http://www.youtube.com/channel/UC9yMWgQf2_xMhbdKPo7Ljrw/videos'/>
@@ -3511,8 +3515,8 @@ def channel_rss(identifier):
         duration_sec = iso8601_duration_to_seconds(v.get("duration", ""))
         rss_items += f"""<entry gd:etag='W/&quot;CUYDQ347eCp7I2A9XRdVGEs.&quot;'>
 		<id>tag:youtube.com,2008:video:{escape_xml(v.get("videoId", ""))}</id>
-		<published>{escape_xml(v.get("publishedAt", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")))}</published>
-		<updated>{escape_xml(v.get("publishedAt", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")))}</updated>
+		<published>{escape_xml(v.get("publishedAt", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")))}.000Z</published>
+		<updated>{escape_xml(v.get("publishedAt", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")))}.000Z</updated>
 		<category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}schemas/2007#video'/>
 		<category scheme='{base_url}schemas/2007/categories.cat' term='News' label='News &amp; Politics'/>
 		<title>{escape_xml(v.get("title", ""))}</title>
@@ -3542,7 +3546,7 @@ def channel_rss(identifier):
 			<media:category label='News &amp; Politics' scheme='{base_url}schemas/2007/categories.cat'>News</media:category>
 			<media:content url='http://www.youtube.com/v/{escape_xml(v.get("videoId", ""))}?version=3&amp;f=user_uploads&amp;app=youtube_gdata' type='application/x-shockwave-flash' medium='video' isDefault='true' expression='full' duration='2506' yt:format='5'/>
             <media:content url='{base_url}channel_fh264_getvideo?v={escape_xml(v.get("videoId", ""))}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/><media:content url='{base_url}get_480?video_id={escape_xml(v.get("videoId", ""))}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='14'/><media:content url='{base_url}exp_hd?video_id={escape_xml(v.get("videoId", ""))}' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='8'/>
-			<media:credit role='uploader' scheme='urn:youtube' yt:display='{channel_title}' yt:type='partner'>{escape_xml(channel_id)}</media:credit>
+			<media:credit role='uploader' scheme='urn:youtube' yt:display='{channel_title}' >{escape_xml(channel_id)}</media:credit>
 			<media:description type='plain'>{escape_xml(v.get("description", ""))}</media:description>
 			<media:keywords/>
 			<media:license type='text/html' href='http://www.youtube.com/t/terms'>youtube</media:license>
@@ -3556,7 +3560,7 @@ def channel_rss(identifier):
 			<media:thumbnail url='http://i.ytimg.com/vi/{escape_xml(v.get("videoId", ""))}/3.jpg' height='90' width='120' time='00:31:19.500' yt:name='end'/>
 			<media:title type='plain'>{escape_xml(v.get("title", ""))}</media:title>
 			<yt:duration seconds='{duration_sec}'/>
-	        <yt:uploaded>{escape_xml(v.get("publishedAt", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")))}</yt:uploaded>
+	        <yt:uploaded>{escape_xml(v.get("publishedAt", datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")))}.000Z  </yt:uploaded>
 			<yt:uploaderId>EE{escape_xml(channel_id)}</yt:uploaderId>
 			<yt:videoid>{escape_xml(v.get("videoId", ""))}</yt:videoid>
 		</media:group>
@@ -3577,7 +3581,7 @@ def channel_rss(identifier):
 	xmlns:media='http://search.yahoo.com/mrss/' gd:etag='W/&quot;CEIMR384cSp7I2A9XRdUE0Q.&quot;'>
 	<id>tag:youtube.com,2008:user:19cachicha:uploads</id>
 	<updated>2014-12-01T00:09:46.139Z</updated>
-	<category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
+	<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
 	<title>Search results</title>
 	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
 	<link rel='alternate' type='text/html' href='http://www.youtube.com/channel/UC9yMWgQf2_xMhbdKPo7Ljrw/videos'/>
@@ -4022,7 +4026,7 @@ def channel_rss_event():
         <yt:groupId>0</yt:groupId>
         <author>
 			<name>{channel_title}</name>
-			<uri>{base_url}feeds/api/users/{channel_title}</uri>
+			<uri>{base_url}feeds/api/users/{escape_xml_events(channel_id)}</uri>
 		</author>
         <link rel='http://gdata.youtube.com/schemas/2007#video' href='{base_url}feeds/api/videos/{escape_xml_events(v.get("videoId", ""))}'>
             
@@ -4054,7 +4058,7 @@ def channel_rss_event():
                 <yt:duration seconds='{duration_sec}'/>
                 <yt:videoid id='{escape_xml_events(v.get("videoId", ""))}'>{escape_xml_events(v.get("videoId", ""))}</yt:videoid>
                 <youTubeId id='{escape_xml_events(v.get("videoId", ""))}'>{escape_xml_events(v.get("videoId", ""))}</youTubeId>
-                <media:credit role='uploader' scheme='urn:youtube' yt:display='{channel_title}' yt:type='partner'>{escape_xml_events(channel_id)}</media:credit>
+                <media:credit role='uploader' scheme='urn:youtube' yt:display='{channel_title}' >{escape_xml_events(channel_id)}</media:credit>
             </media:group>
 		<gd:rating average='4.151515' max='5' min='1' numRaters='99' rel='http://schemas.google.com/g/2005#overall'/>
 		<yt:statistics favoriteCount='0' viewCount='{v.get("viewCount", 0)}'/>
@@ -4072,7 +4076,7 @@ xmlns:media='http://search.yahoo.com/mrss/'
 xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
 xmlns:gd='http://schemas.google.com/g/2005'
 xmlns:yt='http://gdata.youtube.com/schemas/2007'>
-    <id>http://gdata.youtube.com/feeds/api/standardfeeds/us/recently_featured</id>
+    <id>http://192.168.1.27/feeds/api/standardfeeds/us/recently_featured</id>
     <updated>2010-12-21T18:59:58.000-08:00</updated>
     <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
     <title type='text'> </title>
@@ -4081,7 +4085,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
         <name>YouTube</name>
         <uri>http://www.youtube.com/</uri>
     </author>
-    <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+    <generator version='2.0' uri='http://192.168.1.27/'>YouTube data API</generator>
     <openSearch:totalResults>25</openSearch:totalResults>
     <openSearch:startIndex>1</openSearch:startIndex>
     <openSearch:itemsPerPage>25</openSearch:itemsPerPage>
@@ -4534,7 +4538,7 @@ xmlns:media='http://search.yahoo.com/mrss/'
 xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
 xmlns:gd='http://schemas.google.com/g/2005'
 xmlns:yt='http://gdata.youtube.com/schemas/2007'>
-    <id>http://gdata.youtube.com/feeds/api/standardfeeds/us/recently_featured</id>
+    <id>http://192.168.1.27/feeds/api/standardfeeds/us/recently_featured</id>
     <updated>2010-12-21T18:59:58.000-08:00</updated>
     <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
     <title type='text'> </title>
@@ -4543,7 +4547,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
         <name>YouTube</name>
         <uri>http://www.youtube.com/</uri>
     </author>
-    <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+    <generator version='2.0' uri='http://192.168.1.27/'>YouTube data API</generator>
     <openSearch:totalResults>25</openSearch:totalResults>
     <openSearch:startIndex>1</openSearch:startIndex>
     <openSearch:itemsPerPage>25</openSearch:itemsPerPage>{"".join(playlist_entries)}
@@ -4781,7 +4785,7 @@ def related_convert_to_xml(video_id, video_details, base_url):
     <media:thumbnail yt:name='default' url='http://i.ytimg.com/vi/{escape(video_id)}/hqdefault.jpg' height='240' width='320' time='00:00:00'/>
     <yt:duration seconds='{length_seconds}'/>
     <yt:videoid>{escape(video_id)}</yt:videoid>
-    <media:credit role='uploader' scheme='urn:youtube' yt:display="{author}" yt:type='partner'>{channel_id}</media:credit>
+    <media:credit role='uploader' scheme='urn:youtube' yt:display="{author}" >{channel_id}</media:credit>
     <yt:uploaderId>EE{channel_id}</yt:uploaderId>
   </media:group>
   <gd:rating average='5' max='5' min='1' numRaters='5828' rel='http://schemas.google.com/g/2005#overall'/>
@@ -4810,15 +4814,15 @@ def related_fetch_and_display_related_videos(video_id, base_url):
       xmlns:media="http://search.yahoo.com/mrss/"
       xmlns:gd="http://schemas.google.com/g/2005"
       xmlns:openSearch="http://a9.com/-/spec/opensearch/1.1/">
-  <id>http://gdata.youtube.com/feeds/api/videos</id>
+  <id>http://192.168.1.27/feeds/api/videos</id>
   <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
   <title type='text'>YouTube Videos</title>
   <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
   <link rel='alternate' type='text/html' href='http://www.youtube.com'/>
-  <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos'/>
-  <link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/batch'/>
+  <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://192.168.1.27/feeds/api/videos'/>
+  <link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://192.168.1.27/feeds/api/videos/batch'/>
   <author><name>YouTube/yt2009</name><uri>http://www.youtube.com/</uri></author>
-  <generator version='2.0' uri='http://gdata.youtube.com/'>YouTube data API</generator>
+  <generator version='2.0' uri='http://192.168.1.27/'>YouTube data API</generator>
   <openSearch:totalResults>5360034</openSearch:totalResults>
   <openSearch:startIndex>1</openSearch:startIndex>
   <openSearch:itemsPerPage>6</openSearch:itemsPerPage>""" + "\n".join(xml_responses) + """\n</feed>"""
@@ -4851,7 +4855,7 @@ os.makedirs(CHANNELSEARCHMOBILE_CACHE_CHANNEL_DIR, exist_ok=True)
 xmltemplate = """<entry gd:etag='W/&quot;AkQAQn47eCp7I2A9XRRXE0Q.&quot;'>
 		<id>tag:youtube.com,2008:channel:{channelId}</id>
 		<updated>2015-02-20T02:12:23.000Z</updated>
-		<category scheme='http://schemas.google.com/g/2005#kind' term='{link}/schemas/2007#channel'/>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#channel'/>
 		<title>{title}</title>
 		<summary></summary>
 		<link rel='http://gdata.youtube.com/schemas/2007#featured-video' type='application/atom+xml' href='{link}/feeds/api/videos/-MDe7XhRbK8?v=2'/>
@@ -4977,16 +4981,16 @@ def channels_to_xml_template(channels, query, base_url):
 	<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#channel'/>
 	<title>Channels matching: crossfit</title>
 	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
-	<link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/channels?v=2'/>
-	<link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/channels/batch?v=2'/>
-	<link rel='self' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/channels?q=crossfit&amp;start-index=1&amp;max-results=3&amp;v=2'/>
-	<link rel='service' type='application/atomsvc+xml' href='http://gdata.youtube.com/feeds/api/channels?alt=atom-service&amp;v=2'/>
-	<link rel='next' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/channels?q=crossfit&amp;start-index=4&amp;max-results=3&amp;v=2'/>
+	<link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?v=2'/>
+	<link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels/batch?v=2'/>
+	<link rel='self' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?q=crossfit&amp;start-index=1&amp;max-results=3&amp;v=2'/>
+	<link rel='service' type='application/atomsvc+xml' href='http://192.168.1.27/feeds/api/channels?alt=atom-service&amp;v=2'/>
+	<link rel='next' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?q=crossfit&amp;start-index=4&amp;max-results=3&amp;v=2'/>
 	<author>
 		<name>YouTube</name>
 		<uri>http://www.youtube.com/</uri>
 	</author>
-	<generator version='2.1' uri='http://gdata.youtube.com'>YouTube data API</generator>\n{channels_xml}\n</feed>"""
+	<generator version='2.1' uri='http://192.168.1.27'>YouTube data API</generator>\n{channels_xml}\n</feed>"""
 
 @app.route("/feeds/api/channels")
 def channels_endpoint():
@@ -5059,10 +5063,10 @@ def build_xml_template(data, base_url, oauth_token=None):
 xmlns:media='http://search.yahoo.com/mrss/'
 xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/'
 xmlns:gd='http://schemas.google.com/g/2005'
-xmlns:yt='{base_url}/schemas/2007'>
+xmlns:yt='http://gdata.youtube.com/schemas/2007'>
     <id>{base_url}/feeds/mobile/api/standardfeeds/us/recently_featured</id>
     <updated>2010-12-21T18:59:58.000-08:00</updated>
-    <category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#video'/>
+    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#video'/>
     <title type='text'> </title>
     <logo>http://www.youtube.com/img/pic_youtubelogo_123x63.gif</logo>
     <author>
@@ -5096,7 +5100,7 @@ xmlns:yt='{base_url}/schemas/2007'>
         <yt:playlistId>{playlist_id}</yt:playlistId>
 		<published>2008-08-25T10:05:58.000-07:00</published>
 		<updated>2008-08-27T22:37:59.000-07:00</updated>
-		<category scheme='http://schemas.google.com/g/2005#kind' term='{base_url}/schemas/2007#playlistLink'/>
+		<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#playlistLink'/>
 		<title type='text'>{title}</title>
 		<content type='text' src='{base_url}/feeds/mobile/api/playlists/{playlist_id}'>None</content>
 		<link rel='related' type='application/atom+xml' href='{base_url}/feeds/mobile/api/users/{author}'/>
@@ -5106,7 +5110,7 @@ xmlns:yt='{base_url}/schemas/2007'>
 			<name>{author}</name>
 			<uri>{base_url}/feeds/mobile/api/users/{author}</uri>
 		</author>
-		<gd:feedLink rel='{base_url}/schemas/2007#playlist' href='{base_url}/feeds/mobile/api/playlists/{playlist_id}' countHint='{item_count}'/>
+		<gd:feedLink rel='http://gdata.youtube.com/schemas/2007#playlist' href='{base_url}/feeds/mobile/api/playlists/{playlist_id}' countHint='{item_count}'/>
 		<yt:description>{description}</yt:description>
 		<media:group>
 			<media:thumbnail url='http://i.ytimg.com/vi/{first_video_id}/mqdefault.jpg' height='180' width='320' yt:name='mqdefault'/>
@@ -5202,10 +5206,10 @@ def playlist_build_playlist_xml(videos_info, base_url):
 	xmlns:media='http://search.yahoo.com/mrss/'
 	xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/'
 	xmlns:gd='http://schemas.google.com/g/2005'
-	xmlns:yt='{e(base_url)}/schemas/2007' gd:etag='W/&quot;DUECRn47eCp7I2A9WhJVEkU.&quot;'>
+	xmlns:yt='http://gdata.youtube.com/schemas/2007' gd:etag='W/&quot;DUECRn47eCp7I2A9WhJVEkU.&quot;'>
 	<id>tag:youtube.com,2008:playlist:5A4E6E3F17B78FA1</id>
 	<updated>2012-08-30T00:47:47.000Z</updated>
-	<category scheme='http://schemas.google.com/g/2005#kind' term='{e(base_url)}/schemas/2007#playlist'/>
+	<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#playlist'/>
 	<title>Website</title>
 	<subtitle>New Vybe Videos</subtitle>
 	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
@@ -5239,8 +5243,8 @@ def playlist_build_playlist_xml(videos_info, base_url):
         <updated>2010-06-30T22:34:43.880Z</updated>
         <title>{e(video.get('title'))}</title>
         <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={e(video.get('video_id'))}&amp;feature=youtube_gdata'/>
-        <link rel='{e(base_url)}/schemas/2007#video.responses' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/responses?v=2'/>
-        <link rel='{e(base_url)}/schemas/2007#video.related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/related?v=2'/>
+        <link rel="http://gdata.youtube.com/schemas/2007#video.responses' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/responses?v=2'/>
+        <link rel="http://gdata.youtube.com/schemas/2007#video.related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/related?v=2'/>
         <link rel='related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}?v=2'/>
         <link rel='self' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/0A7ED544A0D9877D/00A37F607671690E?v=2'/>
 		<author>
@@ -5256,7 +5260,7 @@ def playlist_build_playlist_xml(videos_info, base_url):
         <yt:accessControl action='syndicate' permission='allowed'/>
         <yt:accessControl action='list' permission='allowed'/>
         <gd:comments>
-            <gd:feedLink href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/comments?v=2' countHint='1'/>
+            <gd:feedLink href='http://gdata.youtube.com/feeds/api/videos/{e(video.get('video_id'))}/comments?v=2' countHint='1'/>
         </gd:comments>
         <media:group>
             <media:content url='{e(base_url)}/get_video?video_id={e(video.get('video_id'))}/mp4' type='video/3gpp' medium='video' expression='full' duration='999' yt:format='3'/>
@@ -5535,12 +5539,12 @@ def build_xml(comments, videoid):
         xml_parts.append(f"    <category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#comment'/>")
         xml_parts.append(f'    <title>...</title>')
         xml_parts.append(f'    <content>{escape_xml(c["content"])}</content>')
-        xml_parts.append(f"    <link rel='related' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/jNQXAC9IVRw?v=2'/>")
+        xml_parts.append(f"    <link rel='related' type='application/atom+xml' href='http://192.168.1.27/feeds/api/videos/jNQXAC9IVRw?v=2'/>")
         xml_parts.append(f"    <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v=jNQXAC9IVRw'/>")
-        xml_parts.append(f"    <link rel='self' type='application/atom+xml' href='http://gdata.youtube.com/feeds/api/videos/jNQXAC9IVRw/comments/c?v=2'/>")
+        xml_parts.append(f"    <link rel='self' type='application/atom+xml' href='http://192.168.1.27/feeds/api/videos/jNQXAC9IVRw/comments/c?v=2'/>")
         xml_parts.append('    <author>')
         xml_parts.append(f'      <name>{escape_xml(c["channel"])}</name>')
-        xml_parts.append(f'      <uri>http://gdata.youtube.com/feeds/api/users/{escape_xml(c["channel"])}</uri>')
+        xml_parts.append(f'      <uri>http://192.168.1.27/feeds/api/users/{escape_xml(c["channel"])}</uri>')
         xml_parts.append('    </author>')
         xml_parts.append('  </entry>')
         
