@@ -25,17 +25,17 @@ Some Uploads Return No video found,Even if user has Uploaded videos
 
 Some Channels Could return 404 even if is present
 
-No Comments
-
-Watch Later don't work
+Login Part has Been Removed
 
 For 2.X:Channel names are channelid for all Things (Such as Home Screen,Category,Search....)
 
 For 3.X:No issues Found
 
-For 4.X:Login don't work (Subscribtions feeds don't work and show An Error Occured) and Clicking on Any Video on Favorites makes app crash
+For 4.X:No Issues Found
 
-For 5.X:Only 5.1.10 and 5.2.27 works,5.0.21 return "Unsupported video format" and clicking on Activity Makes App Crash
+For 4.5.17/5.0.21:Apps works but No PlayBack (Show Unsupported Video format)
+
+For 5.1.10/5.2.27:No Issues Found
 
 ## Setup
 
@@ -48,4 +48,5 @@ after run python app.py
 - [apk_setup.md](apk_setup.md) - set early youtube android APKs to work with Viitube
 
 - [wii_setup.md](wii_setup.md) - Setup Viitube For TV/Wii App
+
 
