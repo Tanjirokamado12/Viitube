@@ -5546,6 +5546,165 @@ def serve_comments(videoid):
     xmlresponse = build_xml(comments, videoid)
     return Response(xmlresponse, mimetype='application/atom+xml')
 
+# -------------------- Configuration --------------------
+WII_CACHE_DIR = "assets/cache/SearchClean"
+WII_CACHE_TTL = 24 * 3600  # 24 hours
+IP = "127.0.0.1"
+PORT = "5000"
+
+# -------------------- Utilities --------------------
+def wii_safe_filename(name: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9_-]+", "_", name.strip())
+
+def wii_duration_to_seconds(dur):
+    parts = dur.split(":")
+    try:
+        parts = [int(x) for x in parts]
+        if len(parts) == 3:
+            h, m, s = parts
+        elif len(parts) == 2:
+            h, m, s = 0, parts[0], parts[1]
+        else:
+            h, m, s = 0, 0, parts[0]
+        return h * 3600 + m * 60 + s
+    except:
+        return 0
+
+def wii_relative_time_text(text):
+    """Keep original 'X years ago' or fallback."""
+    if not text:
+        return "Unknown"
+    return text
+
+# -------------------- YouTube API --------------------
+def wii_fetch_youtube_search_raw(query):
+    url = "https://www.youtube.com/youtubei/v1/search"
+    headers = {"Content-Type": "application/json", "User-Agent": "Mozilla/5.0"}
+    payload = {
+        "context": {"client": {"clientName": "WEB", "clientVersion": "2.20241107.01.00"}},
+        "query": query,
+    }
+    r = requests.post(url, headers=headers, json=payload)
+    r.raise_for_status()
+    return r.json()
+
+def wii_parse_youtubei_to_clean(data, limit=10):
+    try:
+        contents = (
+            data["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]
+            ["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"]
+        )
+    except KeyError:
+        return []
+
+    results = []
+    for item in contents:
+        video = item.get("videoRenderer")
+        if not video:
+            continue
+
+        video_id = video.get("videoId")
+        title = "".join([r.get("text", "") for r in video.get("title", {}).get("runs", [])])
+        author_runs = video.get("ownerText", {}).get("runs", [{}])
+        author = author_runs[0].get("text", "")
+        author_id = (
+            author_runs[0]
+            .get("navigationEndpoint", {})
+            .get("browseEndpoint", {})
+            .get("browseId", "")
+        )
+        published = video.get("publishedTimeText", {}).get("simpleText", "Unknown")
+        duration_text = video.get("lengthText", {}).get("simpleText", "0:00")
+        view_count_text = video.get("viewCountText", {}).get("simpleText", "0 views")
+
+        duration_seconds = wii_duration_to_seconds(duration_text)
+        match = re.search(r"([\d,\.]+)", view_count_text)
+        view_count = int(match.group(1).replace(",", "").replace(".", "")) if match else 0
+
+        results.append({
+            "videoId": video_id,
+            "published": wii_relative_time_text(published),
+            "title": title,
+            "author": author,
+            "authorId": author_id,
+            "durationSeconds": duration_seconds,
+            "viewCount": view_count
+        })
+
+        if len(results) >= limit:
+            break
+
+    return results
+
+# -------------------- Cache --------------------
+def wii_load_raw_cache(query):
+    os.makedirs(WII_CACHE_DIR, exist_ok=True)
+    filename = wii_safe_filename(query) + "_raw.json"
+    path = os.path.join(WII_CACHE_DIR, filename)
+    if not os.path.exists(path):
+        return None
+    try:
+        if time.time() - os.path.getmtime(path) > WII_CACHE_TTL:
+            return None
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+def wii_save_raw_cache(query, data):
+    os.makedirs(WII_CACHE_DIR, exist_ok=True)
+    filename = wii_safe_filename(query) + "_raw.json"
+    path = os.path.join(WII_CACHE_DIR, filename)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+def yt_search_cached(query, limit=10):
+    raw = wii_load_raw_cache(query)
+    if raw is None:
+        raw = wii_fetch_youtube_search_raw(query)
+        wii_save_raw_cache(query, raw)
+    return wii_parse_youtubei_to_clean(raw, limit=limit)
+
+# -------------------- XML --------------------
+def wii_generate_xml(videos):
+    xml_string = '<?xml version="1.0" encoding="UTF-8"?>\n<feed>\n'
+    for v in videos:
+        videoId = escape(v["videoId"])
+        title = escape(v["title"])
+        publishedText = escape(v["published"])
+        authorName = escape(v["author"])
+        authorId = escape(v["authorId"])
+        lengthText = str(v["durationSeconds"])
+        viewCount = str(v["viewCount"])
+
+        xml_string += '<entry>'
+        xml_string += f'<id>http://{IP}:{PORT}/api/videos/{videoId}</id>'
+        xml_string += f'<published>{publishedText}</published>'
+        xml_string += f'<title type="text">{title}</title>'
+        xml_string += f'<link rel="http://{IP}:{PORT}/api/videos/{videoId}/related"/>'
+        xml_string += f'<author><name>{authorName}</name><uri>https://www.youtube.com/channel/{authorId}</uri><yt:userId>EE{authorId}</yt:userId></author>'
+        xml_string += '<media:group>'
+        xml_string += f'<media:thumbnail yt:name="mqdefault" url="http://i.ytimg.com/vi/{videoId}/mqdefault.jpg" height="240" width="320" time="00:00:00"/>'
+        xml_string += f'<yt:duration seconds="{lengthText}"/>'
+        xml_string += f'<yt:uploaderId>EE{authorId}</yt:uploaderId>'
+        xml_string += f'<yt:videoid id="{videoId}">{videoId}</yt:videoid>'
+        xml_string += f'<media:credit role="uploader" name="{authorName}">{authorName}</media:credit>'
+        xml_string += '</media:group>'
+        xml_string += f'<yt:statistics favoriteCount="0" viewCount="{viewCount}"/>'
+        xml_string += '</entry>\n'
+    xml_string += '</feed>'
+    return xml_string
+
+# -------------------- Flask Route --------------------
+@app.route("/feeds/api/wii/videos")
+def wii_feed_videos():
+    query = request.args.get("q", "")
+    if not query:
+        return Response("Missing query parameter ?q=", status=400)
+    videos = yt_search_cached(query, limit=20)
+    xml = wii_generate_xml(videos)
+    return Response(xml, mimetype="application/xml")
+
 # === Run ===
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=80)
