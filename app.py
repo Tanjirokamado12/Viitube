@@ -1972,24 +1972,6 @@ def get_channel_info(channel_id, oauth_token):
 def subscriptions_build_xml(subscriptions, base_url, oauth_token):
     xml_template = f"""<?xml version='1.0' encoding='UTF-8'?>
 <feed xmlns='http://www.w3.org/2005/Atom' xmlns:gd='http://schemas.google.com/g/2005' xmlns:openSearch='http://a9.com/-/spec/opensearch/1.1/' xmlns:yt='http://gdata.youtube.com/schemas/2007' xmlns:media='http://search.yahoo.com/mrss/' gd:etag='W/&quot;Ak4DQnw_fip7I2A9XRRXFEU.&quot;'>
-	<id>tag:youtube.com,2008:channels</id>
-	<updated>2015-02-21T03:22:53.246Z</updated>
-	<category scheme='http://schemas.google.com/g/2005#kind' term='http://gdata.youtube.com/schemas/2007#channel'/>
-	<title>Channels matching: crossfit</title>
-	<logo>http://www.gstatic.com/youtube/img/logo.png</logo>
-	<link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?v=2'/>
-	<link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels/batch?v=2'/>
-	<link rel='self' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?q=crossfit&amp;start-index=1&amp;max-results=3&amp;v=2'/>
-	<link rel='service' type='application/atomsvc+xml' href='http://192.168.1.27/feeds/api/channels?alt=atom-service&amp;v=2'/>
-	<link rel='next' type='application/atom+xml' href='http://192.168.1.27/feeds/api/channels?q=crossfit&amp;start-index=4&amp;max-results=3&amp;v=2'/>
-	<author>
-		<name>YouTube</name>
-		<uri>http://www.youtube.com/</uri>
-	</author>
-	<generator version='2.1' uri='http://192.168.1.27'>YouTube data API</generator>
-	<openSearch:totalResults>77161</openSearch:totalResults>
-	<openSearch:startIndex>1</openSearch:startIndex>
-	<openSearch:itemsPerPage>3</openSearch:itemsPerPage>
 {{channels}}
 </feed>
 """
@@ -5243,8 +5225,6 @@ def playlist_build_playlist_xml(videos_info, base_url):
         <updated>2010-06-30T22:34:43.880Z</updated>
         <title>{e(video.get('title'))}</title>
         <link rel='alternate' type='text/html' href='http://www.youtube.com/watch?v={e(video.get('video_id'))}&amp;feature=youtube_gdata'/>
-        <link rel="http://gdata.youtube.com/schemas/2007#video.responses' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/responses?v=2'/>
-        <link rel="http://gdata.youtube.com/schemas/2007#video.related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}/related?v=2'/>
         <link rel='related' type='application/atom+xml' href='{e(base_url)}/feeds/api/videos/{e(video.get('video_id'))}?v=2'/>
         <link rel='self' type='application/atom+xml' href='{e(base_url)}/feeds/api/playlists/0A7ED544A0D9877D/00A37F607671690E?v=2'/>
 		<author>
