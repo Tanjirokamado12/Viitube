@@ -41,6 +41,8 @@ For 5.1.10/5.2.27:No Issues Found
 
 In first time install Python and Make sur is in path
 
+FFMpeg is Also Required if You use Youtube on wii and Make sur is in path
+
 Seconly run pip install -r requirments.txt
 
 after run python app.py
@@ -48,5 +50,6 @@ after run python app.py
 - [apk_setup.md](apk_setup.md) - set early youtube android APKs to work with Viitube
 
 - [wii_setup.md](wii_setup.md) - Setup Viitube For TV/Wii App
+
 
 
