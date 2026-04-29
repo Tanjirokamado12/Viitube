@@ -85,7 +85,7 @@ VIDEOMETA_PLAYLIST_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 PLAYLIST_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 app = Flask(__name__)
 
-@app.route('/deviceregistration/v1/devices', methods=['POST'])
+@app.route('/deviceregistration/v1/devices', methods=['POST', 'GET'])
 def upload_hex():
     return jsonify({
     "id": "AP+lc78BjKeJW5h+DRL/JIQA7RWj1iq8KzTeYzOxDe9dV6OX/LraIwUX2JiV91A",
@@ -398,7 +398,7 @@ def viitube_playlist_generate_xml_feed(videos, base_url, playlist_id, playlist_t
 {entries}
 </feed>"""
 
-@app.route("/feeds/api/playlists/<playlist_id>")
+@app.route("/feeds/api/playlists/<playlist_id>", methods=['POST', 'GET'])
 def viitube_playlist_xml(playlist_id):
     # Fetch raw playlist data
     raw = viitube_playlist_load_or_fetch_raw(playlist_id)
@@ -453,7 +453,7 @@ def generate_device_id():
     return ''.join(random.choices(charset, k=7))
 
 @app.route('/youtube/accounts/registerDevice', methods=['POST', 'GET'])
-@app.route('/proxy/ytbt', methods=['POST'])
+@app.route('/proxy/ytbt', methods=['POST', 'GET'])
 def register_device():
     device_id = generate_device_id()
 
@@ -617,13 +617,13 @@ def get_clean_video_id():
 
 
 # 📡 All endpoints below
-@app.route('/get_480', methods=['GET'])
-@app.route('/exp_hd', methods=['GET'])
-@app.route('/channel_fh264_getvideo', methods=['GET'])
-@app.route('/geeeeeeeeeeeeet_video', methods=['GET'])
-@app.route('/geeeeeeeeeeeet_video', methods=['GET'])
-@app.route('/get_video', methods=['GET'])
-@app.route('/geeeeeeeeeeeeeet_video', methods=['GET'])
+@app.route('/get_480', methods=['POST', 'GET'])
+@app.route('/exp_hd', methods=['POST', 'GET'])
+@app.route('/channel_fh264_getvideo', methods=['POST', 'GET'])
+@app.route('/geeeeeeeeeeeeet_video', methods=['POST', 'GET'])
+@app.route('/geeeeeeeeeeeet_video', methods=['POST', 'GET'])
+@app.route('/get_video', methods=['POST', 'GET'])
+@app.route('/geeeeeeeeeeeeeet_video', methods=['POST', 'GET'])
 def serve_video():
     video_id = get_clean_video_id()
 
@@ -636,11 +636,11 @@ def serve_video():
     except Exception as e:
         return "Internal server error", 500
 
-@app.route('/wiitv')
+@app.route('/wiitv', methods=['POST', 'GET'])
 def wiitv():
     return send_file('swf/leanbacklite_wii.swf', mimetype='application/x-shockwave-flash')
 
-@app.route('/complete/search', methods=['GET'])
+@app.route('/complete/search', methods=['POST', 'GET'])
 def get_suggestions():
     # Extract the 'q' parameter from the request
     query = request.args.get('q', '')
@@ -751,39 +751,39 @@ def get_suggestions():
 
 
 
-@app.route('/s/tv/wii/config')
+@app.route('/s/tv/wii/config', methods=['POST', 'GET'])
 def config():
     return send_file('swf/yt_lbl.swf', mimetype='application/x-shockwave-flash')
     
-@app.route('/youtube/v3/activities')
+@app.route('/youtube/v3/activities', methods=['POST', 'GET'])
 def river1():
     return send_file('Mobile/browse.json')
  
-@app.route('/apiplayer')
+@app.route('/apiplayer', methods=['POST', 'GET'])
 def apiloader():
     return send_from_directory('swf', 'apiloader.swf')
  
-@app.route('/apiplayerv3')
+@app.route('/apiplayerv3', methods=['POST', 'GET'])
 def apiloaderv3():
     return send_from_directory('swf', 'apiloaderv3.swf') 
 
-@app.route('/yt/swfbin/apiplayer-vfl3wD2Ji.swf')
-@app.route('/videoplayback')
+@app.route('/yt/swfbin/apiplayer-vfl3wD2Ji.swf', methods=['POST', 'GET'])
+@app.route('/videoplayback', methods=['POST', 'GET'])
 def videoplayback():
     return send_from_directory('swf', 'apiplayer.swf')
   
-@app.route('/yt/swfbin/apiplayer-vfl3wD2Jiv3.swf')
-@app.route('/videoplaybackv3')
+@app.route('/yt/swfbin/apiplayer-vfl3wD2Jiv3.swf', methods=['POST', 'GET'])
+@app.route('/videoplaybackv3', methods=['POST', 'GET'])
 def videoplaybackv3():
     return send_from_directory('swf', 'apiplayerv3.swf')
 
-@app.route('/leanbacklite')
-@app.route('/tv')
+@app.route('/leanbacklite', methods=['POST', 'GET'])
+@app.route('/tv', methods=['POST', 'GET'])
 def tv():
     return send_from_directory('swf', 'leanbacklite_v3.swf')
    
-@app.route('/device_204')
-@app.route('/leanback_ajax')
+@app.route('/device_204', methods=['POST', 'GET'])
+@app.route('/leanback_ajax', methods=['POST', 'GET'])
 def leanback_ajax():
     return send_from_directory('swf', 'leanback_ajax.json')
     
@@ -866,7 +866,7 @@ def fetch_channel_videos(youtube, channel_id, published_after):
         ))
     return entries
 
-@app.route('/feeds/tv/users/default/river', methods=['GET'])
+@app.route('/feeds/tv/users/default/river', methods=['POST', 'GET'])
 def river():
     oauth_token = request.args.get('oauth_token')
 
@@ -960,7 +960,7 @@ def needs_update(channel_id):
     last_modified = os.path.getmtime(filepath)
     return (time.time() - last_modified) > UPDATE_INTERVAL
 
-@app.route('/feeds/api/users/<channel_id>/icon')
+@app.route('/feeds/api/users/<channel_id>/icon', methods=['POST', 'GET'])
 def serve_pfp(channel_id):
     filepath = os.path.join(PROFILE_PICTURE_DIR, f'{channel_id}.jpg')
 
@@ -1208,9 +1208,9 @@ def mobile_get_channel_info(channel_id):
 
     return mobile_parse_channel_data(data)
 
-@app.route("/feeds/viitube/users/<handle>", methods=["GET"])
-@app.route("/feeds/api/channels/<handle>", methods=["GET"])
-@app.route("/feeds/api/users/<handle>", methods=["GET"])
+@app.route("/feeds/viitube/users/<handle>", methods=['POST', 'GET'])
+@app.route("/feeds/api/channels/<handle>", methods=['POST', 'GET'])
+@app.route("/feeds/api/users/<handle>", methods=['POST', 'GET'])
 def mobile_user_info(handle):
     info = mobile_get_info_by_handle(handle)
     if not info:
@@ -1268,11 +1268,11 @@ def mobile_user_info(handle):
 
     return Response(xml_response, mimetype="application/xml")
 
-@app.route('/schemas/2007/categories.cat')
+@app.route('/schemas/2007/categories.cat', methods=['POST', 'GET'])
 def categories():
     return send_file('Mobile/categories.cat')
 
-@app.route('/o/oauth2/device/code', methods=['POST'])
+@app.route('/o/oauth2/device/code', methods=['POST', 'GET'])
 def deviceCode():
     response = requests.post(
         OAUTH2_DEVICE_CODE_URL,
@@ -1298,7 +1298,7 @@ def deviceCode():
         'message': message
     })
 
-@app.route('/o/oauth2/device/code/status', methods=['POST'])
+@app.route('/o/oauth2/device/code/status', methods=['POST', 'GET'])
 def checkStatus():
     device_code = request.json.get('device_code')
     if not device_code:
@@ -1327,7 +1327,7 @@ def checkStatus():
             return jsonify({"status": "slow_down", "message": "Too many requests, try again later."}), 429
         return jsonify({"error": "Authorization failed."}), 400
     return jsonify({"error": "Unknown error occurred."}), 500
-@app.route('/o/oauth2/token', methods=['POST'])
+@app.route('/o/oauth2/token', methods=['POST', 'GET'])
 def oauth2_token():
     youtube_oauth_url = 'https://www.youtube.com/o/oauth2/token'
     response = requests.post(youtube_oauth_url, data=request.form)
@@ -1368,7 +1368,7 @@ def fetch_youtube_user_data(access_token):
         return None, "No channel data found"
     return data["items"][0], None
 
-@app.route("/feeds/tv/users/default")
+@app.route("/feeds/tv/users/default", methods=['POST', 'GET'])
 def user_feed():
     access_token = request.args.get("oauth_token")
 
@@ -1436,7 +1436,7 @@ def user_feed():
     except Exception as e:
         return Response(f"Error generating XML: {str(e)}", status=500)
 
-@app.route("/feeds/api/videos/<video_id>")
+@app.route("/feeds/api/videos/<video_id>", methods=['POST', 'GET'])
 def get_video_xml(video_id):
     baseurl = request.host
     cache_path = os.path.join(CACHE_DIR, f"{video_id}.json")
@@ -1541,95 +1541,10 @@ def get_video_xml(video_id):
     </entry>"""
 
     return Response(xmlcontent, mimetype="application/xml")
-
-
-class GetVideoInfoWii:
-    WII_GET_VIDEO_INFO = "./assets/cache/videoinfo"
-
-    def build(self, videoId):
-        os.makedirs(self.WII_GET_VIDEO_INFO, exist_ok=True)
-        cache_path = os.path.join(self.WII_GET_VIDEO_INFO, f"{videoId}.json")
-
-        # Try loading from cache
-        if os.path.exists(cache_path):
-            with open(cache_path, 'r', encoding='utf-8') as f:
-                json_data = json.load(f)
-        else:
-            # Fetch from API
-            streamUrl = f"https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&videoId={videoId}"
-            headers = {
-                'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-            payload = {
-                "context": {
-                    "client": {
-                        "hl": "en",
-                        "gl": "US",
-                        "clientName": "WEB",
-                        "clientVersion": "2.20210714.01.00"
-                    }
-                },
-                "videoId": videoId,
-                "params": ""
-            }
-
-            response = requests.post(streamUrl, json=payload, headers=headers)
-            if response.status_code != 200:
-                return f"Error retrieving video info: {response.status_code}", response.status_code
-            
-            json_data = response.json()
-
-            # Save to cache
-            with open(cache_path, 'w', encoding='utf-8') as f:
-                json.dump(json_data, f)
-
-        try:
-            title = json_data['videoDetails']['title']
-            length_seconds = json_data['videoDetails']['lengthSeconds']
-            author = json_data['videoDetails']['author']
-        except KeyError as e:
-            return f"Missing key: {e}", 400
-
-        fmtList = "43/854x480/9/0/115"
-        fmtStreamMap = f"43|"
-        fmtMap = "43/0/7/0/0"
-        thumbnailUrl = f"http://i.ytimg.com/vi/{videoId}/mqdefault.jpg"
-        
-        response_str = (
-            f"status=ok&"
-            f"length_seconds={length_seconds}&"
-            f"keywords=a&"
-            f"vq=None&"
-            f"muted=0&"
-            f"avg_rating=5.0&"
-            f"thumbnailUrl={thumbnailUrl}&"
-            f"allow_ratings=1&"
-            f"hl=en&"
-            f"ftoken=&"
-            f"allow_embed=1&"
-            f"fmtMap={fmtMap}&"
-            f"fmt_url_map={fmtStreamMap}&"
-            f"token=null&"
-            f"plid=null&"
-            f"track_embed=0&"
-            f"author={author}&"
-            f"title={title}&"
-            f"videoId={videoId}&"
-            f"fmtList={fmtList}&"
-            f"fmtStreamMap={fmtStreamMap.split()[0]}"
-        )
-        return Response(response_str, content_type='text/plain')
-
 	
-@app.route('/get_video_info', methods=['GET'])
+@app.route('/get_video_info', methods=['POST', 'GET'])
 def get_video_info():
-    video_id = request.args.get('video_id')
-    if not video_id:
-        return jsonify({"error": "Missing video_id parameter"}), 400
-
-    video_info = GetVideoInfoWii().build(video_id)
-    return video_info  # Ensure this returns a valid response
+    return('status=ok')
 
 # Ensure 'assets' folder exists
 if not os.path.exists("assets"):
@@ -1673,7 +1588,7 @@ def flv_get_video_orientation(file_path):
     height = data['streams'][0]['height']
     return "vertical" if height > width else "standard"
 
-@app.route('/get_flv', methods=['GET'])
+@app.route('/get_flv', methods=['POST', 'GET'])
 def flv_get_video():
     video_id = request.args.get('video_id')
     if not video_id:
@@ -1719,7 +1634,7 @@ def flv_get_video():
     return send_file(processed_file, as_attachment=True) if os.path.exists(processed_file) else "Processing failed", 500
 
 
-@app.route('/get_flv', methods=['GET'])
+@app.route('/get_flv', methods=['POST', 'GET'])
 def get_flv_video():
     video_id = request.args.get('video_id')
     if not video_id:
@@ -1786,7 +1701,7 @@ def get_video_orientation(file_path):
     height = data['streams'][0]['height']
     return "vertical" if height > width else "standard"
 
-@app.route('/get_webm', methods=['GET'])
+@app.route('/get_webm', methods=['POST', 'GET'])
 def get_video():
     video_id = request.args.get('video_id')
     if not video_id:
@@ -2043,7 +1958,7 @@ def subscriptions_build_xml(subscriptions, base_url, oauth_token):
 
     return xml_template.format(channels="\n".join(channel_entries))
 
-@app.route("/feeds/tv/users/default/subscriptions", methods=["GET"])
+@app.route("/feeds/tv/users/default/subscriptions", methods=['POST', 'GET'])
 def subscriptions_xml():
     oauth_token = request.args.get("oauth_token")
     base_url = request.host
@@ -2377,7 +2292,7 @@ def create_xml_feed(videos, channel_id, channel_name, base_url):
 
     return ET.tostring(feed, encoding="utf-8").decode("utf-8")
 
-@app.route('/feeds/viitube/users/<channel_id>/uploads')
+@app.route('/feeds/viitube/users/<channel_id>/uploads', methods=['POST', 'GET'])
 def uploads(channel_id):
     oauth_token = request.args.get("oauth_token")
     if not oauth_token:
@@ -2520,7 +2435,7 @@ def fetch_liked_videos_xml(oauth_token, base_url):
 
     return xml_output
 
-@app.route("/feeds/tv/users/default/favorites")
+@app.route("/feeds/tv/users/default/favorites", methods=['POST', 'GET'])
 def favorites():
     oauth_token = request.args.get("oauth_token")
     base_url = request.host_url.strip("/")  # e.g., http://127.0.0.1:5000
@@ -2609,7 +2524,7 @@ def get_video_details(video_ids, token):
             })
     return all_data
 
-@app.route('/feeds/tv//users/default/uploads')
+@app.route('/feeds/tv//users/default/uploads', methods=['POST', 'GET'])
 def user_uploads():
     token = request.args.get('oauth_token')
     if not token:
@@ -2851,7 +2766,7 @@ def fetch_watch_later_video_details(video_ids, oauth_token):
     return response.json() if response.status_code == 200 else None
 
 
-@app.route('/feeds/tv/users/default/watch_later', methods=['GET'])
+@app.route('/feeds/tv/users/default/watch_later', methods=['POST', 'GET'])
 def get_watch_later_xml():
     """API endpoint returning ordered Watch Later list with full metadata."""
     oauth_token = request.args.get('oauth_token')
@@ -3188,7 +3103,7 @@ def build_xml_response(videos, baseurl):
     return xml_response
     
 
-@app.route("/feeds/api/videos")
+@app.route("/feeds/api/videos", methods=['POST', 'GET'])
 def search():
     q = request.args.get("q", "").strip()
     limit = request.args.get("limit", "20")
@@ -3460,7 +3375,7 @@ def extract_videos(data):
         pass
     return vids
 
-@app.route("/feeds/api/users/<string:identifier>/uploads")
+@app.route("/feeds/api/users/<string:identifier>/uploads", methods=['POST', 'GET'])
 def channel_rss(identifier):
     base_url = request.host_url  # This is dynamic based on caller's request
     if identifier.startswith("@"):
@@ -3664,7 +3579,7 @@ def fetch_video_details_history(video_ids, oauth_token):
     response = requests.get(url, headers=headers)
     return response.json() if response.status_code == 200 else None
 
-@app.route('/feeds/tv/users/default/watch_history', methods=['GET'])
+@app.route('/feeds/tv/users/default/watch_history', methods=['POST', 'GET'])
 def get_watch_history_xml():
     """API endpoint returning ordered watch history with full metadata."""
     oauth_token = request.args.get('oauth_token')
@@ -3957,7 +3872,7 @@ def extract_videos_event(data):
         pass
     return vids
 
-@app.route("/feeds/api/events")
+@app.route("/feeds/api/events", methods=['POST', 'GET'])
 def channel_rss_event():
     identifier = request.args.get("author")
     if not identifier:
@@ -4076,102 +3991,102 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
 
     return Response(rss_feed.strip(), mimetype="application/atom+xml")
 
-@app.route('/feeds/api/users/<channelfavorites>/favorites')
+@app.route('/feeds/api/users/<channelfavorites>/favorites', methods=['POST', 'GET'])
 def channelfavorites(channelfavorites):
     return send_file('mobile/blank.xml')
 
 
-@app.route('/feeds/api/charts/live/events/<region>')
+@app.route('/feeds/api/charts/live/events/<region>', methods=['POST', 'GET'])
 def live(region):
     return send_file('Mobile/blank.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed')
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed', methods=['POST', 'GET'])
 def most_viewed(region):
     return send_file('Mobile/most_viewed.xml')
 
-@app.route('/feeds/api/channelstandardfeeds/most_subscribed')
+@app.route('/feeds/api/channelstandardfeeds/most_subscribed', methods=['POST', 'GET'])
 def most_subscribed():
     return send_file('Mobile/most_subscribed.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Education')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Education')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Education', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Education', methods=['POST', 'GET'])
 def most_viewed_Education(region):
     return send_file('Mobile/most_viewed_Education.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Comedy')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Comedy')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Comedy', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Comedy', methods=['POST', 'GET'])
 def most_viewed_Comedy(region):
     return send_file('Mobile/most_viewed_Comedy.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Tech')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Tech')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Tech', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Tech', methods=['POST', 'GET'])
 def most_viewed_Tech(region):
     return send_file('Mobile/most_viewed_Tech.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Entertainment')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Entertainment')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Entertainment', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Entertainment', methods=['POST', 'GET'])
 def most_viewed_Entertainment(region):
     return send_file('Mobile/most_viewed_Entertainment.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Animals')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Animals')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Animals', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Animals', methods=['POST', 'GET'])
 def most_viewed_Animals(region):
     return send_file('Mobile/most_viewed_Animals.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Music')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Music')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Music', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Music', methods=['POST', 'GET'])
 def most_viewed_Music(region):
     return send_file('Mobile/most_viewed_Music.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Film')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Film')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Film', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Film', methods=['POST', 'GET'])
 def most_viewed_Film(region):
     return send_file('Mobile/most_viewed_Film.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Autos')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Autos')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Autos', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Autos', methods=['POST', 'GET'])
 def most_viewed_Autos(region):
     return send_file('Mobile/most_viewed_Autos.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_News')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_News')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_News', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_News', methods=['POST', 'GET'])
 def most_viewed_News(region):
     return send_file('Mobile/most_viewed_News.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Howto')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Howto')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Howto', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Howto', methods=['POST', 'GET'])
 def most_viewed_Howto(region):
     return send_file('Mobile/most_viewed_Howto.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Games')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Games')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Games', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Games', methods=['POST', 'GET'])
 def most_viewed_Games(region):
     return send_file('Mobile/most_viewed_Games.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_People')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_People')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_People', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_People', methods=['POST', 'GET'])
 def most_viewed_People(region):
     return send_file('Mobile/most_viewed_People.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Travel')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Travel')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Travel', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Travel', methods=['POST', 'GET'])
 def most_viewed_Travel(region):
     return send_file('Mobile/most_viewed_Travel.xml')
 
-@app.route('/feeds/api/standardfeeds/<region>/most_popular_Sports')
-@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Sports')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular_Sports', methods=['POST', 'GET'])
+@app.route('/feeds/api/standardfeeds/<region>/most_viewed_Sports', methods=['POST', 'GET'])
 def most_viewed_Sports(region):
     return send_file('Mobile/most_viewed_Sports.xml')
 	
-@app.route('/feeds/api/standardfeeds/<region>/most_discussed')
+@app.route('/feeds/api/standardfeeds/<region>/most_discussed', methods=['POST', 'GET'])
 def most_discussed(region):
     return send_file('Mobile/most_discussed.xml')
     
-@app.route('/feeds/api/standardfeeds/<region>/most_popular')
+@app.route('/feeds/api/standardfeeds/<region>/most_popular', methods=['POST', 'GET'])
 def most_popular(region):
     return send_file('Mobile/most_popular.xml')
 	
-@app.route('/feeds/api/standardfeeds/<region>/recently_featured')
+@app.route('/feeds/api/standardfeeds/<region>/recently_featured', methods=['POST', 'GET'])
 def recently_featured(region):
     return send_file('Mobile/recently_featured.xml')
 
@@ -4249,13 +4164,13 @@ def mobile_get_clean_video_id():
 
 
 # 📡 All endpoints below
-@app.route('/get_480', methods=['GET'])
-@app.route('/exp_hd', methods=['GET'])
-@app.route('/channel_fh264_getvideo', methods=['GET'])
-@app.route('/geeeeeeeeeeeeet_video', methods=['GET'])
-@app.route('/geeeeeeeeeeeet_video', methods=['GET'])
-@app.route('/get_video', methods=['GET'])
-@app.route('/geeeeeeeeeeeeeet_video', methods=['GET'])
+@app.route('/get_480', methods=['POST', 'GET'])
+@app.route('/exp_hd', methods=['POST', 'GET'])
+@app.route('/channel_fh264_getvideo', methods=['POST', 'GET'])
+@app.route('/geeeeeeeeeeeeet_video', methods=['POST', 'GET'])
+@app.route('/geeeeeeeeeeeet_video', methods=['POST', 'GET'])
+@app.route('/get_video', methods=['POST', 'GET'])
+@app.route('/geeeeeeeeeeeeeet_video', methods=['POST', 'GET'])
 def mobile_serve_video():
     video_id = mobile_get_clean_video_id()
 
@@ -4537,8 +4452,8 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
 
     return xmlresponse
 
-@app.route('/feeds/viitube/users/<string:channelid>/playlists')
-@app.route('/feeds/api/users/<string:channelid>/playlists')
+@app.route('/feeds/viitube/users/<string:channelid>/playlists', methods=['POST', 'GET'])
+@app.route('/feeds/api/users/<string:channelid>/playlists', methods=['POST', 'GET'])
 def mobile_get_playlists(channelid):
     base_url = request.url_root  # dynamic base URL, e.g. "http://127.0.0.1:5000/"
 
@@ -4811,7 +4726,7 @@ def related_fetch_and_display_related_videos(video_id, base_url):
     return xml_final_response
 
 # Define the Flask route to fetch related videos in XML format, using the base URL '/api'
-@app.route('/feeds/api/videos/<video_id>/related', methods=['GET'])
+@app.route('/feeds/api/videos/<video_id>/related', methods=['POST', 'GET'])
 def related_get_related_videos(video_id):
     try:
         base_url = request.host_url  # Get the base URL of the request
@@ -4974,7 +4889,7 @@ def channels_to_xml_template(channels, query, base_url):
 	</author>
 	<generator version='2.1' uri='http://192.168.1.27'>YouTube data API</generator>\n{channels_xml}\n</feed>"""
 
-@app.route("/feeds/api/channels")
+@app.route("/feeds/api/channels", methods=['POST', 'GET'])
 def channels_endpoint():
     query = request.args.get("q", "")
     limit = int(request.args.get("limit", 5))
@@ -5111,7 +5026,7 @@ xmlns:yt='http://gdata.youtube.com/schemas/2007'>
     final_xml = '\n'.join(xml_template)
     return f'{final_xml}'
 
-@app.route('/feeds/tv/users/default/playlists', methods=['GET'])
+@app.route('/feeds/tv/users/default/playlists', methods=['POST', 'GET'])
 def get_playlists():
     oauth_token = request.args.get('oauth_token')
 
@@ -5342,7 +5257,7 @@ def playlist_get_playlist_videos_details(access_token, playlist_id):
 
 # ========== FLASK ROUTE ==========
 
-@app.route("/feeds/mobile/api/playlists/<playlist_id>")
+@app.route("/feeds/mobile/api/playlists/<playlist_id>", methods=['POST', 'GET'])
 def playlist_route(playlist_id):
     oauth_token = request.args.get('oauth_token')
     base_url = request.host_url.rstrip('/') + '/'
@@ -5531,7 +5446,7 @@ def build_xml(comments, videoid):
     xml_parts.append('</feed>')
     return '\n'.join(xml_parts)
 
-@app.route('/feeds/api/videos/<videoid>/comments')
+@app.route('/feeds/api/videos/<videoid>/comments', methods=['POST', 'GET'])
 def serve_comments(videoid):
     cache_path = os.path.join(COMMENTS_CACHE_DIR, f"{videoid}.json")
 
@@ -5696,7 +5611,7 @@ def wii_generate_xml(videos):
     return xml_string
 
 # -------------------- Flask Route --------------------
-@app.route("/feeds/api/wii/videos")
+@app.route("/feeds/api/wii/videos", methods=['POST', 'GET'])
 def wii_feed_videos():
     query = request.args.get("q", "")
     if not query:
