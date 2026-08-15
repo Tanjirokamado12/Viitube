@@ -94,9 +94,8 @@ https://gist.github.com/aslushnikov/422f1e1a57796a476bf73ebe04f2e5ac (try this f
 
 - [9] patching wii_shim (or whatever its name) and the wii_dev_shim (or whater its name)
 
-     In trusted folder open wii_shim and wii_dev_shim, change any youtube.com url to your url.
-     Do /wiitv/leanbacklite_wii.swf (instead of wiitv, according to mrt /wiitv won't work)
-
+     In trusted folder open wii_shim and wii_dev_shim, change any youtube.com url to your url. (is should be http://%(IP)/wiitv)
+	 
      before patching the wad, go to config/common.pcf, scroll all the down until u see "dummy=1", replace that text to "relax=2" and save the pcf, pack the u8 archive and wad
 
 - [10] finishing up
